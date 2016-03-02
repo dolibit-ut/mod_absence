@@ -992,6 +992,8 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 				}
 						
 			}else{
+				//TODO factoriser
+				
 				$boucleOk=0;
 				//var_dump($ouinon);
 				$labelAbs = $ouinon->label;
@@ -1020,16 +1022,16 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						print '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
-					else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
+						else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
 
 				}	
 				else if(strpos($ouinon,'DPM')!==false){
 						print '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
-					if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
 
 
 				}	
@@ -1037,8 +1039,11 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						print '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
 
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
-					if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')){
+							$TStatPlanning[$idUser]['presence']+=0.5;
+							$TTotal[$dateJour]+=0.5;
+						}
 
 
 				}
@@ -1047,24 +1052,29 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
 
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
-					else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
+						else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
 
 				}
 				else if(strpos($ouinon,'AM')!==false){
 						print '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
 						
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
-					if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')){
+							$TStatPlanning[$idUser]['presence']+=0.5;
+							$TTotal[$dateJour]+=0.5;
+						}
 				}
 				else if(strpos($ouinon,'PM')!==false){
 						print '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
-					if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
-
+						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
+						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')){
+							$TStatPlanning[$idUser]['presence']+=0.5;
+							$TTotal[$dateJour]+=0.5;
+						}
 				}
 				else {
 					print '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
