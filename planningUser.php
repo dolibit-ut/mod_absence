@@ -322,40 +322,10 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			
 			?><script type="text/javascript">
 				
-				function refreshPlanning() {
-				
-					$.ajax({
-						url: "script/interface.php"
-						,dataType: "jsonp"
-						,async: true
-			    		,crossDomain: true
-						,data: {
-							get:'planning'
-							,date_debut_search: "<?php echo date('d/m/Y', $absence->date_debut_planning) ?>"
-							,date_fin_search: "<?php echo date('d/m/Y', $absence->date_fin_planning) ?>"
-							,groupe : <?php echo (int)$idGroupeRecherche ?>
-							,groupe2 : <?php echo (int)$idGroupeRecherche2 ?>
-							,groupe3 : <?php echo (int)$idGroupeRecherche3 ?>
-							,fk_user : <?php echo (int)$idUserRecherche ?>
-							,jsonp : 1
-							,inc:'main'
-						}
-						
-					})
-					.done(function (response) {
-						$('#planning_html').html( response ); // server response
-						
-						$("table.planning td.rouge, table.planning td.vert").each(function() {
-				
-							$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
-							
-						});
-						
-						$(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
-					});
-				}
+				$(document).ready(function() {
+					refreshPlanning()
 					
-				refreshPlanning();	
+				});	
 				
 			</script>
 			<div id="planning_html">
@@ -377,8 +347,43 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	echo $form->end_form();
 	
 	?></div>
+	<script type="text/javascript">
+	function refreshPlanning() {
+				
+				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>')
+				
+				$.ajax({
+					url: "script/interface.php"
+					,dataType: "jsonp"
+					,async: true
+		    		,crossDomain: true
+					,data: {
+						get:'planning'
+						,date_debut_search: "<?php echo date('d/m/Y', $absence->date_debut_planning) ?>"
+						,date_fin_search: "<?php echo date('d/m/Y', $absence->date_fin_planning) ?>"
+						,groupe : <?php echo (int)$idGroupeRecherche ?>
+						,groupe2 : <?php echo (int)$idGroupeRecherche2 ?>
+						,groupe3 : <?php echo (int)$idGroupeRecherche3 ?>
+						,fk_user : <?php echo (int)$idUserRecherche ?>
+						,jsonp : 1
+						,inc:'main'
+					}
+					
+				})
+				.done(function (response) {
+					$('#planning_html').html( response ); // server response
+					
+					$("table.planning td.rouge, table.planning td.vert").each(function() {
+			
+						$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
+						
+					});
+					
+					$(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+				});
+			}
 	
-	
+	</script>
 	<?php
 	
 	global $mesg, $error;

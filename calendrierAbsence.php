@@ -3,7 +3,6 @@
 	require('./class/absence.class.php');
 	require('./lib/absence.lib.php');
 	
-	//TODO replace wdcalendar with fullcalendar
 	
 	if($conf->global->RH_ABSENCE_USE_WORKING_PLANNING){
 		header('location:planningUser.php?mode=auto&jsonp=1');
@@ -13,6 +12,9 @@
 	$langs->load('absence@absence');
 	
 //print_r(get_defined_vars());	
+	//TODO replace wdcalendar with fullcalendar
+	
+
 	llxHeader('', $langs->trans('AbsencesPresencesCalendar'), '', '', 0,0,
 		array(//"/library/wdCalendar/src/jquery.js"   
 			"/rhlibrary/wdCalendar/src/Plugins/Common.js"    
