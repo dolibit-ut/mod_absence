@@ -794,7 +794,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
-				,'userAbsenceCourant'=>$droitsCreation==1?'':$form->hidden('fk_user', $user->id)
+				,'userAbsenceCourant'=>''//$droitsCreation==1?'':$form->hidden('fk_user', $user->id) mis en commentaire pour le ticket 3836
 				,'fk_user_absence'=>$form->hidden('fk_user_absence', $absence->fk_user)
 				,'niveauValidation'=>$absence->niveauValidation
 				,'commentaireValideur'=>$absence->commentaireValideur
