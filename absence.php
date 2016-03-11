@@ -727,11 +727,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	
 	if($droitsCreation==1) {
 		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,$absence->fk_user);
-		else $userAbsenceVisu = $userCourant->getNomUrl(1);
+		else $userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 		
 	}
-		
-	
 	
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
@@ -794,7 +792,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
-				,'userAbsenceCourant'=>$droitsCreation==1?'':$form->hidden('fk_user', $user->id)
+				
 				,'fk_user_absence'=>$form->hidden('fk_user_absence', $absence->fk_user)
 				,'niveauValidation'=>$absence->niveauValidation
 				,'commentaireValideur'=>$absence->commentaireValideur
