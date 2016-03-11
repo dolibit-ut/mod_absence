@@ -20,18 +20,10 @@
 			[view.form_start;strconv=no]
 			
 				<table class="border" width="100%">
-				[onshow;block=begin;when [userCourant.droitCreationAbsenceCollaborateur]=='1']
 				<tr>
 					<td>[translate.User;strconv=no;protect=no]</td>
 					<td>[absenceCourante.userAbsence;strconv=no;protect=no]</td>
 				</tr>	
-				[onshow;block=end]
-				[onshow;block=begin;when [userCourant.droitCreationAbsenceCollaborateur]=='0']
-				<tr>
-					<td>[translate.CurrentUser;strconv=no;protect=no]</td>
-					<td>[userCourant.link;strconv=no;protect=no]</td>
-				</tr>
-				[onshow;block=end]	
 				<tr>
 					<td>[translate.AbsenceType;strconv=no;protect=no]</td>
 					<td>[absenceCourante.comboType;strconv=no;protect=no]</td>
