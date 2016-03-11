@@ -724,11 +724,14 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     }
 	
 	$userAbsenceVisu = '';
-	
+//	var_dump($droitsCreation);
 	if($droitsCreation==1) {
 		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,$absence->fk_user);
 		else $userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 		
+	}
+	else {
+		$userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 	}
 	
 //    var_dump($droitSupprimer);
@@ -787,8 +790,8 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'etat'=>$absence->etat
 				,'libelleEtat'=>$absence->libelleEtat.$valideurs
 				,'duree'=>$form->texte('','duree',round2Virgule($absence->duree),5,10)	
-				,'dureeHeure'=>$form->texte('','dureeHeure',$absence->dureeHeure,5,10)
-				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',$absence->dureeHeurePaie,5,10)
+				,'dureeHeure'=>$form->texte('','dureeHeure',round2Virgule($absence->dureeHeure),5,10)
+				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',round2Virgule($absence->dureeHeurePaie),5,10)
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
