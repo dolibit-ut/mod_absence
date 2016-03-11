@@ -30,7 +30,6 @@
 				<tr>
 					<td>[translate.CurrentUser;strconv=no;protect=no]</td>
 					<td>[userCourant.link;strconv=no;protect=no]</td>
-					[absenceCourante.userAbsenceCourant;strconv=no;protect=no]
 				</tr>
 				[onshow;block=end]	
 				<tr>
