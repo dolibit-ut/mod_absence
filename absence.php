@@ -272,8 +272,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'etat'=>$absence->TEtat
 		)
 		,'eval'=>array(
-			'lastname'=>'ucwords(strtolower(htmlentities("@val@", ENT_COMPAT , "ISO8859-1")))'
-			,'firstname'=>'htmlentities("@val@", ENT_COMPAT , "ISO8859-1")'
+			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
 			,'Compteur'=>'_historyCompteurInForm(getHistoryCompteurForUser(@fk_user@,@ID@,@duree@,"@type@","@etat@"))'
 			
@@ -376,8 +375,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'etat'=>$absence->TEtat
 		)
 		,'eval'=>array(
-			'lastname'=>'ucwords(strtolower(htmlentities("@val@", ENT_COMPAT , "UTF-8")))'
-			,'firstname'=>'htmlentities("@val@", ENT_COMPAT , "UTF-8")'
+			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
 		)
 		,'orderBy'=>$TOrder
@@ -474,8 +472,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,"name"=>true
 			)
 			,'eval'=>array(
-				'lastname'=>'ucwords(strtolower(htmlentities("@val@", ENT_COMPAT , "UTF-8")))'
-				,'firstname'=>'htmlentities("@val@", ENT_COMPAT , "UTF-8")'
+				'lastname'=>'ucwords(strtolower("@val@"))'
 			)
 			
 			,'orderBy'=>$TOrder
@@ -586,7 +583,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$sql="SELECT rowid, lastname,  firstname FROM `".MAIN_DB_PREFIX."user` WHERE rowid=".$user->id;
 	$PDOdb->Execute($sql);
 	if($PDOdb->Get_line()){
-		$TUser[$PDOdb->Get_field('rowid')]=ucwords(strtolower(htmlentities($PDOdb->Get_field('lastname'), ENT_COMPAT , 'ISO8859-1')))." ".htmlentities($PDOdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1');
+		$TUser[$PDOdb->Get_field('rowid')]=ucwords(strtolower($PDOdb->Get_field('lastname')))." ".$PDOdb->Get_field('firstname');
 	}
 	$typeAbsenceCreable= TRH_TypeAbsence::getTypeAbsence($PDOdb, 'user', 0);
 
@@ -669,7 +666,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			";
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$TUser[$PDOdb->Get_field('rowid')]=ucwords(strtolower(htmlentities($PDOdb->Get_field('lastname'), ENT_COMPAT , 'ISO8859-1')))." ".htmlentities($PDOdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1');
+				$TUser[$PDOdb->Get_field('rowid')]=ucwords(strtolower($PDOdb->Get_field('lastname')))." ".$PDOdb->Get_field('firstname');
 			}
 		}
 		
@@ -822,8 +819,8 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			)	
 			,'userCourant'=>array(
 				'id'=>$userCourant->id
-				,'lastname'=>htmlentities($userCourant->lastname, ENT_COMPAT , 'ISO8859-1')
-				,'firstname'=>htmlentities($userCourant->firstname, ENT_COMPAT , 'ISO8859-1')
+				,'lastname'=>$userCourant->lastname
+				,'firstname'=>$userCourant->firstname
 				,'link'=>$userCourant->getNomUrl(1)
 				,'valideurConges'=>($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || $user->rights->absence->myactions->CanValidPersonalAbsencePresence==1))?1:$user->rights->absence->myactions->valideurConges&&$estValideur
 				//,'valideurConges'=>$user->rights->absence->myactions->valideurConges
