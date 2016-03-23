@@ -34,17 +34,19 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			
 			if(!empty($_COOKIE['TRHPlanning']['date_debut_search'])) {
 				$date_debut=$_COOKIE['TRHPlanning']['date_debut_search'];
-				$date_debut_time=strtotime($date_debut);
+				$date_debut_time= str_replace('/', '-', $date_debut);
+				$date_debut_time=strtotime($date_debut_time);
 				$date_debut_time_1_month = strtotime("+1 month", $date_debut_time);
 				$date_debut_recherche = $date_debut;
 			}
 
 			if(!empty($_COOKIE['TRHPlanning']['date_fin_search'])) {
 				$date_fin=$_COOKIE['TRHPlanning']['date_fin_search'];
-				$date_fin_time=strtotime($date_fin);
+                                $date_fin_time = str_replace('/', '-', $date_fin);
+				$date_fin_time=strtotime($date_fin_time);
 				if(isset($date_debut_time_1_month) && $date_debut_time_1_month < $date_fin_time)
 				{
-					$date_fin = date('Y-m-d',$date_debut_time_1_month);
+					$date_fin = date('d/m/Y',$date_debut_time_1_month);
 				}
 				$date_fin_recherche = $date_fin;
 			}
