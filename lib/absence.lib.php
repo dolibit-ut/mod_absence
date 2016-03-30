@@ -615,7 +615,7 @@ function php2Date($phpDate){
     return date("Y-m-d H:i:s", $phpDate);
 }
 function getHistoryCompteurForUser($fk_user,$id_absence,$duree=null,$type=null, $etat=null) {
-global $compteurCongeResteCurrentUser,$ATMdb;
+global $compteurCongeResteCurrentUser,$ATMdb_getHistoryCompteurForUser;
 
 	if(!isset($ATMdb_getHistoryCompteurForUser)) $ATMdb_getHistoryCompteurForUser=new TPDOdb;
 
