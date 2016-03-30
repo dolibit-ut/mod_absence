@@ -602,7 +602,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON (v.fk_usergroup=u.fk_usergroup)
 				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (s.rowid=u.fk_user)  
 			WHERE v.fk_user=".$user->id."
-			AND s.staut=1 
+			AND s.statut=1 
 			AND v.type='Conges'";
 			$comboAbsence=1;
 			//echo $sqlReqUser;exit;
@@ -649,11 +649,11 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	}
 
 	if($pointeurTest>0 && $droitAdmin==0){
-		//			print "Utilisateur Pointeur";
+		if(_debug()) print "Utilisateur Pointeur";
 
 		$typeAbsenceCreable=$absence->TTypeAbsencePointeur;
 		
-		
+		// Ne raffraichis la liste que si pas de droit de pas sinon TUser déjà remplis et plus large
 		if(!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$user->rights->absence->myactions->creerAbsenceCollaborateurGroupe) {
 			$sql=" SELECT DISTINCT u.fk_user,s.rowid, s.lastname,  s.firstname 
 			FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON (v.fk_usergroup=u.fk_usergroup)
@@ -668,10 +668,11 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			while($PDOdb->Get_line()) {
 				$TUser[$PDOdb->Get_field('rowid')]=ucwords(strtolower($PDOdb->Get_field('lastname')))." ".$PDOdb->Get_field('firstname');
 			}
+		if(_debug()) var_dump($TUser);
+
 		}
 		
 		$droitsCreation=1;
-		
 	}
 	
 	
