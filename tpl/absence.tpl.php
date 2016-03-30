@@ -174,7 +174,7 @@
 					<td><b>[absenceCourante.lib_date_fin;strconv=no;protect=no]</b></td>
 					<td><b>[absenceCourante.lib_type_absence;strconv=no;protect=no]</b></td>
 					<td><b>[absenceCourante.lib_duree_decompte;strconv=no;protect=no]</b></td>
-					<td><b>[absenceCourante.lib_conges_dispo_avant;strconv=no;protect=no]</b></td>
+					<!-- <td><b>[absenceCourante.lib_conges_dispo_avant;strconv=no;protect=no]</b></td> -->
 					<td><b>[absenceCourante.lib_etat;strconv=no;protect=no]</b></td>
 				</tr>
 				<tbody id="TRecapAbs">
@@ -298,7 +298,7 @@
 									+"<td>"+liste[i].date_fin+"</td>"
 									+"<td>"+liste[i].libelle+"</td>"
 									+"<td>"+liste[i].duree+"</td>"
-									+"<td>"+liste[i].congesAvant+"</td>"
+									/*+"<td>"+liste[i].congesAvant+"</td>"*/
 									+"<td>"+liste[i].libelleEtat+"</td>"
 									+"</tr>";
 								$('#TRecapAbs').html($('#TRecapAbs').html()+texte);
