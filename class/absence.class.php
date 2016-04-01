@@ -350,6 +350,8 @@ class TRH_Absence extends TObjetStd {
 
 	function delete(&$PDOdb)
 	{
+		dol_include_once('/valideur/class/valideur.class.php');
+		
 		TRH_valideur_object::deleteChildren($PDOdb, 'ABS', $this->getId());
 		return parent::delete($PDOdb);
 	}
