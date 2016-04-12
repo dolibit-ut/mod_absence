@@ -28,6 +28,7 @@
 include '../config.php';
 dol_include_once('/core/lib/admin.lib.php');
 dol_include_once('/core/lib/ajax.lib.php');
+dol_include_once('/core/class/html.form.class.php');
 // Change this following line to use the correct relative path from htdocs (do not remove DOL_DOCUMENT_ROOT)
 
 // Protection if external user
@@ -64,10 +65,11 @@ $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToM
 print_fiche_titre($langs->trans('AbsenceManagement'), $linkback, 'setup');
 
 $form=new TFormCore;
+$doliform = new Form($db);
 
-showParameters($form);
+showParameters($form, $doliform);
 
-function showParameters(&$form) {
+function showParameters(&$form, &$doliform) {
 	global $db,$conf,$langs;
 	
 	
@@ -108,6 +110,16 @@ function showParameters(&$form) {
 		print '</td>';
 		print '<td>';
 		print ajax_constantonoff('ABSENCE_GREATER_THAN_CONGES_RESTANTS_FORBIDDEN');
+		print '</td>';
+		print '</tr>';
+		
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('absenceAddActionComm');
+		print '</td>';
+		print '<td>';
+		print $doliform->selectyesno('TConst[RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE]', $conf->global->RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE, 1);
+		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		print '</td>';
 		print '</tr>';
 		

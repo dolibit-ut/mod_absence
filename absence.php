@@ -115,9 +115,6 @@
 				
 				if ($absence->etat == 'Validee')
 				{
-					mailConges($absence);
-					
-				
 					$mesg = $langs->trans('AbsenceRequestAccepted');
 					setEventMessage($mesg);
 				}

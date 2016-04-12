@@ -206,6 +206,19 @@ class InterfaceAbsenceWorkflow
 					
 				}
 				
+				if($conf->agenda->enabled && !empty($conf->global->RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE)) {
+					
+					dol_include_once('/comm/action/class/actioncomm.class.php');
+					
+					$a = new ActionComm($db);
+					$a->userownerid = $object->fk_user;
+					$a->datep = $object->date_debut;
+					$a->datef = $object->date_fin;
+					$a->label = 'Absence congés';
+					echo $a->add($user);exit;
+					//var_dump($object);exit;
+					
+				}
 
 			}
 			
