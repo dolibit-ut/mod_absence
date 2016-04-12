@@ -46,6 +46,13 @@ if($action=='save') {
 		
 		dolibarr_set_const($db, $name, $param);
 		
+		// Traitement supplémentaire sue enregistrement de cette conf à "oui"
+		if($name == 'RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE' && $param == 1) {
+			$resql = $db->query('SELECT MAX(id) as max_rowid FROM '.MAIN_DB_PREFIX.'c_actioncomm');
+			$res = $db->fetch_object($resql);
+			$db->query('INSERT INTO '.MAIN_DB_PREFIX.'c_actioncomm(id, code, type, libelle, active) VALUES('.($res->max_rowid + 1).', "AC_ABSENCE", "user", "Absence/Présence", 1)');
+		}
+		
 	}
 	
 }
