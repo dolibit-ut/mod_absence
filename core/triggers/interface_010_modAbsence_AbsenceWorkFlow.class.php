@@ -213,9 +213,10 @@ class InterfaceAbsenceWorkflow
 					$a = new ActionComm($db);
 					$a->type_code = 'AC_ABSENCE';
 					$a->userownerid = $object->fk_user;
-					$a->datep = $object->date_debut;
-					$a->datef = $object->date_fin;
+					$a->datep = $object->date_debut + 28800; // 8H du matin
+					$a->datef = $object->date_fin + ((strpos($object->duree, '.') !== false) ? 43200 : 64800); // Un peu moche mais c'est galère de déterminer facilement si c'est un entier ou non
 					$a->label = 'Absence/Présence : '.$object->libelle;
+					$a->note = $object->commentaire;
 					$a->add($user);
 					
 				}
