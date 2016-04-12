@@ -211,12 +211,12 @@ class InterfaceAbsenceWorkflow
 					dol_include_once('/comm/action/class/actioncomm.class.php');
 					
 					$a = new ActionComm($db);
+					$a->type_code = 'AC_ABSENCE';
 					$a->userownerid = $object->fk_user;
 					$a->datep = $object->date_debut;
 					$a->datef = $object->date_fin;
-					$a->label = 'Absence congés';
-					echo $a->add($user);exit;
-					//var_dump($object);exit;
+					$a->label = 'Absence/Présence : '.$object->libelle;
+					$a->add($user);
 					
 				}
 
