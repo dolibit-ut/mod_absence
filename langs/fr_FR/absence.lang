@@ -481,3 +481,4 @@ absenceGreaterThanCongesRestantsForbidden=Interdire la création d'absences si d
 is_tempspartiel=Est un jour temps partiel
 absenceGreaterThanCongesRestantsForbidden=Les absences ne peuvent pas être prisent par anticipation (compteur N -1 < 0)
 GenerateFilePrimoclic=Générer format Primoclic
+absenceAddActionComm=Ajouter un événement dans l'agenda lors de l'acceptation d'une absence
