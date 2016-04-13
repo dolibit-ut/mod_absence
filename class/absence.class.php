@@ -350,7 +350,13 @@ class TRH_Absence extends TObjetStd {
 
 	function delete(&$PDOdb)
 	{
+		global $db, $user,$langs,$conf;
+		
 		dol_include_once('/valideur/class/valideur.class.php');
+		dol_include_once('/core/class/interfaces.class.php');
+		
+		$interface = new Interfaces($db);
+		$result = $interface->run_triggers('ABSENCE_BEFOREDELETE',$this,$user,$langs,$conf);
 		
 		TRH_valideur_object::deleteChildren($PDOdb, 'ABS', $this->getId());
 		return parent::delete($PDOdb);
@@ -375,10 +381,11 @@ class TRH_Absence extends TObjetStd {
 	{
 		global $user,$conf,$langs;
 		
-		$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence` 
+		// POplus besoin de la requête, ce sera fait par l'appel à la fonction setAcceptee
+		/*$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence` 
 				SET etat='Validee', libelleEtat='" . $langs->trans('Accepted') . "', date_validation='".date('Y-m-d')."', fk_user_valideur=".$user->id." 
 				WHERE fk_user=".$this->fk_user. " 
-				AND rowid=".$this->getId();
+				AND rowid=".$this->getId();*/
 		
 		//Valideur fort
 		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity))
@@ -386,7 +393,7 @@ class TRH_Absence extends TObjetStd {
 			$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
 			
 			//Validation final
-			$PDOdb->Execute($sqlEtat);
+			$this->setAcceptee($PDOdb, $user->id);
 		}
 		//Valideur faible
 		else
@@ -399,7 +406,7 @@ class TRH_Absence extends TObjetStd {
 				if (TRH_valideur_object::checkAllAccepted($PDOdb, $user, 'ABS', $this->getId(), $this))
 				{
 					//Validation final
-					$PDOdb->Execute($sqlEtat);
+					$this->setAcceptee($PDOdb, $user->id);
 				}
 			}
 		}
@@ -534,7 +541,7 @@ class TRH_Absence extends TObjetStd {
 	}
 	
 	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
-		global $langs,$user,$conf;	
+		global $db, $langs,$user,$conf;	
 		
 		
 		$this->etat='Validee';
