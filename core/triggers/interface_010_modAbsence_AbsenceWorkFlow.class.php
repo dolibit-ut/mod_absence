@@ -77,7 +77,7 @@ class InterfaceAbsenceWorkflow
      */
     function run_trigger($action, &$object, $user, $langs, $conf)
     {
-        global $db,$langs;
+        global $db,$conf,$langs;
 		
 		if ($action === 'USER_CREATE' || $action === 'USER_MODIFY') {
 			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->rowid);
@@ -226,8 +226,26 @@ class InterfaceAbsenceWorkflow
 
 			}
 			
-			
 			return 0;
+			
+		} elseif($action === 'ABSENCE_BEFOREDELETE') {
+			
+			if(!empty($conf->global->RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE)) {
+				// On cherche l'événement agenda lié si existant
+				dol_include_once('/comm/action/class/actioncomm.class.php');
+				$event = new ActionComm($db);
+				$event->fetchObjectLinked($object->rowid,'rh_absence',null,'action');
+				$TKeys = array_keys($event->linkedObjectsIds['action']);
+				$event->fetch($event->linkedObjectsIds['action'][$TKeys[0]]);
+				
+				if($event->id > 0) {
+					// On supprime le lien + l'événement
+					$event->deleteObjectLinked($object->rowid,'rh_absence',$event->id,'action');
+					$event->delete();
+				}
+				
+			}
+			
 		}
 
 		return 0;
