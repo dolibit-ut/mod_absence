@@ -77,7 +77,7 @@ class modAbsence extends DolibarrModules
 		
 		$this->module_parts = array(
 			'triggers' =>1      
-			,'hooks'=>array('userdao')
+			,'hooks'=>array('userdao','actioncard')
 		);
 
 		// Data directories to create when module is enabled.
