@@ -217,7 +217,10 @@ class InterfaceAbsenceWorkflow
 					$a->datef = $object->date_fin + ((strpos($object->duree, '.') !== false) ? 43200 : 64800); // Un peu moche mais c'est galère de déterminer facilement si c'est un entier ou non
 					$a->label = 'Absence/Présence : '.$object->libelle;
 					$a->note = $object->commentaire;
-					$a->add($user);
+					
+					if($a->add($user) > 0) {
+						$a->add_object_linked('rh_absence', $object->rowid);
+					}
 					
 				}
 
