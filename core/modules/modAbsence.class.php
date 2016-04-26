@@ -822,11 +822,31 @@ class modAbsence extends DolibarrModules
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('alert_email', $langs->trans('EmailAlert'), 'varchar', 0, 255, 'usergroup');
        	
-       	$extrafields=new ExtraFields($this->db);
-		$res = $extrafields->addExtraField('matricule_paye', $langs->trans('MatriculePaye'), 'varchar', 0, 255, 'user');
-		
 		$extrafields=new ExtraFields($this->db);
 		$res =$extrafields->addExtraField("type", "Type", "select", 0, $size, "usergroup", 0, 0, '', array('options'=>array('site','Site','metier','Metier','service','Service','groupe','Groupe')));
+		
+       	//ticket resto
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_raison_sociale', $langs->trans('TRRaisonSociale'), 'varchar', 0, 255, 'usergroup');
+       	
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_address', $langs->trans('Address'), 'varchar', 0, 255, 'usergroup');
+       	
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_zip', $langs->trans('Zip'), 'varchar', 0, 255, 'usergroup');
+       	
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_town', $langs->trans('Town'), 'varchar', 0, 255, 'usergroup');
+       	
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_point_livraison', $langs->trans('TRPointLivraison'), 'varchar', 0, 255, 'usergroup');
+       	
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('tr_code_client', $langs->trans('TRCodeClient'), 'varchar', 0, 255, 'usergroup');
+       	
+		// export paye
+       	$extrafields=new ExtraFields($this->db);
+		$res = $extrafields->addExtraField('matricule_paye', $langs->trans('MatriculePaye'), 'varchar', 0, 255, 'user');
 		
 
 		return $this->_init($sql, $options);

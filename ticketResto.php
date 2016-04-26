@@ -344,7 +344,17 @@ function _ticket(&$ATMdb) {
 	$group = new UserGroup($db);
 	$group->fetch($idGroup);
 	
-	if(!empty($group->note)) {
+	if(!empty($group->array_options['options_tr_raison_sociale'])) {
+		$rs =  $group->array_options['options_tr_raison_sociale'];
+		$address = $group->array_options['options_tr_address'];
+		$cp = $group->array_options['options_tr_zip'];
+		$ville = $group->array_options['options_tr_town'];
+	
+		
+		$pointlivraison = $group->array_options['options_tr_point_livraison'];
+		$code_client = $group->array_options['options_tr_code_client'];
+	}
+	else if(!empty($group->note)) {
 		
 		$var = explode("\n", $group->note);
 		
