@@ -59,7 +59,7 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 		
 		if($type != 'primoclic'){
 			print $langs->trans('ProductCode') . ';' . $langs->trans('ClientCode') . ';' . $langs->trans('DeliveryPoint') . ';';
-			print $langs->trans('Level') . ' 1;' . $langs->trans('Level') . ' 2;' . $langs->trans('EmployeeName') . ';';
+			print $langs->trans('Level') . ' 1;' . $langs->trans('Level') . ' 2;' . $langs->trans('Matricule') . ';' . $langs->transnoentities('EmployeeName') . ';';
 			print $langs->trans('EditingNameOnCover') . ';' . $langs->trans('EditingNameOnTitle') . ';' . $langs->trans('FacialValueInCents') . ';';
 			print $langs->trans('EmployersShareInCents') . ';' . $langs->trans('NbTitle') . ';' . $langs->trans('CompanyName') . ';';
 			print $langs->trans('PostalCode') . ';' . $langs->trans('City') . ';' . $langs->trans('CompanyNameOnBook') . ';';
