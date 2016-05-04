@@ -2548,7 +2548,7 @@ class TRH_EmploiTemps extends TObjetStd {
 		parent::add_champs('fk_user','type=entier;index;');	//utilisateur concerné
 		parent::add_champs('tempsHebdo','type=float;');
 		
-		parent::add_champs('entity,is_archive','type=entier;index;');
+		parent::add_champs('is_archive','type=entier;index;');
 		
 		parent::add_champs('date_debut,date_fin', array('type'=>'date'));
 		
@@ -2576,13 +2576,13 @@ class TRH_EmploiTemps extends TObjetStd {
 	
 	function save(&$db) {
 		global $conf;
-		$this->entity = $conf->entity;
+		
 		parent::save($db);
 	}
 	
 	function initCompteurHoraire (&$PDOdb, $idUser){
 		global $conf;
-		$this->entity = $conf->entity;
+		
 	
 		$this->fk_user=$idUser;
 		$this->lundiam=1;
@@ -2667,11 +2667,12 @@ class TRH_EmploiTemps extends TObjetStd {
 
 	//fonction permettant le chargement de l'emploi du temps d'un user si celui-ci existe	
 	function load_by_fkuser(&$PDOdb, $fk_user, $date=''){
-		
+		global $conf;
 		
 		if(!empty($date)) {
 			$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps
 			WHERE fk_user=".(int)$fk_user." AND is_archive=1 
+			
 			AND date_debut<='$date 23:59:59'  AND date_fin>='$date 00:00:00'";
 			
 			$PDOdb->Execute($sql);
