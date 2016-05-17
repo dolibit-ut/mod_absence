@@ -74,7 +74,7 @@ function _fiche(&$ATMdb) {
 	$ATMdb->Execute($sql);	
 	$TUser[0] = 'Tous';		
 	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('lastname'), ENT_COMPAT , 'ISO8859-1').' '.htmlentities($ATMdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1');
+		$TUser[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname');
 	}
 	
 	//LISTE DE GROUPES	
@@ -83,7 +83,7 @@ function _fiche(&$ATMdb) {
 	$sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup";
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
-		$TGroup[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+		$TGroup[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
 	}
 	
 	//LISTE DES TYPES ABSENCES	
