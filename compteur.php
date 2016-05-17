@@ -366,14 +366,14 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'cumuleAcquis'=>$form->texte('','rttCumuleAcquis',round2Virgule($compteur->rttCumuleAcquis),10,50,'')
 				,'cumulePris'=>$form->texte('','rttCumulePris',round2Virgule($compteur->rttCumulePris),10,50,'')
 				,'cumuleReport'=>$form->texte('','rttCumuleReportNM1',round2Virgule($compteur->rttCumuleReportNM1),10,50,'')
-				,'cumuleTotal'=>$form->texte('','rttCumuleTotal',round2Virgule($compteur->rttCumuleTotal),10,50,'')
+				,'cumuleTotal'=>round2Virgule($compteur->rttCumuleTotal)
 
 				
 				,'nonCumuleAcquisInit'=>$form->texte('','rttAcquisAnnuelNonCumuleInit',round2Virgule($compteur->rttAcquisAnnuelNonCumuleInit),10,50,'')
 				,'nonCumuleAcquis'=>$form->texte('','rttNonCumuleAcquis',round2Virgule($compteur->rttNonCumuleAcquis),10,50,'')
 				,'nonCumulePris'=>$form->texte('','rttNonCumulePris',round2Virgule($compteur->rttNonCumulePris),10,50,'')
 				,'nonCumuleReport'=>$form->texte('','rttNonCumuleReportNM1',round2Virgule($compteur->rttNonCumuleReportNM1),10,50,'')
-				,'nonCumuleTotal'=>$form->texte('','rttNonCumuleTotal',round2Virgule($compteur->rttNonCumuleTotal),10,50,'')
+				,'nonCumuleTotal'=>round2Virgule($compteur->rttNonCumuleTotal)
 
 				
 				,'titreRtt'=>load_fiche_titre($langs->trans('DayOff'),'', 'title.png', 0, '')

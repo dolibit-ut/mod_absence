@@ -138,6 +138,9 @@ class TRH_Compteur extends TObjetStd {
 		global $conf;
 		$this->entity = $conf->entity;
 		
+		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
+		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
+		
 		parent::save($db);
 		TRH_CompteurLog::log($db, $this->getId(), 'compteur', $this->acquisExerciceN, 'sauvegarde compteur ');
 	}
@@ -206,6 +209,12 @@ class TRH_Compteur extends TObjetStd {
 		return false;
 	}
 	
+	function load(&$PDOdb, $id) {
+		
+		$res = parent::load($PDOdb, $id);
+		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
+		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
+	}
 	
 	function add(&$PDOdb, $type, $duree, $motif) {
 		
