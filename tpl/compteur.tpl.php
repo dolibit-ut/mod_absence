@@ -145,10 +145,10 @@
 					  <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.AcquisitionMethodOfDays;strconv=no;protect=no]</h2></td>
 				</tr>
-				<tr>
+				<!-- <tr>
 					<td>[translate.CollabJob;strconv=no;protect=no]</td>
 					<td>[rttCourant.rttMetier;strconv=no;protect=no]</td>
-				</tr>
+				</tr> -->
 				<tr>
 					<td>[translate.AcquisitionType;strconv=no;protect=no]</td>
 					

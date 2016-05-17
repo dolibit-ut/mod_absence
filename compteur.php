@@ -390,7 +390,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 			
 			,'view'=>array(
 				'mode'=>$mode
-				,'head'=>dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur',$userCourant->id, htmlentities($userCourant->lastname, ENT_COMPAT , 'ISO8859-1'), htmlentities($userCourant->firstname, ENT_COMPAT , 'ISO8859-1'))  , 'compteur', $langs->trans('Absence'))
+				,'head'=>dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur',$userCourant->id, $userCourant->lastname, $userCourant->firstname)  , 'compteur', $langs->trans('Absence'))
 			)
             
 			,'translate' => array(
