@@ -7,7 +7,7 @@
 	$langs->load('report@report');
 	$langs->load('absence@absence');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$absence=new TRH_Absence;
 	
 	$mesg = '';
@@ -15,7 +15,7 @@
 	
 	if(!empty($_REQUEST['export'])){
 		//On récupère  les données sous forme d'un tableau bien comme il faut
-		$TRecap = _get_stat_recap($ATMdb, $_REQUEST['TType'], $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['fk_usergroup'], $_REQUEST['fk_user'],true);
+		$TRecap = _get_stat_recap($PDOdb, $_REQUEST['TType'], $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['fk_usergroup'], $_REQUEST['fk_user'],true);
 		
 		$filename="Export_stats_absence_".date('d-m-Y').".csv";
 		
@@ -45,13 +45,13 @@
 		exit;
 	}
 	
-	_fiche($ATMdb);
+	_fiche($PDOdb);
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 
 
-function _fiche(&$ATMdb) {
+function _fiche(&$PDOdb) {
 	global $db, $user, $langs, $conf;
 	llxHeader('', $langs->trans('AbsenceExports'));
 	
@@ -69,32 +69,36 @@ function _fiche(&$ATMdb) {
 	
 	//LISTE DE USERS
 	$TUser=array();
-	$sql="SELECT u.rowid,u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u ORDER BY u.lastname, u.firstname ";
+	$sql="SELECT u.rowid,u.login,u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u ORDER BY u.lastname, u.firstname ";
 
-	$ATMdb->Execute($sql);	
+	$PDOdb->Execute($sql);	
 	$TUser[0] = 'Tous';		
-	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname');
+	while($obj = $PDOdb->Get_line()) {
+		
+		$name = trim($obj->lastname.' '.$obj->firstname);
+		if(empty($name))$name = $obj->login;
+		
+		$TUser[$obj->rowid] = $name;
 	}
 	
 	//LISTE DE GROUPES	
 	$TGroup=array();
 	$TGroup[0] = 'Tous';
 	$sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TGroup[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TGroup[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('nom');
 	}
 	
 	//LISTE DES TYPES ABSENCES	
 	$TType=array();
 	$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence` ";
-	$ATMdb->Execute($sql);
+	$PDOdb->Execute($sql);
 	$k=0;
-	while($ATMdb->Get_line()) {
-		$type = $ATMdb->Get_field('typeAbsence');
+	while($PDOdb->Get_line()) {
+		$type = $PDOdb->Get_field('typeAbsence');
 		
-		$TType[$k]['libelle'] =$ATMdb->Get_field('libelleAbsence');
+		$TType[$k]['libelle'] =$PDOdb->Get_field('libelleAbsence');
 		$TType[$k]['type']= $type;
 		$TType[$k]['case']=$form->checkbox1('','TType['. $type .']','1',(isset($_REQUEST['TType'][$type]))? '1':'0');
 		$k++;
@@ -102,7 +106,7 @@ function _fiche(&$ATMdb) {
 	
 	$TRecap=array();
 	if(isset($_REQUEST['showStat'])) {
-		$TRecap = _get_stat_recap($ATMdb, $_REQUEST['TType'], $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['fk_usergroup'], $_REQUEST['fk_user']);
+		$TRecap = _get_stat_recap($PDOdb, $_REQUEST['TType'], $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['fk_usergroup'], $_REQUEST['fk_user']);
 		$TRecap = _get_stat_recap_format($TRecap);
 	}
 	
@@ -266,7 +270,7 @@ global $db;
 	
 }
 
-function _get_stat_recap(&$ATMdb, $TType, $date_debut, $date_fin, $fk_usergroup, $fk_user,$export=false){
+function _get_stat_recap(&$PDOdb, $TType, $date_debut, $date_fin, $fk_usergroup, $fk_user,$export=false){
 	global $conf, $db;
 	
 	$o=new TObjetStd;
@@ -294,23 +298,23 @@ function _get_stat_recap(&$ATMdb, $TType, $date_debut, $date_fin, $fk_usergroup,
 	
 	$sql.=" ORDER BY u.lastname,u.firstname,a.type ";
 	
-	$ATMdb->Execute($sql);
+	$PDOdb->Execute($sql);
 	
-	$TId  =$ATMdb->Get_All();
+	$TId  =$PDOdb->Get_All();
 
 	$Tab=array();
 	
 	
 	foreach ($TId as $abs) {
 		$absence = new TRH_Absence;
-		$absence->load($ATMdb, $abs->rowid);
+		$absence->load($PDOdb, $abs->rowid);
 		
 		if($TType[$absence->type]) {
 		
 			$date_debut = $absence->get_date('date_debut');
 			$date_fin = $absence->get_date('date_fin');
 			
-			$dureeJour = $absence->calculDureeAbsenceParAddition($ATMdb);
+			$dureeJour = $absence->calculDureeAbsenceParAddition($PDOdb);
 			$dureeHeure = $absence->dureeHeure;
 			
 			if($absence->date_debut<$t_debut_export) {
@@ -327,7 +331,7 @@ function _get_stat_recap(&$ATMdb, $TType, $date_debut, $date_fin, $fk_usergroup,
 			$date_debutPlage = $absence->get_date('date_debut');
 			$date_finPlage = $absence->get_date('date_fin');
 			
-			$dureeJourPlage = $absence->calculDureeAbsenceParAddition($ATMdb);
+			$dureeJourPlage = $absence->calculDureeAbsenceParAddition($PDOdb);
 			$dureeHeurePlage = $absence->dureeHeure;
 			
 			if(!$export){
