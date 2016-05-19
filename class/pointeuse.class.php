@@ -4,10 +4,12 @@ class TRH_Pointeuse extends TObjetStd {
 	function __construct() { /* declaration */
 		$this->set_table(MAIN_DB_PREFIX.'rh_pointeuse');
 		
-		$this->add_champs('date_deb_am,date_fin_am,date_deb_pm,date_fin_pm,date_jour','type=date;');
+		$this->add_champs('date_deb_am,date_fin_am,date_deb_pm,date_fin_pm','type=date;');
 		$this->add_champs('time_presence', 'type=entier;');
 		$this->add_champs('fk_user','type=entier;index;');
 		$this->add_champs('motif','type=text;');
+		$this->add_champs('date_jour',array('type'=>'date','index'=>true));
+		
 		
 		$this->_init_vars();
 		

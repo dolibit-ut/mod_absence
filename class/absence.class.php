@@ -2559,7 +2559,7 @@ class TRH_EmploiTemps extends TObjetStd {
 		
 		parent::add_champs('is_archive','type=entier;index;');
 		
-		parent::add_champs('date_debut,date_fin', array('type'=>'date'));
+		parent::add_champs('date_debut,date_fin', array('type'=>'date','index'=>true));
 		
 		parent::_init_vars();
 		parent::start();	
