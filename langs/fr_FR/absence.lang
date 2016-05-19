@@ -486,3 +486,4 @@ MatriculePaye=Matricule paye
 TRRaisonSociale=Ticket Restaurant/Raison Sociale
 TRPointLivraison=Point de livraison
 TRCodeClient=Code client
+absenceExportDecoupeAbsenceMappingUsed=Mapping utilisé pour l'export découpé des absences
