@@ -2223,7 +2223,7 @@ class TRH_Absence extends TObjetStd {
 					else if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille!='NON')@$Tab[$fk_user][$date]['nb_jour_absence'] = 0.5;
 					else $Tab[$fk_user][$date]['nb_jour_absence'] = 0;
 					 
-					$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
+					//$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
 					$t_am = $TTime['am'];
 					$t_pm = $TTime['pm'];
 					
@@ -2259,7 +2259,7 @@ class TRH_Absence extends TObjetStd {
 							, $fk_user
 							, $date
 							, $timePresencePresume
-						); // en heure
+						); // en heure*/
 					
 					$Tab[$fk_user][$date]['nb_heure_suplementaire'] = $Tab[$fk_user][$date]['nb_heure_presence_reelle'] - $Tab[$fk_user][$date]['nb_heure_presence']; 
 					
@@ -2730,9 +2730,11 @@ class TRH_EmploiTemps extends TObjetStd {
 	}	
 	
 	static function estTravaille(&$PDOdb, $id_user, $date) {
-		global $db,$TCacheUserDateEntree;
+		global $db,$TCacheUserDateEntree, $TCacheUserPlanning;
 		
 		if(!isset($TRHCacheUserDateEntree))$TRHCacheUserDateEntree=array();
+		if(!isset($TCacheUserPlanning))$TCacheUserPlanning=array();
+		
 		if(empty($TRHCacheUserDateEntree[$id_user])) {
 			$u =new User($db);
 			$u->fetch($id_user);
@@ -2742,8 +2744,26 @@ class TRH_EmploiTemps extends TObjetStd {
 ///		var_dump($TRHCacheUserDateEntree[$id_user], $date);exit;
 		if(!empty($TRHCacheUserDateEntree[$id_user]) && strtotime($TRHCacheUserDateEntree[$id_user]) > strtotime($date) ) return 'NON';
 		
-		$e=new TRH_EmploiTemps;
-		$e->load_by_fkuser($PDOdb, $id_user, $date);
+		if(!empty($TCacheUserPlanning[$id_user])) {
+				$time = strtotime($date);
+			
+				if($TCacheUserPlanning[$id_user]->is_archive>0 && $TCacheUserPlanning[$id_user]->date_debut<=$time && $TCacheUserPlanning[$id_user]->date_fin>=$time ) {
+					$e = $TCacheUserPlanning[$id_user];
+				}
+				elseif($TCacheUserPlanning[$id_user]->is_archive == 0) {
+					$e = $TCacheUserPlanning[$id_user];
+				}
+					
+		}
+		
+		if(empty($e)) {
+			$e=new TRH_EmploiTemps;
+			$e->load_by_fkuser($PDOdb, $id_user, $date);
+			$TCacheUserPlanning[$id_user]=$e;
+			
+			
+		}
+		
 		
 		$iJour = (int)date('N', strtotime($date)) - 1 ; 	
 		
