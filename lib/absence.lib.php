@@ -706,7 +706,7 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		
 		if(empty($u->lastname)) $u->lastname = $u->login;
 		
-		print '<tr><td align="left">'.$u->getNomUrl().'</td>';
+		print '<tr><td style="text-align:left;">'.$u->getNomUrl().'</td>';
 		
 		print '<td>'.$stat['presence'].'</td>';
 		print '<td>'.$stat['presence_heure'].'</td>';
