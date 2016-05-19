@@ -39,7 +39,6 @@
 	}
 	
 	if(!empty($Tab)){
-		
 		foreach ($Tab as $idUserC) {
 			$r=new TRH_EmploiTemps;
 			$r->initCompteurHoraire($ATMdb, $idUserC);

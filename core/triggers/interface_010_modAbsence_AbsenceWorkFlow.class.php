@@ -153,13 +153,13 @@ class InterfaceAbsenceWorkflow
 					define('INC_FROM_DOLIBARR', true);
 					dol_include_once('/absence/config.php');
 
-                	                $ATMdb=new TPDOdb;
+                	$ATMdb=new TPDOdb;
                                 	
 					// Gestion type absence
 					$the_type='absent';
-                        	        $typeAbs = new TRH_TypeAbsence;
-        	                        $typeAbs->load_by_type($ATMdb, $object->type);
-	                                if($typeAbs->isPresence)
+        	        $typeAbs = new TRH_TypeAbsence;
+                    $typeAbs->load_by_type($ATMdb, $object->type);
+                    if($typeAbs->isPresence)
 					{
 						$the_type='present';
 					}
