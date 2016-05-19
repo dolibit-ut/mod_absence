@@ -133,7 +133,7 @@ function showParameters(&$form, &$doliform) {
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceExportDecoupeAbsenceMappingUsed')
-				.$doliform->textwithtooltip('Kiwi', '*', 2, 1, '<img src="'.dol_buildpath('/theme/eldy/img/info.png', 1).'" />')
+				.$doliform->textwithtooltip('Kiwi', 'EV,Utilisateur,Code nature,Date début,Heure début,Date fin,Heure fin,Nombre,Zone réservée,Indicateur,Zone réservée,Code motif absence,Zone réservée,Date création,Heure création,Code user,Après-midi,Matin,Date validité', 2, 1, '<img src="'.dol_buildpath('/theme/eldy/img/info.png', 1).'" />')
 				.$doliform->textwithtooltip('Banane', 'EV,Utilisateur,Matricule paye,Code nature,Code absence,Date début,Heure début,Date fin,Heure fin,Nombre,Zone réservée,Indicateur,Zone réservée,Code motif absence,Zone réservée,Date création,Heure création,Code user,Après-midi,Matin,Date validité', 2, 1, '<img src="'.dol_buildpath('/theme/eldy/img/info.png', 1).'" />');
 		print '</td>';
 		print '<td>';
