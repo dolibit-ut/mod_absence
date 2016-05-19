@@ -676,7 +676,7 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		if($first) {
 			
 			print '<tr>
-				<td>' . $langs->trans('LastName') . '</td>
+				<td>' . $langs->trans('Name') . '</td>
 				<td>' . $langs->trans('PresenceDay') . '</td>
 				<td>' . $langs->trans('PresenceHour') . '</td>
 				<td>' . $langs->trans('AbsenceDay') . '</td>
@@ -704,7 +704,9 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 			@$stat['ferie']+=$row['nb_jour_ferie'] ;
 		}
 		
-		print '<tr><td>'.$u->getNomUrl().'</td>';
+		if(empty($u->lastname)) $u->lastname = $u->login;
+		
+		print '<tr><td align="left">'.$u->getNomUrl().'</td>';
 		
 		print '<td>'.$stat['presence'].'</td>';
 		print '<td>'.$stat['presence_heure'].'</td>';
@@ -929,10 +931,11 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	$TTotal=array();
 	foreach($tabUserMisEnForme as $idUser => $planning){
 		
-		$sql="SELECT lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE rowid=".$idUser;
+		$sql="SELECT lastname, firstname,login FROM ".MAIN_DB_PREFIX."user WHERE rowid=".$idUser;
 		$ATMdb->Execute($sql);
 		if($ATMdb->Get_line()) {
-			$name =$ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname');
+			$name =trim($ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname'));
+			if(empty($name))$name = $ATMdb->Get_field('login');
 		}
 		if(mb_detect_encoding($name,'UTF-8', true) === false  ) $name = utf8_encode($name);
 
