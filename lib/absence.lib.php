@@ -755,7 +755,7 @@ global $conf,$db,$user;
 			
 			if($annee!=$annee_old) print '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
 			
-			//_planning($ATMdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
+			_planning($ATMdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
 		
 			$annee_old = $annee;
 		
