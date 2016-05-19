@@ -2201,14 +2201,14 @@ class TRH_Absence extends TObjetStd {
 				$TPlanning = $abs->requetePlanningAbsence($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_current));
 				
 				list($dt, $TAbsence) = each($TPlanning);
-				
+
 				foreach($TAbsence as $fk_user => $ouinon) {	
 					$date = date('Y-m-d', $t_current);
 					
 					$presence = strpos($ouinon, '[Présence]') !== false; //TODO refondre un peu ça pour éviter cette grosse merde de strpos
 					
-					$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $fk_user, $date);
-					$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
+					//$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $fk_user, $date);
+					//$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
 					
 					@$Tab[$fk_user][$date]['presence_jour_entier'] = (int)($estUnJourTravaille=='OUI' && $ouinon=='non' && !$estFerie) ;
 					@$Tab[$fk_user][$date]['presence'] = (int)(($estUnJourTravaille!='NON' && $ouinon=='non' && !$estFerie) || $presence) ;
@@ -2223,7 +2223,7 @@ class TRH_Absence extends TObjetStd {
 					else if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille!='NON')@$Tab[$fk_user][$date]['nb_jour_absence'] = 0.5;
 					else $Tab[$fk_user][$date]['nb_jour_absence'] = 0;
 					 
-					$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
+					//$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
 					$t_am = $TTime['am'];
 					$t_pm = $TTime['pm'];
 					
@@ -2253,14 +2253,14 @@ class TRH_Absence extends TObjetStd {
 					$Tab[$fk_user][$date]['typeAbsence'] = $ouinon;
 					
 					$timePresencePresume = $Tab[$fk_user][$date]['nb_heure_presence'] * 3600;
-					
+					/*
 					$Tab[$fk_user][$date]['nb_heure_presence_reelle'] = TRH_Pointeuse::tempsTravailReelDuJour(
 							$PDOdb
 							, $fk_user
 							, $date
 							, $timePresencePresume
 						); // en heure
-					
+					*/
 					$Tab[$fk_user][$date]['nb_heure_suplementaire'] = $Tab[$fk_user][$date]['nb_heure_presence_reelle'] - $Tab[$fk_user][$date]['nb_heure_presence']; 
 					
 				}
