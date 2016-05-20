@@ -18,7 +18,7 @@
 if($nb_conges + $nb_rtt+ $nb_rttnon == 0) continue;
 
 		$sql=" UPDATE ".MAIN_DB_PREFIX."rh_compteur 
-				SET congesPrisNM1 = $nb_conges, rttCumulePris=rttCumulePris+$nb_rtt, rttNonCumulePris=rttNonCumulePris+$nb_rttnon
+				SET congesPrisNM1 = $nb_conges, rttCumulePris = $nb_rtt, rttNonCumulePris = $nb_rttnon
 				WHERE fk_user=".$obj->fk_user.";
 		";
 	
