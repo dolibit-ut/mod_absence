@@ -214,6 +214,8 @@ class TRH_Compteur extends TObjetStd {
 		$res = parent::load($PDOdb, $id);
 		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
 		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
+		
+		return $res;
 	}
 	
 	function add(&$PDOdb, $type, $duree, $motif) {
