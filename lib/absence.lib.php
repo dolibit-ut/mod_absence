@@ -772,7 +772,7 @@ global $conf,$db,$user;
 function _getSQLListValidation($userid) {
 	// TODO AA encore une grosse merde bien collante sous la semelle
 
-	global $db;
+	global $db, $conf,$user;
 		
  	//LISTE DES GROUPES À VALIDER
  	$sql=" SELECT DISTINCT fk_usergroup, nbjours, validate_himself, level
@@ -883,6 +883,9 @@ function _getSQLListValidation($userid) {
  		}
  		$sql.=")";
 		
+		return $sql;
+	}
+	else if($user->rights->absence->myactions->voirToutesAbsencesListe) {
 		return $sql;
 	}
  	else {
