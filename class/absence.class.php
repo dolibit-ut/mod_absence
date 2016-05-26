@@ -392,14 +392,8 @@ class TRH_Absence extends TObjetStd {
 	{
 		global $user,$conf,$langs;
 		
-		// POplus besoin de la requête, ce sera fait par l'appel à la fonction setAcceptee
-		/*$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence` 
-				SET etat='Validee', libelleEtat='" . $langs->trans('Accepted') . "', date_validation='".date('Y-m-d')."', fk_user_valideur=".$user->id." 
-				WHERE fk_user=".$this->fk_user. " 
-				AND rowid=".$this->getId();*/
-		
 		//Valideur fort
-		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity))
+		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity) || $user->rights->absence->myactions->voirToutesAbsencesListe)
 		{
 			$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
 			
