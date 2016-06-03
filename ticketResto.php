@@ -462,7 +462,7 @@ function _ticket(&$ATMdb) {
 	?></table><br /><?php
 	
 	echo $form->btsubmit($langs->trans('GenerateFile'), 'Generer');
-	//echo $form->btsubmit('Générer le fichier Sage', 'bt_sage');
+	echo $form->btsubmit('Générer le fichier Sage', 'bt_sage');
 	echo $form->btsubmit($langs->trans('GenerateFilePrimoclic'), 'GenererPrimoclic');
 	echo $langs->trans('Then');
 	echo $form->btsubmit($langs->trans('ArchiveThisSending'), 'Archive');
