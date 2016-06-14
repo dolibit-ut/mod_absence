@@ -210,15 +210,15 @@ class TRH_Compteur extends TObjetStd {
 	}
 	function checkRTT(&$PDOdb) {
 		
-		$date_NM1 =  date('Y-m-d',strtotime('-1year', $this->date_rttCloture));
+		$date_NM1 =  date('Y-m-d',strtotime('-1year +1day', $this->date_rttCloture));
 		
 		$TResult['rttcumule'] = $this->chg_getAbsenceInfo($PDOdb, "'rttcumule'", $this->fk_user,$this->date_rttCloture,$date_NM1);
 		$TResult['rttnoncumule'] = $this->chg_getAbsenceInfo($PDOdb, "'rttnoncumule'", $this->fk_user,$this->date_rttCloture,$date_NM1);
 		
-		if($TResult['rttcumule']['congesPrisN']!=$this->rttCumulePris) {
+		if($TResult['rttcumule']['congesPrisNM1']!=$this->rttCumulePris) {
 			$TResult['rttcumule']['congesPrisNError'] = 1;
 		}
-		if($TResult['rttnoncumule']['congesPrisN']!=$this->rttNonCumulePris) {
+		if($TResult['rttnoncumule']['congesPrisNM1']!=$this->rttNonCumulePris) {
 			$TResult['rttnoncumule']['congesPrisNError'] = 1;
 		}
 		
@@ -226,7 +226,7 @@ class TRH_Compteur extends TObjetStd {
 	}
 	function checkConges(&$PDOdb) {
 		
-		$date_NM1 =  date('Y-m-d',strtotime('-1year', $this->date_congesCloture ));
+		$date_NM1 =  date('Y-m-d',strtotime('-1year +1day', $this->date_congesCloture ));
 		$date=  date('Y-m-d',$this->date_congesCloture );
 		
 		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user,$this->date_congesCloture,$date_NM1);
@@ -249,7 +249,7 @@ class TRH_Compteur extends TObjetStd {
         $sql.=" AND date_fin>='$date'";
 		
 		if(!empty($date_max)) $sql.=" AND date_debut<'".$date_max."'";
-		
+		//echo $sql.'<hr>';
 		$Tab = $PDOdb->ExecuteAsArray($sql);
 		
 		$TResult = array('congesPrisNM1'=>0, 'congesPrisN'=>0);

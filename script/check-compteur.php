@@ -4,10 +4,11 @@
 
         ini_set('display_errors',1);
         $PDOdb=new TPDOdb;
+        $PDOdb2=new TPDOdb;
 
 		dol_include_once('/absence/class/absence.class.php');
 
-        $PDOdb->Execute("SELECT rowid, fk_user FROM ".MAIN_DB_PREFIX."rh_compteur WHERE fk_user>0 ");
+        $PDOdb->Execute("SELECT rowid, fk_user FROM ".MAIN_DB_PREFIX."rh_compteur WHERE fk_user>0");// AND fk_user=28045 OR fk_user=27886");
 
 		llxHeader();
 
@@ -27,9 +28,9 @@
         while($obj = $PDOdb->Get_line()) {
 
 				$compteur = new TRH_Compteur;
-				$compteur->load($PDOdb, $obj->rowid);
+				$compteur->load($PDOdb2, $obj->rowid);
 
-				$Tab = array_merge($compteur->checkConges($PDOdb),$compteur->checkRTT($PDOdb));
+				$Tab = array_merge($compteur->checkConges($PDOdb2),$compteur->checkRTT($PDOdb2));
 				
 				if(!empty($Tab['rttcumule']['congesPrisNError']) 
 				|| !empty($Tab['rttnoncumule']['congesPrisNError'])
@@ -42,9 +43,9 @@
 					
 					echo '<tr>
 					<td>'.$u->getNomUrl(1).'</td>
-						<td>'.$Tab['rttcumule']['congesPrisN'].'</td>
+						<td>'.$Tab['rttcumule']['congesPrisNM1'].'</td>
 						<td>'.(empty($Tab['rttcumule']['congesPrisNError']) ? '' : 'Err. : '.$compteur->rttCumulePris).'</td>
-						<td>'.$Tab['rttnoncumule']['congesPrisN'].'</td>
+						<td>'.$Tab['rttnoncumule']['congesPrisNM1'].'</td>
 						<td>'.(empty($Tab['rttnoncumule']['congesPrisNError']) ? '' : 'Err. : '.$compteur->rttNonCumulePris).'</td>
 						<td>'.$Tab['conges']['congesPrisNM1'].'</td>
 						<td>'.(empty($Tab['conges']['congesPrisNM1Error']) ? '' : 'Err. : '.$compteur->congesPrisNM1).'</td>
