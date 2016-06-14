@@ -229,7 +229,7 @@ class TRH_Compteur extends TObjetStd {
 		$date_NM1 =  date('Y-m-d',strtotime('-1year +1day', $this->date_congesCloture ));
 		$date=  date('Y-m-d',$this->date_congesCloture );
 		
-		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user,strtotime('-1year +1day', $this->date_congesCloture ),$date_NM1,$date);
+		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user, $this->date_congesCloture,$date_NM1,$date);
 		
 		if($TResult['conges']['congesPrisNM1']!=$this->congesPrisNM1) {
 			$TResult['conges']['congesPrisNM1Error'] = 1;
