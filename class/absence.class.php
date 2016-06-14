@@ -208,6 +208,70 @@ class TRH_Compteur extends TObjetStd {
 		}
 		return false;
 	}
+	function checkRTT(&$PDOdb) {
+		
+		$date_NM1 =  date('Y-m-d',strtotime('-1year', $this->date_rttCloture));
+		
+		$TResult['rttcumule'] = $this->chg_getAbsenceInfo($PDOdb, "'rttcumule'", $this->fk_user,$this->date_rttCloture,$date_NM1);
+		$TResult['rttnoncumule'] = $this->chg_getAbsenceInfo($PDOdb, "'rttnoncumule'", $this->fk_user,$this->date_rttCloture,$date_NM1);
+		
+		if($TResult['rttcumule']['congesPrisN']!=$this->rttCumulePris) {
+			$TResult['rttcumule']['congesPrisNError'] = 1;
+		}
+		if($TResult['rttnoncumule']['congesPrisN']!=$this->rttNonCumulePris) {
+			$TResult['rttnoncumule']['congesPrisNError'] = 1;
+		}
+		
+		return $TResult;
+	}
+	function checkConges(&$PDOdb) {
+		
+		$date_NM1 =  date('Y-m-d',strtotime('-1year', $this->date_congesCloture ));
+		$date=  date('Y-m-d',$this->date_congesCloture );
+		
+		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user,$this->date_congesCloture,$date_NM1);
+		
+		if($TResult['conges']['congesPrisNM1']!=$this->congesPrisNM1) {
+			$TResult['conges']['congesPrisNM1Error'] = 1;
+		}
+		
+		if($TResult['conges']['congesPrisN']!=$this->congesPrisN) {
+			$TResult['conges']['congesPrisNError'] = 1;
+		}
+		
+		return $TResult;
+	}
+	
+	private function chg_getAbsenceInfo($PDOdb, $type, $fk_user,$time_ref, $date,$date_max='') {
+		
+		$sql = "SELECT rowid,type,duree,congesPrisNM1,congesPrisN,date_cre,date_debut,date_fin FROM ".MAIN_DB_PREFIX."rh_absence
+				 WHERE fk_user=$fk_user AND type IN ($type)";
+        $sql.=" AND date_fin>='$date'";
+		
+		if(!empty($date_max)) $sql.=" AND date_debut<'".$date_max."'";
+		
+		$Tab = $PDOdb->ExecuteAsArray($sql);
+		
+		$TResult = array('congesPrisNM1'=>0, 'congesPrisN'=>0);
+		foreach($Tab as $row) {
+			/*$row->date_compteur = $date;
+			var_dump($row);
+			*/
+			$a = new TRH_Absence;
+			$a->load($PDOdb, $row->rowid);
+			$a->calculDureeAbsenceParAddition($PDOdb,$time_ref);
+			
+			$TResult['congesPrisNM1']+=$a->congesPrisNM1;
+			$TResult['congesPrisN']+=$a->congesPrisN;
+
+			
+			//var_dump(array($row,$date, $a->duree, $a->congesPrisNM1, $a->congesPrisN));
+			
+		}
+		
+		return $TResult;
+		
+	} 
 	
 	function load(&$PDOdb, $id) {
 		
@@ -711,6 +775,8 @@ class TRH_Absence extends TObjetStd {
 		$this->dureeHeure=0;
 		$this->dureeContigue=0;
 		$this->dureeContigueWhitoutJNT = 0;
+		$this->congesPrisNM1 = 0; // lors du comptage d'une absence pour alimenter le compteur
+		$this->congesPrisN = 0; 
 		
 		$t_start = $this->date_debut;
 		$t_end = $this->date_fin;
