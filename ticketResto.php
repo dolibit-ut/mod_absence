@@ -180,7 +180,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
 	$ATMdb->Execute($sqlReq);
 	while($ATMdb->Get_line()) {
-		$TGroupe[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+		$TGroupe[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
 	}
 	
 	$TUser=array('Tous');
@@ -196,7 +196,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	//print $sql;
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')]=ucwords(strtolower(htmlentities($ATMdb->Get_field('lastname'), ENT_COMPAT , 'UTF-8')))." ".htmlentities($ATMdb->Get_field('firstname'), ENT_COMPAT , 'UTF-8');
+		$TUser[$ATMdb->Get_field('rowid')]=ucwords(strtolower($ATMdb->Get_field('lastname')))." ".$ATMdb->Get_field('firstname');
 	}
 	
 	$TStatPlanning=array();
