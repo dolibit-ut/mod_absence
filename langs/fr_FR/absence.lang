@@ -207,6 +207,7 @@ FundManagementAbout=Gestion de la caisse, à propos
 GenerateFile=Générer le fichier
 Generate=Générer
 GlobalHolidayAdministration=Administration générale des congés
+CheckCompteur=Outil de contrôle des compteurs
 GlobalHolidaysData=Données générales des congés
 Group=Groupe
 Groups=Groupes
