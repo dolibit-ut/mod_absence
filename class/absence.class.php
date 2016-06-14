@@ -229,7 +229,7 @@ class TRH_Compteur extends TObjetStd {
 		$date_NM1 =  date('Y-m-d',strtotime('-1year +1day', $this->date_congesCloture ));
 		$date=  date('Y-m-d',$this->date_congesCloture );
 		
-		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user,$this->date_congesCloture,$date_NM1);
+		$TResult['conges'] = $this->chg_getAbsenceInfo($PDOdb, "'conges','cppartiel'", $this->fk_user,strtotime('-1year +1day', $this->date_congesCloture ),$date_NM1,$date);
 		
 		if($TResult['conges']['congesPrisNM1']!=$this->congesPrisNM1) {
 			$TResult['conges']['congesPrisNM1Error'] = 1;
@@ -259,7 +259,7 @@ class TRH_Compteur extends TObjetStd {
 			*/
 			$a = new TRH_Absence;
 			$a->load($PDOdb, $row->rowid);
-			$a->calculDureeAbsenceParAddition($PDOdb,$time_ref);
+			$a->calculDureeAbsenceParAddition($PDOdb,$time_ref, strtotime('-1year',$time_ref));
 			
 			$TResult['congesPrisNM1']+=$a->congesPrisNM1;
 			$TResult['congesPrisN']+=$a->congesPrisN;
@@ -764,7 +764,7 @@ class TRH_Absence extends TObjetStd {
 	
 	}
 	
-	function calculDureeAbsenceParAddition(&$PDOdb, $dateN=0) {
+	function calculDureeAbsenceParAddition(&$PDOdb, $dateN=0, $dateTooOld = 0) {
 		global $TJourNonTravailleEntreprise, $langs;
 		
 		$TJourSemaine = array('dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi');
@@ -860,8 +860,9 @@ class TRH_Absence extends TObjetStd {
 				
 				if(!empty($dateN)) {
 					// distrib sur conges N ou N+1
-
-					if($t_current<=$dateN) $this->congesPrisNM1+=$dureeJour;
+					
+					if(!empty($dateTooOld) && $t_current<=$dateTooOld) null;
+					else if($t_current<=$dateN) $this->congesPrisNM1+=$dureeJour;
 					else $this->congesPrisN+=$dureeJour;
 					
 				}
