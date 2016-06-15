@@ -14,7 +14,7 @@ $ATMdb=new TPDOdb;
 
 // relever le point de départ
 $timestart=microtime(true);
-		
+
 //on charge quelques listes pour avoir les clés externes.
 $TUser = array();
 
@@ -57,17 +57,17 @@ $numLigne = 0;
 $cpt = 0;
 if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 	while(($data = fgetcsv($handle)) != false){
-		
+
 		if($numLigne>0){
-			
+
 			$infos = explode(';', $data[0]);
 
 			$login = strtolower($infos[4]);
-			
+
 			//echo $infos[4].$TUserEdt[$TUser[strtolower($infos[4])]]."<br>";
 			if(!isset( $TUser[$login] )){	//si le login n'existe pas, on ne traite pas la ligne
 				echo $langs->trans('ErrNot', strtolower($infos[4])) . '<br>';
-			else {
+			} else {
 				echo $TUser[$login].'<br>';
 				if ( !isset($TUserEdt[$TUser[$login]] )){	//si le login n'existe pas, on ne traite pas la ligne
 					echo $langs->trans('ErrNonExistentUser', $login);
@@ -79,20 +79,20 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 					//echo '<br/>';
 					$absence=new TRH_Absence;
 					$absence->load_by_idImport($ATMdb,$infos[0]);
-					
+
 					$absence->fk_user=$TUser[strtolower($infos[4])];
 					$absence->idAbsImport=$infos[0];
 					echo $absence->idAbsImport;
 					$absence->etat='Validee';
 					$absence->commentaireValideur=$infos[2];
-					
-					
+
+
 					switch($infos[1]){
 						case 40:
 							$absence->type='conges';
 							$absence->libelle=saveLibelle($absence->type);
 							$absence->code='0950';//saveCodeTypeAbsence($ATMdb, $absence->type);
-							
+
 							break;
 						case 73:
 							$absence->type='rttcumule';
@@ -107,11 +107,11 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 
 							break;
 					}
-					
+
 					$absence->libelle=saveLibelle($absence->type);
 					$absence->libelleEtat='Acceptée';
-					
-					
+
+
 					//on teste si le début de la demande d'absence et sa fin est le matin ou l'pm
 					//début d'absence
 					if(substr($infos[5],'-12','2')<=12){
@@ -119,53 +119,53 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 					}
 					else{
 						$absence->ddMoment='apresmidi';
-					}; 
+					};
 					//fin d'absence
 					if(substr($infos[6],'-12','2')<=12){
 						$absence->dfMoment='matin';
 					}
 					else{
 						$absence->dfMoment='apresmidi';
-					}; 
-					
-					
+					};
+
+
 					$absence->date_debut=strtotime($infos[7]);
 					$absence->date_fin=strtotime($infos[8]);
-					
+
 					$absence->duree=0;
 					$absence->dureeHeure=0;
-					
+
 					//calcul de la durée des absences en jours
 					$dureeAbsenceCourante=$absence->calculDureeAbsence($ATMdb, $absence->date_debut, $absence->date_fin, $absence);
-					
+
 					$dureeAbsenceCourante=$absence->calculJoursFeries($ATMdb, $dureeAbsenceCourante, $absence->date_debut, $absence->date_fin, $absence);
 					//echo "ici".$dureeAbsenceCourante;exit;
-					$dureeAbsenceCourante=$absence->calculJoursTravailles($ATMdb, $dureeAbsenceCourante, $absence->date_debut, $absence->date_fin, $absence); 
+					$dureeAbsenceCourante=$absence->calculJoursTravailles($ATMdb, $dureeAbsenceCourante, $absence->date_debut, $absence->date_fin, $absence);
 
 					$absence->duree=$dureeAbsenceCourante;
- 					
-					
+
+
 					//on calcule la durée des absences en heures pour l'export en paie
-					$sql="SELECT tempsHebdo FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps 
+					$sql="SELECT tempsHebdo FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps
 					WHERE fk_user=".$absence->fk_user;
 					$ATMdb->Execute($sql);
 					if ($ATMdb->Get_line()) {$tpsHebdo=$ATMdb->Get_field('tempsHebdo');	}
-					
+
 					if($tpsHebdo>=35){
 						$absence->dureeHeurePaie = $absence->duree*7;
 					}
 					else $absence->dureeHeurePaie = $absence->dureeHeure;
-					
+
 					$absence->niveauValidation=1;
-					
+
 					$absence->save($ATMdb);
 					$cpt++;
 			}
-			
-			}	
+
 			}
-			$numLigne++;	
-			
+			}
+			$numLigne++;
+
 		}
 }
 
@@ -173,7 +173,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 //------------FIN DU TRAITEMENT DES LIGNES----------------------------------------------------------
 
 
-echo $langs->trans('EndOfProcessing') . ' ' . $langs->trans('AddedLines', $cpt) . '<br><br>';	
+echo $langs->trans('EndOfProcessing') . ' ' . $langs->trans('AddedLines', $cpt) . '<br><br>';
 //Fin du code PHP : Afficher le temps d'éxecution
 $timeend=microtime(true);
 $page_load_time = number_format($timeend-$timestart, 3);
