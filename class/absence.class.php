@@ -246,10 +246,12 @@ class TRH_Compteur extends TObjetStd {
 
 		$sql = "SELECT rowid,type,duree,congesPrisNM1,congesPrisN,date_cre,date_debut,date_fin FROM ".MAIN_DB_PREFIX."rh_absence
 				 WHERE fk_user=$fk_user AND type IN ($type)";
-        $sql.=" AND date_fin>='$date'";
+        	$sql.=" AND date_fin>='$date'";
 
 		if(!empty($date_max)) $sql.=" AND date_debut<'".$date_max."'";
 		//echo $sql.'<hr>';
+		$sql.=" AND etat!='Refusee' ";
+
 		$Tab = $PDOdb->ExecuteAsArray($sql);
 
 		$TResult = array('congesPrisNM1'=>0, 'congesPrisN'=>0);
