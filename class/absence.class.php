@@ -1814,7 +1814,7 @@ class TRH_Absence extends TObjetStd {
 		return $dureeAbsenceRecevable;
 	}
 
-	function loadTypeAbsencePerTypeUser(&$PDOdb) {
+	function loadTypeAbsencePerTypeUser(&$PDOdb, $isPresence=0) {
 
 		//combo box pour le type d'absence admin
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array();
