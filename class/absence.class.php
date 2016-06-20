@@ -1671,7 +1671,9 @@ class TRH_Absence extends TObjetStd {
 				case 'conges':
 				case 'cppartiel':
 
-					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus congé');
+					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_congesCloture);
+
+					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus ou suppression congé');
 
 				break;
 
