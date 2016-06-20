@@ -85,9 +85,8 @@ function _log(&$PDOdb, &$compteur) {
 	
 	llxHeader('', $langs->trans('CounterLog'));
 	
-	$req = 'SELECT lastname, firstname FROM ' . MAIN_DB_PREFIX . 'user WHERE rowid = ' . $compteur->fk_user;
-	$PDOdb->Execute($req);
-	$usr = $PDOdb->Get_line();
+	$usr = new User($db);
+	$usr->fetch($compteur->fk_user);
 		
 	getStandartJS();
 	print dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur', $compteur->fk_user, $usr->lastname, $usr->firstname)  , 'log', $langs->trans('Log'));
@@ -98,7 +97,7 @@ function _log(&$PDOdb, &$compteur) {
 		WHERE fk_compteur=".$compteur->getId();
 		
 	
-	$TOrder = array('DateCre'=>'DESC');
+	$TOrder = array('date_cre'=>'DESC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 	
@@ -110,7 +109,7 @@ function _log(&$PDOdb, &$compteur) {
 			'page'=>$page
 			,'nbLine'=>'30'
 		)
-		
+		,'orderBy'=>$TOrder
 		,'translate'=>array()
 		,'type'=>array('date_cre'=>'date')
 		,'title'=>array(
