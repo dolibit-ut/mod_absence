@@ -25,6 +25,7 @@
 			<td>Err.</td>
 		</tr>';
 
+	$fixSQL = '';
         while($obj = $PDOdb->Get_line()) {
 
 				$compteur = new TRH_Compteur;
@@ -53,7 +54,11 @@
 						<td>'.(empty($Tab['conges']['congesPrisNError']) ? '' : 'Err. : '.$compteur->congesPrisN).'</td>
 					</tr>';
 					
-					
+					$fixSQL.=" UPDATE ".MAIN_DB_PREFIX."rh_compteur 
+						SET congesPrisNM1 = ".$Tab['conges']['congesPrisNM1'].", congesPrisN = ".$Tab['conges']['congesPrisN'].", rttCumulePris = ".$Tab['rttcumule']['congesPrisNM1']."
+						, rttNonCumulePris = ".$Tab['rttnoncumule']['congesPrisNM1']."
+						WHERE fk_user=".$u->id.";
+					";			
 				}
 					
 					
@@ -74,5 +79,7 @@
 
 		
 		echo '</table>';
+
+if(isset($_REQUEST['show_sql'])) echo $fixSQL;
 
 		llxFooter();

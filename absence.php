@@ -466,7 +466,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 				'date_debut'=>array('recherche'=>'calendar')
 				,'libelle'=>true
 				,"firstname"=>true
-				,"name"=>true
+				,"lastname"=>true
 			)
 			,'eval'=>array(
 				'lastname'=>'ucwords(strtolower("@val@"))'
