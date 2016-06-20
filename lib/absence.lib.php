@@ -456,6 +456,7 @@ function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 	$sql="SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user 
 	WHERE fk_user= ".$absence->fk_user;
 
+
 	$ATMdb->Execute($sql);
 	$TGValideur=array();
 	while($ATMdb->Get_line()){
@@ -484,7 +485,7 @@ function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER && $absence->code=='nonjustifiee') {
 		if(!in_array($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER, $TValideur))  $TValideur[] = $conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER;
 	}
-//var_dump($TValideur);
+
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
 			envoieMailValideur($ATMdb, $absence, $idVal,$presence);
@@ -886,6 +887,16 @@ function _getSQLListValidation($userid) {
 		return $sql;
 	}
 	else if($user->rights->absence->myactions->voirToutesAbsencesListe) {
+			 $sql=" SELECT DISTINCT a.fk_user,
+                                a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
+                                ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
+                                a.libelleEtat as 'Statut demande', a.avertissement, a.duree
+                                FROM ".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta
+                                WHERE 1
+                                AND a.fk_user=s.rowid
+                                AND ta.typeAbsence=a.type
+                                AND a.etat LIKE 'AValider'";
+
 		return $sql;
 	}
  	else {

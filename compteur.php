@@ -41,7 +41,6 @@
 				break;
 			
 			case 'view':
-			
 				if(isset($_REQUEST['id'])){
 					$compteur->load($PDOdb, $_REQUEST['id']);
 				}
