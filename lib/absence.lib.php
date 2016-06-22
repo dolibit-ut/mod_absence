@@ -444,6 +444,12 @@ function mailConges(&$absence,$presence=false){
 	
 	if(!empty($sendto) && !$dont_send_mail) {
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
+		
+		if(!empty($conf->global->ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL)) {
+			$fileics = absenceCreateICS($absence);
+			$mail->add_piece_jointeb('invite.ics', $fileics, 'text/calendar');
+		}
+		
 		$result = $mail->send(true, 'utf-8');
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
 		else setEventMessage('Erreur lors de l\'envoi du mail à l\'utilisateur');*/
@@ -451,7 +457,28 @@ function mailConges(&$absence,$presence=false){
 	
 	return 1;	
 }
+function absenceCreateICS(&$absence){
+	global $langs;
+	
+$ics=<<<EOT
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//hacksw/handcal//NONSGML v1.0//EN
+BEGIN:VEVENT
+DTSTART:$absence->get_date('date_debut','Ymd')
+DTEND:$absence->get_date('date_fin','Ymd')
+SUMMARY:$langs->trans('MonAbsence')
+LOCATION:
+DESCRIPTION:
+END:VEVENT
+END:VCALENDAR
+EOT;
 
+	$tmfile = tempnam('/tmp','ICS');
+	file_put_contents($tmfile, $ics);
+	
+	return $tmfile;
+}
 //fonction permettant la récupération
 function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 	global $conf;

@@ -502,4 +502,5 @@ TIMESHEET_WORKING_HOUR_PER_DAY=Heures travaillées (9-18)
 CanChangeEmploiTempsForGroup=Peut appliquer un emploi du temps à tout un groupe
 CanDeclareAbsenceForGroup=Peut déclarer une absence pour tout un groupe 
 
-
+absenceAddInvitationToAcceptNofication=Ajouter une invitation au mail d'acceptation
+MonAbsence=Absence
