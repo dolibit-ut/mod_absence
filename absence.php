@@ -108,11 +108,7 @@
 				
 			case 'accept':
 				$absence->load($PDOdb, $_REQUEST['id']);
-				$absence->valid($PDOdb);if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
-			
-			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
-			
-		}
+				$absence->valid($PDOdb);
 				
 				$absence->load($PDOdb, $_REQUEST['id']);
 
@@ -432,6 +428,7 @@ function _linkUser($fk_user) {
 	$u->fetch($fk_user);
 	
 	if(method_exists($u, 'getLoginUrl')) return $u->getLoginUrl(1);
+	
 	else return $u->getNomUrl(1);
 	
 	
