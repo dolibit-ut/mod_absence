@@ -801,7 +801,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				
 				,'titreNvDemande'=>load_fiche_titre($langs->trans('NewAbsenceRequest'),'', 'title.png', 0, '')
 				,'titreRecapAbsence'=>load_fiche_titre($langs->trans('AbsenceRequestSummary'),'', 'title.png', 0, '')
-				,'titreJourRestant'=>load_fiche_titre($langs->trans('RemainingDays'),'', 'title.png', 0, '')
+				,'titreJourRestant'=>load_fiche_titre($langs->trans('RemainingDays').'<span id="link-to-counter"></span>','', 'title.png', 0, '')
 				,'titreDerAbsence'=>load_fiche_titre($langs->trans('LastAbsencePresence'),'', 'title.png', 0, '')
 				,'titreRegle'=>load_fiche_titre($langs->trans('RelevantRules'),'', 'title.png', 0, '')
 				
