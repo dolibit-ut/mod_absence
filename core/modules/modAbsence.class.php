@@ -78,6 +78,7 @@ class modAbsence extends DolibarrModules
 		$this->module_parts = array(
 			'triggers' =>1      
 			,'hooks'=>array('userdao','actioncard')
+			,'css'=>array('/absence/css/absence.css')
 		);
 
 		// Data directories to create when module is enabled.
@@ -409,15 +410,21 @@ class modAbsence extends DolibarrModules
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'CanAvoidSendMail';
-	$r++;	
+		$r++;	
+		
 		$this->rights[$r][0] = 7135;
 		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
-	        $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
+	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
 		$r++;
         
-        
+		$this->rights[$r][0] = $this->numero.$r;
+		$this->rights[$r][1] = $langs->trans('CanDeclareAbsenceAutoValidated');
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'CanDeclareAbsenceAutoValidated';
+		$r++;
 		
 
 		
