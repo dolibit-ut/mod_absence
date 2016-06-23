@@ -1820,7 +1820,7 @@ class TRH_Absence extends TObjetStd {
 
 		//combo box pour le type d'absence admin
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array();
-		$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence` WHERE isPresence = ".$isPresence;
+		$sql="SELECT typeAbsence, libelleAbsence  FROM ".MAIN_DB_PREFIX."rh_type_absence WHERE isPresence = ".$isPresence;
 		$PDOdb->Execute($sql);
 		while($PDOdb->Get_line()) {
 			$this->TTypeAbsenceAdmin[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
@@ -1828,7 +1828,7 @@ class TRH_Absence extends TObjetStd {
 
 
 		//combo box pour le type d'absence utilisateur
-		$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence`
+		$sql="SELECT typeAbsence, libelleAbsence  FROM ".MAIN_DB_PREFIX."rh_type_absence
 				WHERE admin=0 AND isPresence = ".$isPresence;
 		$PDOdb->Execute($sql);
 		while($PDOdb->Get_line()) {
@@ -1836,7 +1836,7 @@ class TRH_Absence extends TObjetStd {
 		}
 
 		//combo box pour le type d'absence pointeur
-		$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence`
+		$sql="SELECT typeAbsence, libelleAbsence  FROM ".MAIN_DB_PREFIX."rh_type_absence
 				WHERE isPresence = ".$isPresence." AND (admin=0 OR typeAbsence LIKE 'nonjustifiee')";
 		$PDOdb->Execute($sql);
 		while($PDOdb->Get_line()) {
