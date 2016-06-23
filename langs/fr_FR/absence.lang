@@ -504,3 +504,4 @@ CanDeclareAbsenceForGroup=Peut déclarer une absence pour tout un groupe
 
 absenceAddInvitationToAcceptNofication=Ajouter une invitation au mail d'acceptation
 MonAbsence=Absence
+absenceTicketRestoOnUserCreate=Par défaut, un nouvel utilisateur souscrit aux tickets restaurants
