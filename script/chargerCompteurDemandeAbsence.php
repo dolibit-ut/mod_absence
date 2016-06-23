@@ -19,7 +19,7 @@ if(isset($_REQUEST['user'])) {
             ,'acquisRecuperation'=>round2Virgule($c->acquisRecuperation)
             ,'annuelCumule'=>round2Virgule($c->rttCumuleAcquis+$c->rttCumuleReportNM1-$c->rttCumulePris)
             ,'annuelNonCumule'=>round2Virgule($c->rttNonCumuleAcquis+$c->rttNonCumuleReportNM1-$c->rttNonCumulePris)
-            
+            ,'link'=> (!empty($user->rights->absence->myactions->modifierCompteur) ? ' - '.$c->getNomUrl(1) : '')
         ));
         
         exit;

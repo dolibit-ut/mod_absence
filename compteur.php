@@ -231,7 +231,7 @@ function _listeAdmin(&$PDOdb, &$compteur) {
 			,'nbLine'=>$conf->liste_limit
 		)
 		,'link'=>array(
-			'Compteur'=>'<a href="?id=@ID@&action=view">'. $langs->trans('Counter') . '</a>'
+			'Compteur'=>'<a href="?id=@ID@&action=view">'.img_picto('','compteur@absence').' '. $langs->trans('Counter') . '</a>'
 			,'ID'=>'<a href="?id=@ID@&action=view">@val@</a>'
 			
 		)
