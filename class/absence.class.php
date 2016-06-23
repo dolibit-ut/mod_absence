@@ -2188,7 +2188,88 @@ class TRH_Absence extends TObjetStd {
 		}
 		return false;
 	}
+	
+	function getICS() {
+		
+		global $langs,$db,$conf;
+		
+		if($this->ddMoment=='apresmidi')	{
+			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
+		}
+		else {
+			$date_debut = strtotime( date('Y-m-d 00:00:00', $this->date_debut) );
+		}
 
+		if($this->dfMoment=='matin')	{
+			$date_fin = strtotime( date('Y-m-d 11:59:59', $this->date_fin) );
+		}
+		else {
+			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
+		}
+			
+		$u=new User($db);
+		$u->fetch($this->fk_user);
+		
+		$uid = $this->getId(). md5($this.time()).rand(0,1000). '@mondynamicrh.fr';
+/*
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//hacksw/handcal//NONSGML v1.0//EN
+BEGIN:VEVENT
+UID:uid1@example.com
+DTSTAMP:19970714T170000Z
+ORGANIZER;CN=John Doe:MAILTO:john.doe@example.com
+DTSTART:19970714T170000Z
+DTEND:19970715T035959Z
+SUMMARY:Bastille Day Party
+END:VEVENT
+END:VCALENDAR 
+*/		
+		$Tab=array();
+		$Tab[]='BEGIN:VCALENDAR';
+		$Tab[]='PRODID:-//ATM Consulting//DynamicRH//FR';
+		$Tab[]='VERSION:2.0';
+		$Tab[]='METHOD:REQUEST';
+		$Tab[]='BEGIN:VEVENT';
+		$Tab[]='DTSTART:'.gmdate('Ymd\THis\Z', $date_debut);
+		$Tab[]='DTEND:'.gmdate('Ymd\THis\Z', $date_fin);
+		$Tab[]='DTSTAMP:'.gmdate('Ymd\THis\Z');
+		//$Tab[]='ORGANIZER;CN=DynamicRH:mailto:noreply@mondynamicrh.fr';
+		$Tab[]='UID='.$uid;
+		//$Tab[]='ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN='.$u->getFullName($langs).';X-NUM-GUESTS=0:mailto:'.$u->email;
+		$Tab[]='SUMMARY:'.$langs->trans('MonAbsence');
+		$Tab[]='CREATED:'.gmdate('Ymd\THis\Z');
+		$Tab[]='LOCATION:';
+		$Tab[]='DESCRIPTION:'.dol_print_date($date_debut).' '.$langs->transnoentities('To').' '.dol_print_date($date_fin);
+		$Tab[]='LAST-MODIFIED:'.gmdate('Ymd\THis\Z');
+		$Tab[]='SEQUENCE:1';
+		//$Tab[]='STATUS:CONFIRMED';
+		$Tab[]='TRANSP:OPAQUE';
+		$Tab[]='END:VEVENT';
+		$Tab[]='END:VCALENDAR';
+	
+		return implode("\r\n",$Tab);	
+	}
+	
+	function __toString() {
+		global $langs;
+		if($this->ddMoment=='apresmidi')	{
+			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
+		}
+		else {
+			$date_debut = strtotime( date('Y-m-d 00:00:00', $this->date_debut) );
+		}
+
+		if($this->dfMoment=='matin')	{
+			$date_fin = strtotime( date('Y-m-d 11:59:59', $this->date_fin) );
+		}
+		else {
+			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
+		}
+
+		return $this->libelle.'( '.dol_print_date($date_debut).' '.$langs->transnoentities('To').' '.dol_print_date($date_fin).' ) ';
+		
+	}
 
 	//fonction qui renvoie 1 si une absence existe déjà pendant la date que l'on veut ajouter, 0 sinon
 	function testExisteDeja($PDOdb, $absence){

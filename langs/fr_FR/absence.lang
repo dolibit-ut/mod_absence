@@ -489,6 +489,9 @@ TRPointLivraison=Point de livraison
 TRCodeClient=Code client
 absenceExportDecoupeAbsenceMappingUsed=Mapping utilisé pour l'export découpé des absences
 CanDeclareAbsenceAutoValidated=Peux déclarer des absences déjà validées
+AbsenceAcceptAll=Accepter les absences
+NoAbsenceChecked=Aucune absence cochée
+AbsenceCheckedValidated=Absence "%s" validée
 
 RH_DOL_ADMIN_USER=Utilisateur administrateur (pour webservice)
 RH_USER_MAIL_SENDER=Mail par défaut si pas de mail dans la fiche utilisateur

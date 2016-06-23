@@ -447,7 +447,7 @@ function mailConges(&$absence,$presence=false){
 		
 		if(!empty($conf->global->ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL)) {
 			$fileics = absenceCreateICS($absence);
-			$mail->add_piece_jointeb('invite.ics', $fileics, 'text/calendar');
+			$mail->add_piece_jointe('absence-'.$absence->getId().'-'.date('Ymdhis').'.ics', $fileics, 'application/ics');
 		}
 		
 		$result = $mail->send(true, 'utf-8');
@@ -460,22 +460,9 @@ function mailConges(&$absence,$presence=false){
 function absenceCreateICS(&$absence){
 	global $langs;
 	
-$ics=<<<EOT
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//hacksw/handcal//NONSGML v1.0//EN
-BEGIN:VEVENT
-DTSTART:$absence->get_date('date_debut','Ymd')
-DTEND:$absence->get_date('date_fin','Ymd')
-SUMMARY:$langs->trans('MonAbsence')
-LOCATION:
-DESCRIPTION:
-END:VEVENT
-END:VCALENDAR
-EOT;
 
 	$tmfile = tempnam('/tmp','ICS');
-	file_put_contents($tmfile, $ics);
+	file_put_contents($tmfile, $absence->getICS());
 	
 	return $tmfile;
 }

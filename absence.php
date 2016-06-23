@@ -108,7 +108,11 @@
 				
 			case 'accept':
 				$absence->load($PDOdb, $_REQUEST['id']);
-				$absence->valid($PDOdb);
+				$absence->valid($PDOdb);if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+			
+			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
+			
+		}
 				
 				$absence->load($PDOdb, $_REQUEST['id']);
 
@@ -170,6 +174,27 @@
 				_listeValidation($PDOdb, $absence);
 				break;
 			case 'listeAdmin' : 
+			
+				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
+				
+					if(empty($_POST['TAbsenceAccept'])) {
+						setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
+					}
+					else {
+						foreach($_POST['TAbsenceAccept'] as $fk_absence) {
+							
+							$a=new TRH_Absence;
+							$a->load($PDOdb, $fk_absence);
+							
+							$a->setAcceptee($PDOdb, $user->id);
+							
+							setEventMessage($langs->trans('AbsenceCheckedValidated', $a));
+						}	
+					}
+					
+				}
+			
+			
 				_listeAdmin($PDOdb, $absence);
 				break;
 		}
@@ -305,7 +330,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.date_cre as 'DateCre',a.date_debut , a.date_fin, 
 		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
-		  	a.etat, a.avertissement
+		  	a.etat, a.avertissement,'' as 'action'
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
 				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
@@ -317,10 +342,13 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;	
-	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');		
+	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','post');		
 	echo $form->hidden('action', 'listeAdmin');
-	//print $page;
 	
+	$THide = array('isPresence','DateCre', 'fk_user', 'ID');
+	if(empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+		$THide[] = 'action';
+	}
 	//echo $sql;exit;
 	
 	$r->liste($PDOdb, $sql, array(
@@ -330,12 +358,13 @@ function _listeAdmin(&$PDOdb, &$absence) {
 		)
 		,'link'=>array(
 			'libelle'=>'<a href="@isPresence@.php?id=@ID@&action=view">@val@</a>'
+			
 		)
 		,'translate'=>array(
-			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
+			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
 			/*,'etat'=>$absence->TEtat*/
 		)
-		,'hide'=>array('isPresence','DateCre', 'fk_user', 'ID')
+		,'hide'=>$THide
 		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date')
 		,'liste'=>array(
 			'titre'=> $langs->trans('ListeAllCollabAbsences')
@@ -360,6 +389,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'login'=> $langs->trans('Login')
 			,'duree'=> $langs->trans('DurationInDays')
 			,'etat'=> $langs->trans('RequestStatus')
+			,'action'=>img_help('','Cocher pour valider en bloc')
 		)
 		,'search'=>array(
 			'date_debut'=>array('recherche'=>'calendar')
@@ -367,19 +397,27 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'libelle'=>true
 			,"firstname"=>true
 			,"lastname"=>true
-			,"name"=>true
 			,"login"=>true
 			,'etat'=>$absence->TEtat
 		)
 		,'eval'=>array(
 			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
+			,'login'=>'_linkUser(@fk_user@)'
+			,'action'=>'_getCheckbox(@ID@,"@etat@")'
 		)
 		,'orderBy'=>$TOrder
 		
 	));
 	?><div class="tabsAction" >
 		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
+		<?php
+		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+			
+			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
+			
+		}
+		?>
 	</div>	
 	<div style="clear:both"></div><?php
 	$form->end();
@@ -387,6 +425,24 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	
 	llxFooter();
 }	
+function _linkUser($fk_user) {
+	global $db,$langs;
+	
+	$u=new User($db);
+	$u->fetch($fk_user);
+	
+	if(method_exists($u, 'getLoginUrl')) return $u->getLoginUrl(1);
+	else return $u->getNomUrl(1);
+	
+	
+}
+function _getCheckbox($fk_absence,$etat) {
+	
+	$form=new TFormCore;
+	return $etat=='Avalider' ? $form->checkbox1('', 'TAbsenceAccept[]', $fk_absence) : '';
+	
+}
+
 function _setColorEtat($val) {
 	global $langs;
 	
