@@ -333,7 +333,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 		)
 		,'translate'=>array(
 			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
-			,'etat'=>$absence->TEtat
+			/*,'etat'=>$absence->TEtat*/
 		)
 		,'hide'=>array('isPresence','DateCre', 'fk_user', 'ID')
 		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date')
@@ -390,11 +390,10 @@ function _listeAdmin(&$PDOdb, &$absence) {
 function _setColorEtat($val) {
 	global $langs;
 	
-	return strtr($val,array(
-				$langs->trans('Refused') => '<b style="color:#A72947">' . $langs->trans('Refused') . '</b>',
-				$langs->trans('WaitingValidation') =>'<b style="color:#5691F9">' . $langs->trans('WaitingValidation') . '</b>' , 
-				$langs->trans('Accepted') =>'<b style="color:#30B300">' . $langs->trans('Accepted') . '</b>'
-	));
+	$a=new TRH_Absence;
+	
+	return '<span class="absence '.$val.'">'.$a->TEtat[$val].'</span>';
+	
 }
 	
 function _listeValidation(&$PDOdb, &$absence) {
