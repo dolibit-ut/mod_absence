@@ -1820,7 +1820,7 @@ class TRH_Absence extends TObjetStd {
 
 		//combo box pour le type d'absence admin
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array();
-		$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence` AND isPresence = ".$isPresence;
+		$sql="SELECT typeAbsence, libelleAbsence  FROM `".MAIN_DB_PREFIX."rh_type_absence` WHERE isPresence = ".$isPresence;
 		$PDOdb->Execute($sql);
 		while($PDOdb->Get_line()) {
 			$this->TTypeAbsenceAdmin[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
