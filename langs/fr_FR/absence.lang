@@ -488,6 +488,10 @@ TRRaisonSociale=Ticket Restaurant/Raison Sociale
 TRPointLivraison=Point de livraison
 TRCodeClient=Code client
 absenceExportDecoupeAbsenceMappingUsed=Mapping utilisé pour l'export découpé des absences
+CanDeclareAbsenceAutoValidated=Peux déclarer des absences déjà validées
+AbsenceAcceptAll=Accepter les absences
+NoAbsenceChecked=Aucune absence cochée
+AbsenceCheckedValidated=Absence "%s" validée
 
 RH_DOL_ADMIN_USER=Utilisateur administrateur (pour webservice)
 RH_USER_MAIL_SENDER=Mail par défaut si pas de mail dans la fiche utilisateur
@@ -502,4 +506,6 @@ TIMESHEET_WORKING_HOUR_PER_DAY=Heures travaillées (9-18)
 CanChangeEmploiTempsForGroup=Peut appliquer un emploi du temps à tout un groupe
 CanDeclareAbsenceForGroup=Peut déclarer une absence pour tout un groupe 
 
-
+absenceAddInvitationToAcceptNofication=Ajouter une invitation au mail d'acceptation
+MonAbsence=Absence
+absenceTicketRestoOnUserCreate=Par défaut, un nouvel utilisateur souscrit aux tickets restaurants

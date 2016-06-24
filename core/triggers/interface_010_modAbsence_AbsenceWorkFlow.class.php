@@ -82,6 +82,16 @@ class InterfaceAbsenceWorkflow
 		if ($action === 'USER_CREATE' || $action === 'USER_MODIFY') {
 			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->rowid);
 			
+			
+			if($action === 'USER_CREATE' && !empty($conf->global->ABSENCE_USER_CREATE_TR_ON)) {
+				
+				$object->fetch_optionals();
+				$object->array_options['options_ticketresto_ok'] = 1;
+				$object->insertExtraFields();
+				
+			}
+			
+			
 			define('INC_FROM_DOLIBARR', true);
 	        dol_include_once('/absence/config.php');
 		    dol_include_once('/valideur/lib/valideur.lib.php');

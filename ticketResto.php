@@ -412,8 +412,18 @@ function _ticket(&$ATMdb) {
 				<td><?php echo $langs->trans('City'); ?></td>
 				<td><?php echo $langs->trans('CompanyNameOnBook'); ?></td>
 				<td><?php echo $langs->trans('PostalCodeAndCityOnBook'); ?></td>
-				<td><?php echo $langs->trans('DeliveryDate'); ?></td>
-			</tr><?php 
+				<td align="right"><?php echo $langs->trans('DeliveryDate').$form->calendrier('', 'delivery_date', ''); ?></td>
+			</tr>
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('#delivery_date').change(function() {
+						$('[rel=delivery]').val( $(this).val() );
+					});
+				});
+				
+			</script>
+			
+			<?php 
 			
 			$first = false;
 		}
@@ -442,7 +452,7 @@ function _ticket(&$ATMdb) {
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][ville]',$ville, 10,255)  ?></td>
 			<td align="right"><?php echo $form->combo('', 'TTicket['.$idUser.'][rscarnet]', $TON , false)  ?></td>
 			<td align="right"><?php echo $form->combo('', 'TTicket['.$idUser.'][cpcarnet]', $TON , false)  ?></td>
-			<td align="right"><?php echo $form->calendrier('', 'TTicket['.$idUser.'][date_distribution]', strtotime('+15day', $t_fin) )  ?></td>
+			<td align="right"><?php echo $form->calendrier('', 'TTicket['.$idUser.'][date_distribution]', strtotime('+15day', $t_fin),12,10, ' rel="delivery" ' )  ?></td>
 			<?php
 
 		} else {
