@@ -110,6 +110,15 @@ function showParameters(&$form, &$doliform) {
 		</tr><?php
 		
 		}
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('absenceTicketRestoOnUserCreate');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_USER_CREATE_TR_ON');
+		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
+		print '</td>';
+		print '</tr>';
 		
 		print '<tr>';
 		print '<td>';
@@ -120,12 +129,22 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '</tr>';
 		
+		
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('absenceAddInvitationToAcceptNofication');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL');
+		print '</td>';
+		print '</tr>';
+		
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceAddActionComm');
 		print '</td>';
 		print '<td>';
-		print $doliform->selectyesno('TConst[RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE]', $conf->global->RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE, 1);
+		print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		print '</td>';
 		print '</tr>';

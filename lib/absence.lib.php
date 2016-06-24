@@ -444,6 +444,12 @@ function mailConges(&$absence,$presence=false){
 	
 	if(!empty($sendto) && !$dont_send_mail) {
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
+		
+		if(!empty($conf->global->ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL)) {
+			$fileics = absenceCreateICS($absence);
+			$mail->add_piece_jointe('absence-'.$absence->getId().'-'.date('Ymdhis').'.ics', $fileics, 'application/ics');
+		}
+		
 		$result = $mail->send(true, 'utf-8');
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
 		else setEventMessage('Erreur lors de l\'envoi du mail à l\'utilisateur');*/
@@ -451,7 +457,15 @@ function mailConges(&$absence,$presence=false){
 	
 	return 1;	
 }
+function absenceCreateICS(&$absence){
+	global $langs;
+	
 
+	$tmfile = tempnam('/tmp','ICS');
+	file_put_contents($tmfile, $absence->getICS());
+	
+	return $tmfile;
+}
 //fonction permettant la récupération
 function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 	global $conf;

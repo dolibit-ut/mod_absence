@@ -326,6 +326,13 @@ class TRH_Compteur extends TObjetStd {
 
 	}
 
+	function getNomUrl($picto=  1) {
+		global $langs;
+		
+		$url = '<a href="'.dol_buildpath('/absence/compteur.php?id='.$this->getId().'&action=view',1).'">'.( $picto ?img_picto('', 'compteur.png@absence'). ' ' : '' ).$langs->trans('Counter').'</a>'; 
+		return $url;
+	}
+
 }
 
 
@@ -374,24 +381,24 @@ class TRH_Absence extends TObjetStd {
 		global $user,$conf, $langs;
 
 		parent::set_table(MAIN_DB_PREFIX.'rh_absence');
-		parent::add_champs('code','type=varchar;index;');				//code  congé
-		parent::add_champs('type','type=varchar;index;');				//type de congé
-		parent::add_champs('libelle','type=varchar;');				//type de congé
-		parent::add_champs('date_debut,date_fin,date_validation','type=date;index;');	//dates debut fin de congés
-		parent::add_champs('date_hourStart,date_hourEnd','type=date;');	//dates debut fin de congés
-		parent::add_champs('ddMoment, dfMoment','type=chaine;');		//moment (matin ou après midi)
-		parent::add_champs('duree,congesPrisNM1,congesPrisN','type=float;');
-		parent::add_champs('dureeHeure','type=chaine;');
-		parent::add_champs('dureeHeurePaie','type=chaine;');
-		parent::add_champs('commentaire','type=chaine;');		//commentaire
-		parent::add_champs('commentaireValideur','type=chaine;');		//commentaire
-		parent::add_champs('etat','type=chaine;index;');			//état (à valider, validé...)
-		parent::add_champs('avertissement','type=entier;');
-		parent::add_champs('libelleEtat,avertissementInfo','type=chaine;');			//état (à valider, validé...)
-		parent::add_champs('niveauValidation','type=entier;');	//niveau de validation
-		parent::add_champs('idAbsImport','type=entier;index;');	//niveau de validation
-		parent::add_champs('fk_user, fk_user_valideur','type=entier;index;');	//utilisateur concerné
-		parent::add_champs('entity','type=entier;');
+		parent::add_champs('code',array('type'=>'string','length'=>50, 'index'=>true));				//code  congé
+		parent::add_champs('type',array('type'=>'string','length'=>50, 'index'=>true));				//type de congé
+		parent::add_champs('libelle');				//type de congé
+		parent::add_champs('date_debut,date_fin,date_validation',array('type'=>'date', 'index'=>true));	//dates debut fin de congés
+		parent::add_champs('date_hourStart,date_hourEnd',array('type'=>'date'));	//dates debut fin de congés
+		parent::add_champs('ddMoment, dfMoment',array('type'=>'string','length'=>10));		//moment (matin ou après midi)
+		parent::add_champs('duree,congesPrisNM1,congesPrisN',array('type'=>'float'));
+		parent::add_champs('dureeHeure');
+		parent::add_champs('dureeHeurePaie');
+		parent::add_champs('commentaire');		//commentaire
+		parent::add_champs('commentaireValideur');		//commentaire
+		parent::add_champs('etat',array('type'=>'string','length'=>50, 'index'=>true));			//état (à valider, validé...)
+		parent::add_champs('avertissement',array('type'=>'integer'));
+		parent::add_champs('libelleEtat,avertissementInfo');			//état (à valider, validé...)
+		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation
+		parent::add_champs('idAbsImport',array('type'=>'integer','index'=>true));	//niveau de validation
+		parent::add_champs('fk_user, fk_user_valideur',array('type'=>'integer','index'=>true));	//utilisateur concerné
+		parent::add_champs('entity',array('type'=>'integer','index'=>true));
 
 		parent::_init_vars();
 		parent::start();
@@ -2181,7 +2188,88 @@ class TRH_Absence extends TObjetStd {
 		}
 		return false;
 	}
+	
+	function getICS() {
+		
+		global $langs,$db,$conf;
+		
+		if($this->ddMoment=='apresmidi')	{
+			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
+		}
+		else {
+			$date_debut = strtotime( date('Y-m-d 00:00:00', $this->date_debut) );
+		}
 
+		if($this->dfMoment=='matin')	{
+			$date_fin = strtotime( date('Y-m-d 11:59:59', $this->date_fin) );
+		}
+		else {
+			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
+		}
+			
+		$u=new User($db);
+		$u->fetch($this->fk_user);
+		
+		$uid = $this->getId(). md5($this.time()).rand(0,1000). '@mondynamicrh.fr';
+/*
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//hacksw/handcal//NONSGML v1.0//EN
+BEGIN:VEVENT
+UID:uid1@example.com
+DTSTAMP:19970714T170000Z
+ORGANIZER;CN=John Doe:MAILTO:john.doe@example.com
+DTSTART:19970714T170000Z
+DTEND:19970715T035959Z
+SUMMARY:Bastille Day Party
+END:VEVENT
+END:VCALENDAR 
+*/		
+		$Tab=array();
+		$Tab[]='BEGIN:VCALENDAR';
+		$Tab[]='PRODID:-//ATM Consulting//DynamicRH//FR';
+		$Tab[]='VERSION:2.0';
+		$Tab[]='METHOD:REQUEST';
+		$Tab[]='BEGIN:VEVENT';
+		$Tab[]='DTSTART:'.gmdate('Ymd\THis\Z', $date_debut);
+		$Tab[]='DTEND:'.gmdate('Ymd\THis\Z', $date_fin);
+		$Tab[]='DTSTAMP:'.gmdate('Ymd\THis\Z');
+		//$Tab[]='ORGANIZER;CN=DynamicRH:mailto:noreply@mondynamicrh.fr';
+		$Tab[]='UID='.$uid;
+		//$Tab[]='ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN='.$u->getFullName($langs).';X-NUM-GUESTS=0:mailto:'.$u->email;
+		$Tab[]='SUMMARY:'.$langs->trans('MonAbsence');
+		$Tab[]='CREATED:'.gmdate('Ymd\THis\Z');
+		$Tab[]='LOCATION:';
+		$Tab[]='DESCRIPTION:'.dol_print_date($date_debut).' '.$langs->transnoentities('To').' '.dol_print_date($date_fin);
+		$Tab[]='LAST-MODIFIED:'.gmdate('Ymd\THis\Z');
+		$Tab[]='SEQUENCE:1';
+		//$Tab[]='STATUS:CONFIRMED';
+		$Tab[]='TRANSP:OPAQUE';
+		$Tab[]='END:VEVENT';
+		$Tab[]='END:VCALENDAR';
+	
+		return implode("\r\n",$Tab);	
+	}
+	
+	function __toString() {
+		global $langs;
+		if($this->ddMoment=='apresmidi')	{
+			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
+		}
+		else {
+			$date_debut = strtotime( date('Y-m-d 00:00:00', $this->date_debut) );
+		}
+
+		if($this->dfMoment=='matin')	{
+			$date_fin = strtotime( date('Y-m-d 11:59:59', $this->date_fin) );
+		}
+		else {
+			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
+		}
+
+		return $this->libelle.'( '.dol_print_date($date_debut).' '.$langs->transnoentities('To').' '.dol_print_date($date_fin).' ) ';
+		
+	}
 
 	//fonction qui renvoie 1 si une absence existe déjà pendant la date que l'on veut ajouter, 0 sinon
 	function testExisteDeja($PDOdb, $absence){
