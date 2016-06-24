@@ -8,7 +8,7 @@
     $langs->load('absence@absence');
     
     
-    if($user->rights->absence->myactions->CanDeclareAbsenceForGroup!=1) exit('$user->rights->absence->myactions->CanDeclareAbsenceForGroup failed');
+    if(empty($user->rights->absence->myactions->CanDeclareAbsenceForGroup)) exit('$user->rights->absence->myactions->CanDeclareAbsenceForGroup failed');
     
     $PDOdb=new TPDOdb;
     $absence=new TRH_Absence;
@@ -52,14 +52,9 @@
                         
                         $abs->calculDureeAbsenceParAddition($PDOdb);
                         
-                        $abs->etat='Validee';
-                        $abs->libelleEtat = $langs->trans('Accepted');
-                        $abs->date_validation=time();
-                        $abs->fk_user_valideur = $user->id;
-                        
                         $abs->save($PDOdb, false);
                         
-                        
+                        $abs->setAcceptee($PDOdb, $user->id);
                     }
                     
                 }
@@ -96,13 +91,15 @@ function _view(&$PDOdb, &$absence, $fk_group) {
             $u=new User($db);
             $u->fetch($fk_user_in_group);
             
+			if($u->statut<1) continue; // utilisateur désactivé
+			
             $absence->fk_user = $u->id;
             $existeDeja=$absence->testExisteDeja($PDOdb, $absence);
             
             ?>
             <tr>
                 <td><?php echo $u->getNomUrl(1);  ?></td>
-                <td><?
+                <td><?php
                     if($existeDeja === false) {
                         echo img_picto('Ok', 'star');
                         echo '<input type="hidden" name="TUser[]" value="'.$u->id.'"/>';   
@@ -117,14 +114,14 @@ function _view(&$PDOdb, &$absence, $fk_group) {
                 
                 ?></td>
             </tr>
-            <?
+            <?php
             
             
         }
         
         ?></table>
         <div class="tabsAction">
-                    <input type="submit" class="button" name="create_absence" value="Creer et valider les absences">
+                    <input type="submit" class="button" name="create_absence" value="Creer les absences">
         </div>
         
         <?php
@@ -139,14 +136,10 @@ function _view(&$PDOdb, &$absence, $fk_group) {
 function _fiche(&$PDOdb, &$absence, &$form, $mode) {
     global $db,$user,$conf,$langs;
     
-    //echo $_REQUEST['validation'];
-    
-   
-    
     $formDoli = new Form($db);
     
     $TBS=new TTemplateTBS();
-    
+ // var_dump($form->type_aff ,$user->rights->absence->myactions->CanDeclareAbsenceAutoValidated);
     print $TBS->render('./tpl/absenceGroup.tpl.php'
         ,array(
         )
@@ -204,8 +197,12 @@ function _fiche(&$PDOdb, &$absence, &$form, $mode) {
                 'Delete' => $langs->trans('Delete')
                 ,'AbsenceBy' => $langs->trans('AbsenceBy')
                 ,'acquisRecuperation'=>$langs->trans('acquisRecuperation')
+				,'langs'=>$langs
             )
-            
+            ,'other'=>array(
+				'autoValidatedAbsence' => (int)($form->type_aff == 'FORM' &&  $user->rights->absence->myactions->CanDeclareAbsenceAutoValidated)
+				,'autoValidatedAbsenceChecked'=> ( !empty($user->rights->absence->myactions->voirToutesAbsencesListe) ? ' checked="checked" ':'')
+			)
         )
     );
 
