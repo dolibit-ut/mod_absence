@@ -252,6 +252,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'date_fin'  	 => $langs->trans('EndDate')
 			,'avertissement' => $langs->trans('Rules')
 			,'libelle'	 	 => $langs->trans('AbsenceType')
+			,'typeAbsence'=>$langs->trans('AbsenceType')
 			,'firstname' 	 => $langs->trans('FirstName')
 			,'lastname'	 	 => $langs->trans('Name')
 			,'login'	 	 => $langs->trans('Login')
@@ -262,7 +263,7 @@ function _liste(&$PDOdb, &$absence) {
 		,'search'=>array(
 			'date_debut'=>array('recherche'=>'calendar')
 			,'date_fin'=>array('recherche'=>'calendar')
-			,'libelle'=>true
+			,'typeAbsence'=>$absence->TTypeAbsenceAdmin
 			,"firstname"=>true
 			,"lastname"=>true
 			,"login"=>true
@@ -305,7 +306,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.date_cre as 'DateCre',a.date_debut , a.date_fin, 
 		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
-		  	a.etat, a.avertissement
+		  	a.etat, a.avertissement,ta.typeAbsence
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
 				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
@@ -322,7 +323,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	//print $page;
 	
 	//echo $sql;exit;
-	
+	//$PDOdb->debug=true;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
@@ -335,7 +336,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
 			,'etat'=>$absence->TEtat
 		)
-		,'hide'=>array('isPresence','DateCre', 'fk_user', 'ID')
+		,'hide'=>array('isPresence','DateCre', 'fk_user', 'ID','typeAbsence','name')
 		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date')
 		,'liste'=>array(
 			'titre'=> $langs->trans('ListeAllCollabAbsences')
@@ -355,6 +356,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'date_fin'=> $langs->trans('EndDate')
 			,'avertissement'=> $langs->trans('Rules')
 			,'libelle'=> $langs->trans('AbsenceType')
+			,'typeAbsence'=>$langs->trans('AbsenceType')
 			,'firstname'=> $langs->trans('FirstName')
 			,'lastname'=> $langs->trans('Name')
 			,'login'=> $langs->trans('Login')
@@ -364,10 +366,10 @@ function _listeAdmin(&$PDOdb, &$absence) {
 		,'search'=>array(
 			'date_debut'=>array('recherche'=>'calendar')
 			,'date_fin'=>array('recherche'=>'calendar')
-			,'libelle'=>true
+			,'typeAbsence'=>$absence->TTypeAbsenceAdmin
 			,"firstname"=>true
 			,"lastname"=>true
-			,"name"=>true
+			//,"name"=>true
 			,"login"=>true
 			,'etat'=>$absence->TEtat
 		)
@@ -439,7 +441,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 				$langs->trans('Accepted')=>'<b style="color:#30B300">' . $langs->trans('Accepted') . '</b>')
 				,'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
 			)		
-			,'hide'=>array('date_cre','fk_user','ID', 'DateCre')
+			,'hide'=>array('date_cre','fk_user','ID', 'DateCre','typeAbsence')
 			,'type'=>array('date_debut'=>'date','date_fin'=>'date')
 			,'liste'=>array(
 				'titre'=> $langs->trans('ListeAbsencesWaitingValidation')
@@ -464,7 +466,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 			)
 			,'search'=>array(
 				'date_debut'=>array('recherche'=>'calendar')
-				,'libelle'=>true
+				,'typeAbsence'=>$absence->TTypeAbsenceAdmin
 				,"firstname"=>true
 				,"lastname"=>true
 			)
