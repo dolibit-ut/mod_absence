@@ -1,0 +1,19 @@
+.liste span.absence {
+	padding:2px 5px;
+	border-radius: 5px;
+}
+
+span.absence.Refusee {
+	background-color: red;
+	color:#fff;
+}
+
+span.absence.Avalider {
+	background-color: #ff8800;
+	color:#000;
+}
+
+span.absence.Validee {
+	background-color: none;
+	color:#006600;
+}
