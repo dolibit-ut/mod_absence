@@ -29,7 +29,7 @@
 	
 	//on récupère la date de fin de cloture des RTT
 	$k=0;
-	$sqlReqCloture="SELECT fk_user, date_rttCloture, rttAcquisAnnuelCumuleInit, rttAcquisAnnuelNonCumuleInit FROM `".MAIN_DB_PREFIX."rh_compteur`";
+	$sqlReqCloture="SELECT fk_user, date_rttCloture, rttAcquisAnnuelCumuleInit, rttAcquisAnnuelNonCumuleInit FROM ".MAIN_DB_PREFIX."rh_compteur";
 	$ATMdb->Execute($sqlReqCloture);
 	$Tab=array();
 	while($ATMdb->Get_line()) {
@@ -102,7 +102,7 @@
 	$jour=date("d");
 	if($jour=="01"){
 		$sqlMois="SELECT fk_user, rttAcquisMensuelInit 
-		FROM `".MAIN_DB_PREFIX."rh_compteur` 
+		FROM ".MAIN_DB_PREFIX."rh_compteur 
 		WHERE rttTypeAcquisition='Mensuel'";
 		$ATMdb->Execute($sqlMois);
 		$Tab=array();

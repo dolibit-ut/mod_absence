@@ -29,7 +29,7 @@
 	
 	
 	//on récupère la date de fin de cloture des congés
-	$sqlReqCloture="SELECT fk_user, date_congesCloture FROM `".MAIN_DB_PREFIX."rh_compteur`";
+	$sqlReqCloture="SELECT fk_user, date_congesCloture FROM ".MAIN_DB_PREFIX."rh_compteur";
 	$PDOdb->Execute($sqlReqCloture);
 	$Tab=array();
 	while($PDOdb->Get_line()) {
