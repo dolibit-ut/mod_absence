@@ -502,27 +502,42 @@ function envoieMailValideur(&$ATMdb, &$absence, $idValideur,$presence=false){
 
 	$TBS=new TTemplateTBS();
 	
+	if($absence->etat == 'deleted') {
 	if(!$presence){
-		$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidation');
-		$tpl = dol_buildpath('/absence/tpl/mail.absence.creationValideur.tpl.php');
+		$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidationDeleted');
+		$tpl = dol_buildpath('/absence/tpl/mail.absence.deletedValideur.tpl.php');
 	}
 	else{
-		$subject = $langs->transnoentities('NewPresenceRequestWaitingValidation');
-		$tpl = dol_buildpath('/absence/tpl/mail.presence.creationValideur.tpl.php');
+		$subject = $langs->transnoentities('NewPresenceRequestWaitingValidationDeleted');
+		$tpl = dol_buildpath('/absence/tpl/mail.absence.deletedValideur.tpl.php');
 	}
+		
+	}
+	else{
+		if(!$presence){
+			$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidation');
+			$tpl = dol_buildpath('/absence/tpl/mail.absence.creationValideur.tpl.php');
+		}
+		else{
+			$subject = $langs->transnoentities('NewPresenceRequestWaitingValidation');
+			$tpl = dol_buildpath('/absence/tpl/mail.presence.creationValideur.tpl.php');
+		}
+		
+	}
+	
 	
 	$message = $TBS->render($tpl
 		,array()
 		,array(
 			'absence'=>array(
-				'nom'=>htmlentities($name, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
-				,'prenom'=>htmlentities($firstname, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
-				,'valideurNom'=>htmlentities($nameValideur, ENT_COMPAT | ENT_HTML401, 'UTF-8')
-				,'valideurPrenom'=>htmlentities($firstnameValideur, ENT_COMPAT | ENT_HTML401, 'UTF-8')
+				'nom'=>$name
+				,'prenom'=>$firstname
+				,'valideurNom'=>$nameValideur
+				,'valideurPrenom'=>$firstnameValideur
 				,'date_debut'=>php2dmy($absence->date_debut)
 				,'date_fin'=>php2dmy($absence->date_fin)
-				,'libelle'=>'<a href="'.dol_buildpath('/absence/absence.php?id='.$absence->getId().'&action=view',2).'">'.htmlentities($absence->libelle, ENT_COMPAT | ENT_HTML401, 'UTF-8').'</a>'
-				,'libelleEtat'=>htmlentities($absence->libelleEtat, ENT_COMPAT | ENT_HTML401, 'UTF-8')
+				,'libelle'=>($absence->etat == 'deleted' ? $absence->libelle : '<a href="'.dol_buildpath('/absence/absence.php?id='.$absence->getId().'&action=view',2).'">'.$absence->libelle.'</a>')
+				,'libelleEtat'=>$absence->libelleEtat
 			)
 			,'translate' => array(
 				'Hello' => $langs->trans('Hello'),
