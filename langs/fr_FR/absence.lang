@@ -490,6 +490,7 @@ TRPointLivraison=Point de livraison
 TRCodeClient=Code client
 absenceExportDecoupeAbsenceMappingUsed=Mapping utilisé pour l'export découpé des absences
 CanDeclareAbsenceAutoValidated=Peux déclarer des absences déjà validées
+autoValidatedAbsence=Automatiquement validée ?
 AbsenceAcceptAll=Accepter les absences
 NoAbsenceChecked=Aucune absence cochée
 AbsenceCheckedValidated=Absence "%s" validée
