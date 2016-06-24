@@ -27,7 +27,7 @@
 	$jour=date("d");
 	if($jour=='01' || isset($_REQUEST['forceCompteur'])){
 		$k=0;
-		$sqlReqUser="SELECT fk_user, nombreCongesAcquisMensuel FROM `".MAIN_DB_PREFIX."rh_compteur`";
+		$sqlReqUser="SELECT fk_user, nombreCongesAcquisMensuel FROM ".MAIN_DB_PREFIX."rh_compteur";
 		$ATMdb->Execute($sqlReqUser);
 		$Tab=array();
 		while($ATMdb->Get_line()) {
