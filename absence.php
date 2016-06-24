@@ -170,6 +170,27 @@
 				_listeValidation($PDOdb, $absence);
 				break;
 			case 'listeAdmin' : 
+			
+				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
+				
+					if(empty($_POST['TAbsenceAccept'])) {
+						setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
+					}
+					else {
+						foreach($_POST['TAbsenceAccept'] as $fk_absence) {
+							
+							$a=new TRH_Absence;
+							$a->load($PDOdb, $fk_absence);
+							
+							$a->setAcceptee($PDOdb, $user->id);
+							
+							setEventMessage($langs->trans('AbsenceCheckedValidated', $a));
+						}	
+					}
+					
+				}
+			
+			
 				_listeAdmin($PDOdb, $absence);
 				break;
 		}
@@ -252,7 +273,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'date_fin'  	 => $langs->trans('EndDate')
 			,'avertissement' => $langs->trans('Rules')
 			,'libelle'	 	 => $langs->trans('AbsenceType')
-			,'typeAbsence'=>$langs->trans('AbsenceType')
+			,'typeAbsence'	 => $langs->trans('AbsenceType')
 			,'firstname' 	 => $langs->trans('FirstName')
 			,'lastname'	 	 => $langs->trans('Name')
 			,'login'	 	 => $langs->trans('Login')
@@ -306,7 +327,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.date_cre as 'DateCre',a.date_debut , a.date_fin, 
 		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
-		  	a.etat, a.avertissement,ta.typeAbsence
+		  	a.etat, a.avertissement,'' as 'action',ta.typeAbsence
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
 				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
@@ -318,12 +339,15 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;	
-	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');		
+	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','post');		
 	echo $form->hidden('action', 'listeAdmin');
-	//print $page;
 	
+	$THide = array('isPresence','DateCre', 'fk_user', 'ID','typeAbsence');
+	if(empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+		$THide[] = 'action';
+	}
 	//echo $sql;exit;
-	//$PDOdb->debug=true;
+
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
@@ -333,10 +357,10 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			'libelle'=>'<a href="@isPresence@.php?id=@ID@&action=view">@val@</a>'
 		)
 		,'translate'=>array(
-			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
-			,'etat'=>$absence->TEtat
+			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
+			/*,'etat'=>$absence->TEtat*/
 		)
-		,'hide'=>array('isPresence','DateCre', 'fk_user', 'ID','typeAbsence','name')
+		,'hide'=>$THide
 		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date')
 		,'liste'=>array(
 			'titre'=> $langs->trans('ListeAllCollabAbsences')
@@ -362,6 +386,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'login'=> $langs->trans('Login')
 			,'duree'=> $langs->trans('DurationInDays')
 			,'etat'=> $langs->trans('RequestStatus')
+			,'action'=>img_help('','Cocher pour valider en bloc')
 		)
 		,'search'=>array(
 			'date_debut'=>array('recherche'=>'calendar')
@@ -369,19 +394,27 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'typeAbsence'=>$absence->TTypeAbsenceAdmin
 			,"firstname"=>true
 			,"lastname"=>true
-			//,"name"=>true
 			,"login"=>true
 			,'etat'=>$absence->TEtat
 		)
 		,'eval'=>array(
 			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
+			,'login'=>'_linkUser(@fk_user@)'
+			,'action'=>'_getCheckbox(@ID@,"@etat@")'
 		)
 		,'orderBy'=>$TOrder
 		
 	));
 	?><div class="tabsAction" >
 		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
+		<?php
+		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+			
+			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
+			
+		}
+		?>
 	</div>	
 	<div style="clear:both"></div><?php
 	$form->end();
@@ -389,14 +422,32 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	
 	llxFooter();
 }	
+function _linkUser($fk_user) {
+	global $db,$langs;
+	
+	$u=new User($db);
+	$u->fetch($fk_user);
+	
+	if(method_exists($u, 'getLoginUrl')) return $u->getLoginUrl(1);
+	
+	else return $u->getNomUrl(1);
+	
+	
+}
+function _getCheckbox($fk_absence,$etat) {
+	
+	$form=new TFormCore;
+	return $etat=='Avalider' ? $form->checkbox1('', 'TAbsenceAccept[]', $fk_absence) : '';
+	
+}
+
 function _setColorEtat($val) {
 	global $langs;
 	
-	return strtr($val,array(
-				$langs->trans('Refused') => '<b style="color:#A72947">' . $langs->trans('Refused') . '</b>',
-				$langs->trans('WaitingValidation') =>'<b style="color:#5691F9">' . $langs->trans('WaitingValidation') . '</b>' , 
-				$langs->trans('Accepted') =>'<b style="color:#30B300">' . $langs->trans('Accepted') . '</b>'
-	));
+	$a=new TRH_Absence;
+	
+	return '<span class="absence '.$val.'">'.$a->TEtat[$val].'</span>';
+	
 }
 	
 function _listeValidation(&$PDOdb, &$absence) {
@@ -803,7 +854,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				
 				,'titreNvDemande'=>load_fiche_titre($langs->trans('NewAbsenceRequest'),'', 'title.png', 0, '')
 				,'titreRecapAbsence'=>load_fiche_titre($langs->trans('AbsenceRequestSummary'),'', 'title.png', 0, '')
-				,'titreJourRestant'=>load_fiche_titre($langs->trans('RemainingDays'),'', 'title.png', 0, '')
+				,'titreJourRestant'=>load_fiche_titre($langs->trans('RemainingDays').'<span id="link-to-counter"></span>','', 'title.png', 0, '')
 				,'titreDerAbsence'=>load_fiche_titre($langs->trans('LastAbsencePresence'),'', 'title.png', 0, '')
 				,'titreRegle'=>load_fiche_titre($langs->trans('RelevantRules'),'', 'title.png', 0, '')
 				
