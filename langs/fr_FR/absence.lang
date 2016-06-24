@@ -510,3 +510,8 @@ CanDeclareAbsenceForGroup=Peut déclarer une absence pour tout un groupe
 absenceAddInvitationToAcceptNofication=Ajouter une invitation au mail d'acceptation
 MonAbsence=Absence
 absenceTicketRestoOnUserCreate=Par défaut, un nouvel utilisateur souscrit aux tickets restaurants
+
+ABSENCE_ALERT_OTHER_VALIDEUR=Alerter tout les valideurs qui en auront le droit d'une acception de congé par un valideur du même groupe
+IfAllValideurAlertedAlerteMe=Si l'alerte pour tous les valideurs d'acception de congés est active, me l'envoyer
+
+AbsenceCopy=Copie
