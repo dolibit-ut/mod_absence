@@ -763,9 +763,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
     
     $valideurs = '';
-    if($absence->etat=='Avalider' && !$conf->global->RH_HIDE_VALIDEUR_ON_CARD) {
-        $TValideurId = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges', true, true);
-        $valideurs = implode(", ", $TValideurId);
+    if($absence->etat=='Avalider' && empty($conf->global->RH_HIDE_VALIDEUR_ON_CARD)) {
+        $TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges', true, true,false);
+        $valideurs = implode(", ", $TValideur);
         if(!empty($valideurs)) $valideurs = ' (à valider par '.$valideurs.')';
         
     }
