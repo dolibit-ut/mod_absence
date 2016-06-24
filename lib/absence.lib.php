@@ -362,6 +362,7 @@ function mailConges(&$absence,$presence=false){
 		);
 		//echo $message;exit;
 		if($conf->global->ABSENCE_ALERT_OTHER_VALIDEUR) {
+			$ATMdb=new TPDOdb;
 			$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
 			
 			foreach($TValideur as $fk_valideur) {
@@ -369,8 +370,8 @@ function mailConges(&$absence,$presence=false){
 				$valideur->fetch($fk_valideur);
 				$valideur->getrights('absence');
 				
-				if(!empty($valideur->email) && !$dont_send_mail) {
-					$mail = new TReponseMail($from,$valideur->email,'['.$langs->trans('Copy').'] '. $subject,$message);
+				if(!empty($valideur->email) && !empty($valideur->rights->absence->myactions->IfAllValideurAlertedAlerteMe) && !$dont_send_mail) {
+					$mail = new TReponseMail($from,$valideur->email,'['.$langs->trans('AbsenceCopy').'] '. $subject,$message);
 			
 					$result = $mail->send(true, 'utf-8');
 				//	print "{$valideur->email}<br />";

@@ -426,6 +426,13 @@ class modAbsence extends DolibarrModules
 	    $this->rights[$r][5] = 'CanDeclareAbsenceAutoValidated';
 		$r++;
 		
+		$this->rights[$r][0] = $this->numero.$r;
+		$this->rights[$r][1] = $langs->trans('IfAllValideurAlertedAlerteMe');
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'IfAllValideurAlertedAlerteMe';
+		$r++;
+		
 
 		
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
