@@ -102,6 +102,14 @@
 				//avant de supprimer, on récredite les heures d'absences qui avaient été décomptées. (que si l'absence n'a pas été refusée, dans quel cas 
 				//les heures seraient déjà recréditées)
 				$absence->recrediterHeure($PDOdb);
+				
+				if($absence->fk_user == $user->id) { // Si le collaborateur supprime sa demande d'absence on prévient les valideurs
+
+					$absence->etat = 'deleted';
+					mailCongesValideur($PDOdb, $absence);
+					
+				}
+				
 				$absence->delete($PDOdb);
 				
 				?>
@@ -176,7 +184,7 @@
 				break;
 			case 'listeAdmin' : 
 			
-				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
+				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')) {
 				
 					if(empty($_POST['TAbsenceAccept'])) {
 						setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
