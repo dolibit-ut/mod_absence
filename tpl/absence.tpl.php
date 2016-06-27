@@ -115,6 +115,14 @@
 					<td id="dont_send_mail">[other.dontSendMail_CB;strconv=no;protect=no]</td>
 				</tr>
 				[onshow;block=end]
+				[onshow;block=begin;when [other.autoValidatedAbsence]==1]
+				<tr>
+					<td>[translate.langs.transnoentities(autoValidatedAbsence)]</td>
+					<td id="autoValidatedAbsence"><input type="checkbox" name="autoValidatedAbsence" id="autoValidatedAbsence" value="1" [other.autoValidatedAbsenceChecked;strconv=no] /></td>
+				</tr>
+				[onshow;block=end]
+				
+				
 				
 			</table>
 		<div class="tabsAction" >

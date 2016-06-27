@@ -132,6 +132,15 @@ function showParameters(&$form, &$doliform) {
 		
 		print '<tr>';
 		print '<td>';
+		print $langs->trans('ABSENCE_ALERT_OTHER_VALIDEUR');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_ALERT_OTHER_VALIDEUR');
+		print '</td>';
+		print '</tr>';
+		
+		print '<tr>';
+		print '<td>';
 		print $langs->trans('absenceAddInvitationToAcceptNofication');
 		print '</td>';
 		print '<td>';

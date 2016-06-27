@@ -59,7 +59,12 @@
 							if($absence->avertissementInfo) setEventMessage($absence->avertissementInfo, 'warnings');
 						
 							$absence->load($PDOdb, $_REQUEST['id']);
-							if($absence->fk_user==$user->id){	//on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
+							
+							if(GETPOST('autoValidatedAbsence')>0) {
+								$absence->setAcceptee($PDOdb, $user->id);
+							}
+							else if($absence->fk_user==$user->id){	//on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
+							
 								mailConges($absence);
 								mailCongesValideur($PDOdb,$absence);
 							}
@@ -97,6 +102,14 @@
 				//avant de supprimer, on récredite les heures d'absences qui avaient été décomptées. (que si l'absence n'a pas été refusée, dans quel cas 
 				//les heures seraient déjà recréditées)
 				$absence->recrediterHeure($PDOdb);
+				
+				if($absence->fk_user == $user->id) { // Si le collaborateur supprime sa demande d'absence on prévient les valideurs
+
+					$absence->etat = 'deleted';
+					mailCongesValideur($PDOdb, $absence);
+					
+				}
+				
 				$absence->delete($PDOdb);
 				
 				?>
@@ -171,7 +184,7 @@
 				break;
 			case 'listeAdmin' : 
 			
-				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
+				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')) {
 				
 					if(empty($_POST['TAbsenceAccept'])) {
 						setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
@@ -764,9 +777,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
     
     $valideurs = '';
-    if($absence->etat=='Avalider' && !$conf->global->RH_HIDE_VALIDEUR_ON_CARD) {
-        $TValideurId = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges', true, true);
-        $valideurs = implode(", ", $TValideurId);
+    if($absence->etat=='Avalider' && empty($conf->global->RH_HIDE_VALIDEUR_ON_CARD)) {
+        $TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges', true, true,false);
+        $valideurs = implode(", ", $TValideur);
         if(!empty($valideurs)) $valideurs = ' (à valider par '.$valideurs.')';
         
     }
@@ -917,10 +930,13 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'AbsenceBy' => $langs->trans('AbsenceBy')
 				,'acquisRecuperation'=>$langs->trans('acquisRecuperation')
 				,'dontSendMail'=>$langs->trans('dontSendMail')
+				,'langs'=>$langs
 			)
 			,'other' => array(
-				'dontSendMail' => $user->rights->absence->myactions->CanAvoidSendMail
+				'dontSendMail' => (int)$user->rights->absence->myactions->CanAvoidSendMail
 				,'dontSendMail_CB' => '<input type="checkbox" name="dontSendMail" id="dontSendMail" value="1" />' // J'utilise pas $form->checkbox1('','dontSendMail', 1) parce que j'ai besoin que la ce soit toujours cochable meme en mode view pour les valideurs
+				,'autoValidatedAbsence' => (int)($form->type_aff == 'edit' &&  $user->rights->absence->myactions->CanDeclareAbsenceAutoValidated)
+				,'autoValidatedAbsenceChecked'=> ( !empty($user->rights->absence->myactions->voirToutesAbsencesListe) ? ' checked="checked" ':'')
 			)
 			
 		)

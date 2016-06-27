@@ -447,6 +447,7 @@ class TRH_Absence extends TObjetStd {
 	}
 
 	//renvoie le tableau des utilisateurs
+	//TODO check & remove
 	function recupererTUser(&$PDOdb){
 		global $conf, $langs;
 		$TUser=array();
@@ -2250,24 +2251,37 @@ END:VCALENDAR
 	
 		return implode("\r\n",$Tab);	
 	}
-	
+	function getNomUrl($picto=1, $fulltext = false) {
+		global $langs;
+		
+		$url = '<a href="'.dol_buildpath('/absence/absence.php?id='.$this->getId().'&action=view',1).'">'
+			.( $picto ?img_picto('', 'absenceicon.png@absence'). ' ' : '' )
+			.($fulltext ? $this->__toString() : $this->libelle)
+			.'</a>';
+			 
+		return $url;
+	}
 	function __toString() {
 		global $langs;
 		if($this->ddMoment=='apresmidi')	{
 			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
+			$ddMoment = $langs->trans('AbsenceMorning');
 		}
 		else {
 			$date_debut = strtotime( date('Y-m-d 00:00:00', $this->date_debut) );
+			$ddMoment = $langs->trans('AbsenceAfternoon');
 		}
 
 		if($this->dfMoment=='matin')	{
 			$date_fin = strtotime( date('Y-m-d 11:59:59', $this->date_fin) );
+			$dfMoment = $langs->trans('AbsenceMorning');
 		}
 		else {
 			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
+			$dfMoment = $langs->trans('AbsenceAfternoon');
 		}
 
-		return $this->libelle.'( '.dol_print_date($date_debut).' '.$langs->transnoentities('To').' '.dol_print_date($date_fin).' ) ';
+		return $this->libelle.'( '.dol_print_date($date_debut).' '.$ddMoment.' '.$langs->transnoentities('AbsenceTo').' '.dol_print_date($date_fin).' '.$dfMoment.' ) ';
 		
 	}
 
