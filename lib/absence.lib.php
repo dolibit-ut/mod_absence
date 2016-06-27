@@ -362,33 +362,16 @@ function mailConges(&$absence,$presence=false){
 		);
 		//echo $message;exit;
 		if($conf->global->ABSENCE_ALERT_OTHER_VALIDEUR) {
-			// TODO copier-coller too crade ! Mais c'est le mien	
 			$ATMdb=new TPDOdb;
-			$sql="SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user 
-			WHERE fk_user= ".$absence->fk_user;
-		
-			$ATMdb->Execute($sql);
-			$TGValideur=array();
-			while($ATMdb->Get_line()){
-				$TGValideur[]=$ATMdb->Get_field('fk_usergroup');
-			}
+			$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
 			
-			$sql="SELECT fk_user 
-			FROM ".MAIN_DB_PREFIX."rh_valideur_groupe 
-			WHERE type LIKE 'Conges' AND fk_usergroup IN(".implode(',', $TGValideur).")
-			AND pointeur=0 AND level>=".$absence->niveauValidation." AND fk_user NOT IN(".$absence->fk_user.",".$user->id.")";
-			
-			if (empty($conf->multicompany->transverse_mode)) $sql.=" AND entity IN (".getEntity('user').")"; 
-			
-	//	print $sql;
-			$TValideur=$ATMdb->ExecuteAsArray($sql);
-			
-			foreach($TValideur as $row) {
+			foreach($TValideur as $fk_valideur) {
 				$valideur=new User($db);
-				$valideur->fetch($row->fk_user);
+				$valideur->fetch($fk_valideur);
+				$valideur->getrights('absence');
 				
-				if(!empty($valideur->email) && !$dont_send_mail) {
-					$mail = new TReponseMail($from,$valideur->email,'[Copie] '. $subject,$message);
+				if(!empty($valideur->email) && !empty($valideur->rights->absence->myactions->IfAllValideurAlertedAlerteMe) && !$dont_send_mail) {
+					$mail = new TReponseMail($from,$valideur->email,'['.$langs->trans('AbsenceCopy').'] '. $subject,$message);
 			
 					$result = $mail->send(true, 'utf-8');
 				//	print "{$valideur->email}<br />";
@@ -468,30 +451,9 @@ function absenceCreateICS(&$absence){
 }
 //fonction permettant la récupération
 function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
-	global $conf;
+	global $conf,$user;
 
-	//on récupèreles ids des groupes auxquels appartient l'utilisateur
-	$sql="SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user 
-	WHERE fk_user= ".$absence->fk_user;
-
-
-	$ATMdb->Execute($sql);
-	$TGValideur=array();
-	while($ATMdb->Get_line()){
-		$TGValideur[]=$ATMdb->Get_field('fk_usergroup');
-	}
-	
-	//on récupère tous les ids des collaborateurs à qui on devra envoyer un mail lors de la création d'une absence (valideurs des groupes précédents)
-	$sql="SELECT fk_user FROM ".MAIN_DB_PREFIX."rh_valideur_groupe 
-		WHERE type LIKE 'Conges' AND fk_usergroup IN(".implode(',', $TGValideur).") 
-		AND pointeur=0 AND level=".$absence->niveauValidation." AND fk_user!=".$absence->fk_user;
-	
-	if (empty($conf->multicompany->transverse_mode)) $sql.=" AND entity IN (".getEntity('user').")";
-	
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()){
-		$TValideur[]=$ATMdb->Get_field('fk_user');
-	}
+	$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
 
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_SUPERIOR && $absence->code=='nonjustifiee') {
 		$sql="SELECT fk_user FROM ".MAIN_DB_PREFIX."user WHERE rowid=".(int)$absence->fk_user;
@@ -510,6 +472,7 @@ function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 			envoieMailValideur($ATMdb, $absence, $idVal,$presence);
 		}
 	}
+	
 }
 
 
@@ -523,8 +486,8 @@ function envoieMailValideur(&$ATMdb, &$absence, $idValideur,$presence=false){
 	$userr = new User($db);  
 	$userr->fetch($absence->fk_user);
 
-    	$name=$userr->lastname;
-    	$firstname=$userr->firstname;
+	$name=$userr->lastname;
+	$firstname=$userr->firstname;
 
 	/*
 	 * Mail destinataire
@@ -539,27 +502,42 @@ function envoieMailValideur(&$ATMdb, &$absence, $idValideur,$presence=false){
 
 	$TBS=new TTemplateTBS();
 	
+	if($absence->etat == 'deleted') {
 	if(!$presence){
-		$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidation');
-		$tpl = dol_buildpath('/absence/tpl/mail.absence.creationValideur.tpl.php');
+		$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidationDeleted');
+		$tpl = dol_buildpath('/absence/tpl/mail.absence.deletedValideur.tpl.php');
 	}
 	else{
-		$subject = $langs->transnoentities('NewPresenceRequestWaitingValidation');
-		$tpl = dol_buildpath('/absence/tpl/mail.presence.creationValideur.tpl.php');
+		$subject = $langs->transnoentities('NewPresenceRequestWaitingValidationDeleted');
+		$tpl = dol_buildpath('/absence/tpl/mail.absence.deletedValideur.tpl.php');
 	}
+		
+	}
+	else{
+		if(!$presence){
+			$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidation');
+			$tpl = dol_buildpath('/absence/tpl/mail.absence.creationValideur.tpl.php');
+		}
+		else{
+			$subject = $langs->transnoentities('NewPresenceRequestWaitingValidation');
+			$tpl = dol_buildpath('/absence/tpl/mail.presence.creationValideur.tpl.php');
+		}
+		
+	}
+	
 	
 	$message = $TBS->render($tpl
 		,array()
 		,array(
 			'absence'=>array(
-				'nom'=>htmlentities($name, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
-				,'prenom'=>htmlentities($firstname, ENT_COMPAT | ENT_HTML401, 'ISO-8859-1')
-				,'valideurNom'=>htmlentities($nameValideur, ENT_COMPAT | ENT_HTML401, 'UTF-8')
-				,'valideurPrenom'=>htmlentities($firstnameValideur, ENT_COMPAT | ENT_HTML401, 'UTF-8')
+				'nom'=>$name
+				,'prenom'=>$firstname
+				,'valideurNom'=>$nameValideur
+				,'valideurPrenom'=>$firstnameValideur
 				,'date_debut'=>php2dmy($absence->date_debut)
 				,'date_fin'=>php2dmy($absence->date_fin)
-				,'libelle'=>'<a href="'.dol_buildpath('/absence/absence.php?id='.$absence->getId().'&action=view',2).'">'.htmlentities($absence->libelle, ENT_COMPAT | ENT_HTML401, 'UTF-8').'</a>'
-				,'libelleEtat'=>htmlentities($absence->libelleEtat, ENT_COMPAT | ENT_HTML401, 'UTF-8')
+				,'libelle'=>($absence->etat == 'deleted' ? $absence->libelle : '<a href="'.dol_buildpath('/absence/absence.php?id='.$absence->getId().'&action=view',2).'">'.$absence->libelle.'</a>')
+				,'libelleEtat'=>$absence->libelleEtat
 			)
 			,'translate' => array(
 				'Hello' => $langs->trans('Hello'),

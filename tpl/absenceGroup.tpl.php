@@ -38,8 +38,16 @@
 						<td>[translate.CreatedThe;strconv=no;protect=no]</td>
 						<td>[absenceCourante.dt_cre;strconv=no;protect=no]</td>
 					</tr>
+				<tr>
+					<td>[translate.langs.transnoentities(dontSendMail);strconv=no;protect=no]</td>
+					<td id="dont_send_mail"><input type="checkbox" name="dont_send_mail" id="dont_send_mail" value="1" checked="checked" /></td>
+				</tr>
 				
-				
+				<tr>
+					<td>[translate.langs.transnoentities(autoValidatedAbsence)]</td>
+					<td id="autoValidatedAbsence"><input type="checkbox" name="autoValidatedAbsence" id="autoValidatedAbsence" value="1" [other.autoValidatedAbsenceChecked;strconv=no] /></td>
+				</tr>
+					
 			</table>		
 
 
