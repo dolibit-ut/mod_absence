@@ -180,29 +180,12 @@
 
 				break;
 			case 'listeValidation' : 
+				_valideMultiple($PDOdb);
 				_listeValidation($PDOdb, $absence);
 				break;
 			case 'listeAdmin' : 
 			
-				if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')) {
-				
-					if(empty($_POST['TAbsenceAccept'])) {
-						setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
-					}
-					else {
-						foreach($_POST['TAbsenceAccept'] as $fk_absence) {
-							
-							$a=new TRH_Absence;
-							$a->load($PDOdb, $fk_absence);
-							
-							$a->setAcceptee($PDOdb, $user->id);
-							
-							setEventMessage($langs->trans('AbsenceCheckedValidated', $a));
-						}	
-					}
-					
-				}
-			
+				_valideMultiple($PDOdb);
 			
 				_listeAdmin($PDOdb, $absence);
 				break;
@@ -221,6 +204,28 @@
 	
 	llxFooter();
 	
+function _valideMultiple(&$PDOdb) {
+	global $user,$langs,$conf,$db;
+	if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')) {
+				
+		if(empty($_POST['TAbsenceAccept'])) {
+			setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
+		}
+		else {
+			foreach($_POST['TAbsenceAccept'] as $fk_absence) {
+				
+				$a=new TRH_Absence;
+				$a->load($PDOdb, $fk_absence);
+				
+				$a->setAcceptee($PDOdb, $user->id);
+				
+				setEventMessage($langs->transnoentities('AbsenceCheckedValidated', $a));
+			}	
+		}
+		
+	}
+	
+}
 	
 function _liste(&$PDOdb, &$absence) {
 	global $langs, $conf, $db, $user;	
@@ -487,8 +492,13 @@ function _listeValidation(&$PDOdb, &$absence) {
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 					
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;	
-		$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
+		$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','post');	
 		echo $form->hidden('action', 'listeValidation');
+		
+		$THide = array('date_cre','fk_user','ID', 'DateCre','typeAbsence');
+		if(empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+			$THide[] = 'action';
+		}
 		
 		//print $page;
 		$r->liste($PDOdb, $sql, array(
@@ -499,13 +509,10 @@ function _listeValidation(&$PDOdb, &$absence) {
 			,'link'=>array(
 				'libelle'=>'<a href="?id=@ID@&action=view&validation=ok">@val@</a>'
 			)
-			,'translate'=>array('Statut demande'=>array(
-				$langs->trans('Refused') => '<b style="color:#A72947">' . $langs->trans('Refused') . '</b>',
-				$langs->trans('WaitingValidation') =>'<b style="color:#5691F9">' . $langs->trans('WaitingValidation') . '</b>' , 
-				$langs->trans('Accepted')=>'<b style="color:#30B300">' . $langs->trans('Accepted') . '</b>')
-				,'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>')
+			,'translate'=>array(
+				'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
 			)		
-			,'hide'=>array('date_cre','fk_user','ID', 'DateCre','typeAbsence')
+			,'hide'=>$THide
 			,'type'=>array('date_debut'=>'date','date_fin'=>'date')
 			,'liste'=>array(
 				'titre'=> $langs->trans('ListeAbsencesWaitingValidation')
@@ -517,7 +524,6 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,'order_down'=>img_picto('','1downarrow.png', '', 0)
 				,'order_up'=>img_picto('','1uparrow.png', '', 0)
 				/*,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
-				
 			)
 			,'title'=>array(
 				'date_debut'=> $langs->trans('StartDate')
@@ -526,7 +532,9 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,'firstname'=> $langs->trans('FirstName')
 				,'lastname'=> $langs->trans('LastName')
 				,'libelle'=>'Type absence'
-				
+				,'etat'=> $langs->trans('RequestStatus')
+				,'typeAbsence'=>$langs->trans('AbsenceType')
+				,'action'=>img_help('','Cocher pour valider en bloc')
 			)
 			,'search'=>array(
 				'date_debut'=>array('recherche'=>'calendar')
@@ -535,13 +543,23 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,"lastname"=>true
 			)
 			,'eval'=>array(
-				'lastname'=>'ucwords(strtolower("@val@"))'
+				'etat'=>'_setColorEtat("@val@")'
+				,'action'=>'_getCheckbox(@ID@,"@etat@")'
 			)
 			
 			,'orderBy'=>$TOrder
 			
 		));
-	
+	?><div class="tabsAction" >
+		<?php
+		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
+			
+			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
+			
+		}
+		?>
+	</div>	
+	<div style="clear:both"></div><?php
 	
 	llxFooter();
 }	
