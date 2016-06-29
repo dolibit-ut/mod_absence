@@ -795,7 +795,7 @@ function _getSQLListValidation($userid) {
 		$sql=" SELECT DISTINCT u.fk_user, 
 				a.rowid as 'ID', a.date_cre  as 'DateCre',a.date_debut, a.date_fin, a.duree,
 			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.libelleEtat as 'Statut demande', a.avertissement, ta.typeAbsence
+			 	a.etat, a.avertissement, ta.typeAbsence,'' as 'action'
 				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v, ".MAIN_DB_PREFIX."usergroup_user as u, 
 				".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta 
 				WHERE v.fk_user=".$userid." 
@@ -825,7 +825,7 @@ function _getSQLListValidation($userid) {
 		$sql=" SELECT DISTINCT u.fk_user, 
 				a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin, 
 			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.libelleEtat as 'Statut demande', a.avertissement, a.duree, ta.typeAbsence
+			 	a.etat, a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
 				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v, ".MAIN_DB_PREFIX."usergroup_user as u, 
 				".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta 
 				WHERE v.fk_user=".$userid." 
@@ -887,7 +887,7 @@ function _getSQLListValidation($userid) {
 			 $sql=" SELECT DISTINCT a.fk_user,
                                 a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
                                 ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-                                a.libelleEtat as 'Statut demande', a.avertissement, a.duree, ta.typeAbsence
+                                a.etat, a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
                                 FROM ".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta
                                 WHERE 1
                                 AND a.fk_user=s.rowid
