@@ -17,8 +17,12 @@ class ActionsAbsence
 			
 			// On cherche s'il existe une absence liée :
 			$object->fetchObjectLinked(null,'rh_absence',$object->id,'action');
-			$TKeys = array_keys($object->linkedObjectsIds['rh_absence']);
-			$absence_id = $object->linkedObjectsIds['rh_absence'][$TKeys[0]];
+			
+			if(!empty($object->linkedObjectsIds['rh_absence'])) {
+				$TKeys = array_keys($object->linkedObjectsIds['rh_absence']);
+				$absence_id = $object->linkedObjectsIds['rh_absence'][$TKeys[0]];
+				
+			}
 			
 			if(!empty($absence_id)) {
 
