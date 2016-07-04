@@ -159,6 +159,8 @@ class InterfaceAbsenceWorkflow
 				$u->fetch($object->fk_user);
 				$u->getrights('absence');
 				
+				/*
+				 * Supression de ce droit trop dangeureux ** AlertAllMyCoWorker
 				if($u->rights->absence->myactions->alertAllMyCoWorker) {
 					define('INC_FROM_DOLIBARR', true);
 					dol_include_once('/absence/config.php');
@@ -215,7 +217,7 @@ class InterfaceAbsenceWorkflow
 					}
 					
 				}
-				
+				*/
 				if($conf->agenda->enabled && !empty($conf->global->RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE)) {
 					
 					dol_include_once('/comm/action/class/actioncomm.class.php');
