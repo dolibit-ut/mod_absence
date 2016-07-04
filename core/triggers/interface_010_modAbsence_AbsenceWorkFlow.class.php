@@ -98,25 +98,25 @@ class InterfaceAbsenceWorkflow
 			dol_include_once('/absence/class/absence.class.php');
 			
 				
-			$ATMdb=new TPDOdb;
+			$PDOdb=new TPDOdb;
 			
 			if($object->id>0) {
 				$compteur=new TRH_Compteur;
-				if(!$compteur->load_by_fkuser($ATMdb, $object->id)) {
+				if(!$compteur->load_by_fkuser($PDOdb, $object->id)) {
 					
-						$compteur->initCompteur($ATMdb,$object->id );
+						$compteur->initCompteur($PDOdb,$object->id );
 					
-						$compteur->save($ATMdb);
+						$compteur->save($PDOdb);
 					
 				}
 				
 				$emploi = new TRH_EmploiTemps;
 				
-				if(!$emploi->load_by_fkuser($ATMdb, $object->id)) {
+				if(!$emploi->load_by_fkuser($PDOdb, $object->id)) {
 					
-						$emploi->initCompteurHoraire($ATMdb,$object->id );
+						$emploi->initCompteurHoraire($PDOdb,$object->id );
 					
-						$emploi->save($ATMdb);
+						$emploi->save($PDOdb);
 					
 				}
 				
@@ -131,8 +131,8 @@ class InterfaceAbsenceWorkflow
 			define('INC_FROM_DOLIBARR', true);
 	        dol_include_once('/absence/config.php');	
 		
-			$ATMdb=new TPDOdb;
-			$demandeRecevable=$object->testDemande($ATMdb, $object->fk_user, $object);
+			$PDOdb=new TPDOdb;
+			$demandeRecevable=$object->testDemande($PDOdb, $object->fk_user, $object);
 
 			if($demandeRecevable==1 || $demandeRecevable==2){
 						
@@ -165,12 +165,12 @@ class InterfaceAbsenceWorkflow
 					define('INC_FROM_DOLIBARR', true);
 					dol_include_once('/absence/config.php');
 
-                	$ATMdb=new TPDOdb;
+                	$PDOdb=new TPDOdb;
                                 	
 					// Gestion type absence
 					$the_type='absent';
         	        $typeAbs = new TRH_TypeAbsence;
-                    $typeAbs->load_by_type($ATMdb, $object->type);
+                    $typeAbs->load_by_type($PDOdb, $object->type);
                     if($typeAbs->isPresence)
 					{
 						$the_type='present';
@@ -184,7 +184,7 @@ class InterfaceAbsenceWorkflow
 					
 					
 					
-					$Tab = $ATMdb->ExecuteAsArray("SELECT gu.fk_user 
+					$Tab = $PDOdb->ExecuteAsArray("SELECT gu.fk_user 
 						FROM ".MAIN_DB_PREFIX."usergroup_user gu 
 						WHERE gu.fk_usergroup IN ( SELECT DISTINCT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user WHERE fk_user=".$u->id." )	 
 						AND gu.fk_user NOT IN (".$u->id.") 
@@ -236,6 +236,27 @@ class InterfaceAbsenceWorkflow
 					
 				}
 
+			}
+			else{
+				// type presence
+				
+				if($conf->global->RH_RECUP_RULES == 'AUTO') {
+					
+					//TODO check emploi du temps utilisateur pour voir demie journée normalement non travaillée et détermination compteur de récup en +	
+					$PDOdb=new TPDOdb;
+					$duree = $object->getNbJourPresence($PDOdb);
+					
+					if($duree > 0) {
+						$compteur=new TRH_Compteur;
+						if($compteur->load_by_fkuser($PDOdb, $object->fk_user)) {
+							$compteur->add($PDOdb, 'recup', -$recupSum, 'Récupération suite à présence un jour non travaillé '.dol_print_date($object->date_debut));
+							setEventMessage("Compteur de récupération incrémenté de ".$recupSum." jour(s)");
+						}
+					}
+					
+				}
+				
+				
 			}
 			
 			return 0;

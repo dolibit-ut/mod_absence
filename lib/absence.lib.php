@@ -453,6 +453,7 @@ function absenceCreateICS(&$absence){
 function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 	global $conf,$user;
 
+	dol_include_once('/valideur/class/valideur.class.php');
 	$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
 
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_SUPERIOR && $absence->code=='nonjustifiee') {
