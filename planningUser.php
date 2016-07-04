@@ -345,7 +345,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		}
 		else{
 		
-			getPlanningAbsence($ATMdb, $absence, array((int)$idGroupeRecherche,(int)$idGroupeRecherche2,(int)$idGroupeRecherche3), $idUserRecherche);
+			echo getPlanningAbsence($ATMdb, $absence, array((int)$idGroupeRecherche,(int)$idGroupeRecherche2,(int)$idGroupeRecherche3), $idUserRecherche);
 			
 		}
 		

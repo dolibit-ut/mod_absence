@@ -661,8 +661,8 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 	if(empty($TStatPlanning)) return false;
 
-	print '<table class="planning" border="0">';
-	print "<tr class=\"entete\">";
+	$html = '<table class="planning" border="0">';
+	$html .= "<tr class=\"entete\">";
 	
 	
 
@@ -673,7 +673,7 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		
 		if($first) {
 			
-			print '<tr>
+			$html .= '<tr>
 				<td>' . $langs->trans('Name') . '</td>
 				<td>' . $langs->trans('PresenceDay') . '</td>
 				<td>' . $langs->trans('PresenceHour') . '</td>
@@ -704,28 +704,30 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		
 		if(empty($u->lastname)) $u->lastname = $u->login;
 		
-		print '<tr><td style="text-align:left;">'.$u->getNomUrl().'</td>';
+		$html .= '<tr><td style="text-align:left;">'.$u->getNomUrl().'</td>';
 		
-		print '<td>'.$stat['presence'].'</td>';
-		print '<td>'.$stat['presence_heure'].'</td>';
-		print '<td>'.$stat['absence'].'</td>';
-		print '<td>'.$stat['absence_heure'].'</td>';
-		print '<td>'.$stat['presence+ferie'].'</td>';
-		print '<td>'.$stat['absence+ferie'].'</td>';
-		print '<td>'.$stat['ferie'].'</td></tr>';
+		$html .= '<td>'.$stat['presence'].'</td>';
+		$html .= '<td>'.$stat['presence_heure'].'</td>';
+		$html .= '<td>'.$stat['absence'].'</td>';
+		$html .= '<td>'.$stat['absence_heure'].'</td>';
+		$html .= '<td>'.$stat['presence+ferie'].'</td>';
+		$html .= '<td>'.$stat['absence+ferie'].'</td>';
+		$html .= '<td>'.$stat['ferie'].'</td></tr>';
 		
 		
 	}
 	
 
-	print '</table><p>&nbsp;</p>';
+	$html .= '</table><p>&nbsp;</p>';
 
+	return $html;
 }
 
 function getPlanningAbsence(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche) {
 global $conf,$db,$user;
 	
-	
+		$html='';
+		
 		$t_current = $absence->date_debut_planning;
 		
 		$annee_old = '';
@@ -751,9 +753,9 @@ global $conf,$db,$user;
 				$date_fin =date('d/m/Y', $t_fin_periode);	
 			}
 			
-			if($annee!=$annee_old) print '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
+			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
 			
-			_planning($ATMdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
+			$html.= _planning($ATMdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
 		
 			$annee_old = $annee;
 		
@@ -761,9 +763,9 @@ global $conf,$db,$user;
 			$t_current=strtotime('+1 month', $t_current);
 		}
 
-		if($user->rights->absence->myactions->creerAbsenceCollaborateur) _recap_abs($ATMdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
+		if($user->rights->absence->myactions->creerAbsenceCollaborateur) $html.= _recap_abs($ATMdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
 		
-
+		return $html;
 	
 }
 
@@ -904,7 +906,10 @@ function _getSQLListValidation($userid) {
 }
 
 function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {
-	global $langs,$user;
+	global $langs,$user,$db;
+	
+	dol_include_once('/valideur/class/valideur.class.php');
+	
 //on va obtenir la requête correspondant à la recherche désirée
 	// Test si somme des trois groupes = (99999 * 3) Tous les select sur Aucun alors recherche vide
 	if(array_sum($idGroupeRecherche) == 299997)$idGroupeRecherche = array('0'=>0); //TODO mais c'est quoi cette merde ?!
@@ -923,35 +928,40 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 		,6=>substr($langs->trans('Saturday'),0,1)
 		,7=>substr($langs->trans('Sunday'),0,1)
 	);
-	
+	$html='';
 	$tabUserMisEnForme=array();
-	print '<table class="planning" border="0">';
-	print "<tr class=\"entete\">";
-	print "<td ></td>";
+	$html .= '<table class="planning" border="0">';
+	$html .= "<tr class=\"entete\">";
+	$html .= "<td ></td>";
 	foreach($TPlanningUser as $planning=>$val){
 		$std = new TObjetStd;
 		$std->set_date('date_jour', $planning);
 		
-		print '<td colspan="2">'.$TJourTrans[date('N', $std->date_jour)].' '.substr($planning,0,5).'</td>';
+		$html .=  '<td colspan="2">'.$TJourTrans[date('N', $std->date_jour)].' '.substr($planning,0,5).'</td>';
 		foreach($val as $id=>$present){
 			$tabUserMisEnForme[$id][$planning]=$present;	
 		}
 	}
-	print "</tr>";
+	$html .=  "</tr>";
 	//var_dump($tabUserMisEnForme);
 	$TTotal=array();
+	
+	global $TCacheUser;
+	if(empty($TCacheUser)) $TCacheUser=array();
+	
+	$isValideur =  TRH_valideur_groupe::isValideur($ATMdb, $user->id, $idGroupeRecherche);
+	
 	foreach($tabUserMisEnForme as $idUser => $planning){
 		
-		$sql="SELECT lastname, firstname,login FROM ".MAIN_DB_PREFIX."user WHERE rowid=".$idUser;
-		$ATMdb->Execute($sql);
-		if($ATMdb->Get_line()) {
-			$name =trim($ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname'));
-			if(empty($name))$name = $ATMdb->Get_field('login');
+		if(empty($TCacheUser[$idUser])) {
+			$user_courant=new User($db);
+			$user_courant->fetch($idUser);
+			$TCacheUser[$idUser] = $user_courant;	
 		}
-		if(mb_detect_encoding($name,'UTF-8', true) === false  ) $name = utf8_encode($name);
-
-		print '<tr >';		
-		print '<td style="text-align:right; font-weight:bold;height:20px;" nowrap="nowrap">'.$name.'</td>';
+		$user_courant = $TCacheUser[$idUser];
+		
+		$html .=  '<tr >';		
+		$html .=  '<td style="text-align:right; font-weight:bold;height:20px;" nowrap="nowrap">'.$user_courant->getFullName($langs).'</td>';
 //$planning=array();
 		foreach($planning as $dateJour => $ouinon){
 			
@@ -979,7 +989,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 			if($isFerie && $estUnJourTravaille!='NON') { $TStatPlanning[$idUser]['ferie']++; }
 			
 			$labelJour = '+';//$labelJour = $TJourTrans[date('N', strtotime($dateJour))];
-			if( isset($_REQUEST['no-link']) || !$user->rights->absence->myactions->creerAbsenceCollaborateur ) {
+			if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) ) {
 				$linkPop='&nbsp;';
 			}
 			else{
@@ -993,7 +1003,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 			
 			if($ouinon=='non') {
 				
-				print '<td class="'.$class.$classTravail.'" rel="am">'.$linkPop.'</td>
+				$html .=  '<td class="'.$class.$classTravail.'" rel="am">'.$linkPop.'</td>
 					<td class="'.$class.$classTravail.'" rel="pm">'.$linkPop.'</td>';
 					
 				if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM')){
@@ -1033,7 +1043,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 				}
 				
 				if(strpos($ouinon,'DAM')!==false){
-						print '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+						$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
 						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
@@ -1041,7 +1051,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 				}	
 				else if(strpos($ouinon,'DPM')!==false){
-						print '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
+						$html .=  '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
 						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
@@ -1050,7 +1060,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 				}	
 				else if(strpos($ouinon,'FAM')!==false){
-						print '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+						$html .=  '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
 
 						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
@@ -1062,7 +1072,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 				}
 				else if(strpos($ouinon,'FPM')!==false){
-						print '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+						$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
 
@@ -1071,7 +1081,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 				}
 				else if(strpos($ouinon,'AM')!==false){
-						print '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+						$html .=  '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
 						
 						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
@@ -1081,7 +1091,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						}
 				}
 				else if(strpos($ouinon,'PM')!==false){
-						print '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
+						$html .=  '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
 						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 
 						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
@@ -1091,7 +1101,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						}
 				}
 				else {
-					print '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+					$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
 					<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
 						
 					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
@@ -1105,13 +1115,15 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 		
 		
 		
-		print "</tr>";
+		$html .=  "</tr>";
 	}
 	
-	print '<tr class="footer"><td>'.$langs->trans('TotalPresent').'</td>';
+	$html .=  '<tr class="footer"><td>'.$langs->trans('TotalPresent').'</td>';
 	foreach($TTotal as $date=>$nb) {
-		print '<td align="center" colspan="2">'.$nb.'</td>';
+		$html .=  '<td align="center" colspan="2">'.$nb.'</td>';
 	}
 	
-	print '</tr></table><p>&nbsp;</p>';
+	$html .=  '</tr></table><p>&nbsp;</p>';
+	
+	return $html;
 }
