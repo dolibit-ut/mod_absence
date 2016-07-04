@@ -54,11 +54,12 @@
 	echo $form->hidden('action', 'save');
 
 	$TFormAbsenceType=array();
+	$TAbsenceTypeObligatoire = array('conges','cppartiel','rttcumule','rttnoncumule','rttcumule');
 
 	foreach($TAbsenceType as $absenceType) {
 		
 		$TFormAbsenceType[]=array(
-			'typeAbsence'=>$form->texte('', 'TTypeAbsence['.$absenceType->getId().'][typeAbsence]', $absenceType->typeAbsence, 15,50)
+			'typeAbsence'=>$form->hidden('TTypeAbsence['.$absenceType->getId().'][typeAbsence]', $absenceType->typeAbsence).$absenceType->typeAbsence
 			,'libelleAbsence'=>$form->texte('', 'TTypeAbsence['.$absenceType->getId().'][libelleAbsence]', $absenceType->libelleAbsence, 30,255)
 			,'codeAbsence'=>$form->texte('', 'TTypeAbsence['.$absenceType->getId().'][codeAbsence]', $absenceType->codeAbsence, 6,10)
 			
@@ -70,7 +71,7 @@
             ,'isPresence'=>$form->hidden( 'TTypeAbsence['.$absenceType->getId().'][isPresence]', 0)
 			,'admin'=>$form->combo('', 'TTypeAbsence['.$absenceType->getId().'][admin]', $absenceTypeDummy->TForAdmin , $absenceType->admin)
 			
-			,'delete'=>$form->checkbox1('', 'TTypeAbsence['.$absenceType->getId().'][delete]', 1)
+			,'delete'=>(in_array($absenceType->typeAbsence,$TAbsenceTypeObligatoire) ? '' :$form->checkbox1('', 'TTypeAbsence['.$absenceType->getId().'][delete]', 1))
 		);
 		
 	}

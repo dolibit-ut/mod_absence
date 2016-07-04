@@ -169,6 +169,14 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '</tr>';
 		
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('absenceRecupAcuisitionRules');
+		print '</td>';
+		print '<td>';
+		print $doliform->selectarray('TConst[RH_RECUP_RULES]', array(''=>$langs->trans('None'), 'DECLARE'=>$langs->trans('recupRulesDeclare'), 'AUTO'=>$langs->trans('recupRulesAuto')), $conf->global->RH_RECUP_RULES);
+		print '</td>';
+		print '</tr>';
 	?>	
 	</table>
 	<p align="right">
