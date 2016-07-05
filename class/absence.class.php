@@ -429,7 +429,7 @@ class TRH_Absence extends TObjetStd {
 
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array(); //cf. loadTypeAbsencePerTypeUser
 
-
+		$this->typeAbsence=null;
 	}
 
 	function delete(&$PDOdb)
@@ -622,17 +622,18 @@ class TRH_Absence extends TObjetStd {
 	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
 		global $db, $langs,$user,$conf;
 
+		if($this->etat=='Validee') return false;		
 
 		$this->etat='Validee';
 		$this->libelleEtat = $langs->trans('Accepted');
 		$this->date_validation=time();
 		$this->fk_user_valideur = $fk_valideur;
-
+		$this->isPresence = $isPresence;
 
 		// Appel des triggers
 		dol_include_once('/core/class/interfaces.class.php');
 		$interface = new Interfaces($db);
-
+		
 		$result = $interface->run_triggers('ABSENCE_BEFOREVALIDATE',$this,$user,$langs,$conf);
 
 		if ($result < 0) {
@@ -925,7 +926,7 @@ class TRH_Absence extends TObjetStd {
 		$emploiTemps->load_by_fkuser($PDOdb, $this->fk_user, date('Y-m-d',$this->date_debut));
 
 		while($t_current<=$t_end) {
-		
+				$dureeJour=0;
 				$estTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $this->fk_user, date('Y-m-d',$t_current));
 		
                 if( ($t_current==$t_start && $this->ddMoment=='matin') || $t_current>$t_start  ) {
@@ -2053,6 +2054,17 @@ class TRH_Absence extends TObjetStd {
 			}
 
 			return $sql;
+	}
+	
+	function load(&$PDOdb, $id) {
+		
+		$res = parent::load($PDOdb, $id);
+		
+		$this->typeAbsence = new TRH_TypeAbsence;
+		$this->typeAbsence->load_by_type($PDOdb, $this->type);
+		$this->isPresence = $this->typeAbsence->isPresence;
+		
+		return $res;
 	}
 
 	//	fonction permettant le chargement de l'absence pour un utilisateur si celle-ci existe
