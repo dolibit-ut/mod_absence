@@ -518,3 +518,7 @@ ABSENCE_ALERT_OTHER_VALIDEUR=Alerter tout les valideurs qui en auront le droit d
 IfAllValideurAlertedAlerteMe=Si l'alerte pour tous les valideurs d'acception de congés est active, me l'envoyer
 
 AbsenceCopy=Copie
+
+absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
+recupRulesDeclare=Sur déclaration du temps de travail
+recupRulesAuto=Sur déclaration d'une présence sur un temps non travaillé

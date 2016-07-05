@@ -18,7 +18,7 @@
 		
 		$d=new TRH_declarationTemps;
 		$date_ref = $_POST['year'].'-'.$_POST['month'].'-01';
-		if(!$d->load_by_date($ATMdb, $date_ref)) {
+		if($conf->global->RH_RECUP_RULES == 'DECLARE' && !$d->load_by_date($ATMdb, $date_ref)) {
 			// première signature
 			
 			if($_POST['nb_hour_diff']!=0) {

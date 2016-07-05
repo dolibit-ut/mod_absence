@@ -429,7 +429,7 @@ class TRH_Absence extends TObjetStd {
 
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array(); //cf. loadTypeAbsencePerTypeUser
 
-
+		$this->typeAbsence=null;
 	}
 
 	function delete(&$PDOdb)
@@ -622,17 +622,18 @@ class TRH_Absence extends TObjetStd {
 	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
 		global $db, $langs,$user,$conf;
 
+		if($this->etat=='Validee') return false;		
 
 		$this->etat='Validee';
 		$this->libelleEtat = $langs->trans('Accepted');
 		$this->date_validation=time();
 		$this->fk_user_valideur = $fk_valideur;
-
+		$this->isPresence = $isPresence;
 
 		// Appel des triggers
 		dol_include_once('/core/class/interfaces.class.php');
 		$interface = new Interfaces($db);
-
+		
 		$result = $interface->run_triggers('ABSENCE_BEFOREVALIDATE',$this,$user,$langs,$conf);
 
 		if ($result < 0) {
@@ -904,9 +905,69 @@ class TRH_Absence extends TObjetStd {
 		return $duree;
 	}
 
-	function calculDureePresence(&$PDOdb) {
-		$typeAbs = new TRH_TypeAbsence;
+	function getNbJourPresence(&$PDOdb) {
+		
+		global $langs;
 
+		$TJourSemaine = array('dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi');
+		$TJourFerie = $this->getJourFerie($PDOdb);
+
+		$duree = 0;
+
+		$t_start = $this->date_debut;
+		$t_end = $this->date_fin;
+		$t_current = $t_start;
+
+		$typeAbs = new TRH_TypeAbsence;
+		$typeAbs->load_by_type($PDOdb, $this->type);
+
+		//print_r($typeAbs);
+		$emploiTemps = new TRH_EmploiTemps;
+		$emploiTemps->load_by_fkuser($PDOdb, $this->fk_user, date('Y-m-d',$this->date_debut));
+
+		while($t_current<=$t_end) {
+				$dureeJour=0;
+				$estTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $this->fk_user, date('Y-m-d',$t_current));
+		
+                if( ($t_current==$t_start && $this->ddMoment=='matin') || $t_current>$t_start  ) {
+                    // si l'absence démarre aujorud'hui et qu'elle commence le matin ou bien qu'elle a déjà commencée, je test le matin
+
+                    if(isset($TJourFerie[ date('Y-m-d', $t_current) ]['am']) || $estTravaille=='NON' || $estTravaille=='PM'  ) {
+                            $dureeJour+=.5;
+                         
+                    }
+                }
+
+                if(($t_current==$t_end && $this->dfMoment=='apresmidi') || $t_current<$t_end  ) {
+                // si l'absence se termine aujourd'hui et cet après midi ou bien que l'absence se termine dans le futur, alors je test l'après-midi
+
+                   
+                    if(isset($TJourFerie[ date('Y-m-d', $t_current) ]['pm']) || $estTravaille=='NON' || $estTravaille=='AM'  ) {
+                            $dureeJour+=.5;
+                           
+                    }
+
+                }
+
+            $duree+=$dureeJour;
+			
+			//$this->TDureePresenceUser[date('Y', $t_current)][date('m', $t_current)] += $dureeJour;
+
+			$t_current = strtotime('+1day',$t_current);
+		}
+
+		$this->dureePresence = $duree; // Attention, je rajoute ça ici car semble normal, vérif pas effets de bord
+
+		return $duree;
+		
+	}
+
+	function calculDureePresence(&$PDOdb) {
+		//TODO delete
+		// Cette fonction est une blague de MP bien moisie
+		
+		
+		$typeAbs = new TRH_TypeAbsence;
 		$typeAbs->load_by_type($PDOdb, $this->type);
 
 		$duree = 0;
@@ -963,188 +1024,6 @@ class TRH_Absence extends TObjetStd {
 
 		return $workingDays;
 	}
-
-	//TODO Delete, version dépréciée est buguée
-	//calcul de la durée initiale de l'absence (sans jours fériés, sans les jours travaillés du salariés)
-	function calculDureeAbsence(&$PDOdb, $date_debut, $date_fin, &$absence){
-		$diff=$date_fin-$date_debut;
-		$duree=intval($diff/3600/24);
-		//echo $duree;exit;
-		//prise en compte du matin et après midi
-
-		if($absence->ddMoment=="matin"&&$absence->dfMoment=="apresmidi"){
-
-			$duree+=1;
-		}
-		else if($absence->ddMoment==$absence->dfMoment){
-
-			$duree+=0.5;
-		}
-		$this->date_debut = $date_debut;
-		$this->date_fin = $date_fin;
-
-		return $this->calculDureeAbsenceParAddition($PDOdb);
-	}
-
-	//TODO Delete, version dépréciée est buguée
-	//calcul la durée de l'absence après le décompte des jours fériés
-	function calculJoursFeries(&$PDOdb, $duree, $date_debut, $date_fin, &$absence){
-
-		global $conf, $TJourNonTravailleEntreprise;
-		//on cherche s'il existe un ou plusieurs jours fériés  entre la date de début et de fin d'absence
-		$sql="SELECT rowid, date_jourOff, moment FROM `".MAIN_DB_PREFIX."rh_absence_jours_feries`";
-		$PDOdb->Execute($sql);
-		$Tab = array();
-		while($PDOdb->Get_line()) {
-			$Tab[date('Y-m-d', strtotime($PDOdb->Get_field('date_jourOff')))]= array(
-				'rowid'=>$PDOdb->Get_field('rowid')
-				,'moment'=>$PDOdb->Get_field('moment')
-				);
-		}
-
-
-		/*echo '<pre>';
-		print_r($Tab);
-		echo '</pre>';*/
-		$t_current = $t_start = $date_debut;
-		$t_end = $date_fin;
-		while($t_current<=$t_end) {
-
-			$date_current = date('Y-m-d', $t_current);
-			$jour = $absence->jourSemaine($t_current);
-
-			if(in_array($jour, $TJourNonTravailleEntreprise))
-				$duree -= 0.5;
-		//	print " $date_current ";
-			elseif(isset($Tab[$date_current])) {
-		//		print "$date_current est férié";
-				if($t_current==$t_start && $absence->ddMoment=='apresmidi') {
-					if($Tab[$date_current]['moment']=='matin') {
-						null;
-					}
-					else {
-						$duree-=0.5;
-					}
-
-				}
-				else if($t_current==$t_end && $absence->dfMoment=='matin') {
-					if($Tab[$date_current]['moment']=='apresmidi') {
-						null;
-					}
-					else {
-						$duree-=0.5;
-					}
-				}
-				else {
-					if($Tab[$date_current]['moment']=='allday') {
-						$duree-=1;
-					}
-					else {
-						$duree-=0.5;
-					}
-
-
-				}
-
-			}
-
-
-			$t_current = strtotime("+1 day", $t_current);
-		}
-
-
-		return $duree;
-		/*
-		$dateDebutAbs=$absence->php2Date($date_debut);
-		$dateFinAbs=$absence->php2Date($date_fin);
-
-		//on cherche s'il existe un ou plusieurs jours fériés  entre la date de début et de fin d'absence
-		$sql="SELECT rowid, date_jourOff, moment FROM `".MAIN_DB_PREFIX."rh_absence_jours_feries`";
-		$PDOdb->Execute($sql);
-		$Tab = array();
-		while($PDOdb->Get_line()) {
-			$Tab[$PDOdb->Get_field('rowid')]= array(
-				'date_jourOff'=>$PDOdb->Get_field('date_jourOff')
-				,'moment'=>$PDOdb->Get_field('moment')
-				);
-		}
-
-		if(!empty($Tab)){
-			foreach ($Tab as $key=>$jour) {
-			//on teste si le jour est égal à l'une des extrémités de la demande d'absence, sinon il n'y a pas de test spécial à faire
-			if($dateDebutAbs==$jour['date_jourOff']&&$dateFinAbs==$jour['date_jourOff']){ //date début absence == jour férié et date fin absence == même jour férié
-				//echo "boucle1";
-				if($absence->ddMoment==$absence->dfMoment&&$jour['moment']=='allday'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment==$absence->dfMoment&&$absence->ddMoment=='matin'&&$jour['moment']=='matin'){
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment==$absence->dfMoment&&$absence->ddMoment=='apresmidi'&&$jour['moment']=='apresmidi'){
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='matin'&&$absence->dfMoment=='apresmidi'&&$jour['moment']=='apresmidi'){
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='matin'&&$absence->dfMoment=='apresmidi'&&$jour['moment']=='matin'){
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='matin'&&$absence->dfMoment=='apresmidi'&&$jour['moment']=='allday'){
-					$duree-=1;
-				}
-			}else if($dateDebutAbs==$jour['date_jourOff']){	//si la date début est égale à la date du jour férié
-				//echo "boucle2";
-				if($absence->ddMoment=='matin'&&$jour['moment']=='allday'){ //traite le cas matin et apresmidi
-					$duree-=1;
-				}
-				else if($absence->ddMoment=='matin'&&$jour['moment']=='matin'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='matin'&&$jour['moment']=='apresmidi'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='apresmidi'&&$jour['moment']=='apresmidi'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->ddMoment=='apresmidi'&&$jour['moment']=='allday'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-			}
-			else if($dateFinAbs==$jour['date_jourOff']){	//si la date début est égale à la date du jour férié
-			//	echo "boucle3";
-				if($absence->dfMoment=='matin'&&$jour['moment']=='allday'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->dfMoment=='matin'&&$jour['moment']=='matin'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->dfMoment=='matin'&&$jour['moment']=='apresmidi'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->dfMoment=='apresmidi'&&$jour['moment']=='apresmidi'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->dfMoment=='apresmidi'&&$jour['moment']=='matin'){ //traite le cas matin et apresmidi
-					$duree-=0.5;
-				}
-				else if($absence->dfMoment=='apresmidi'&&$jour['moment']=='allday'){ //traite le cas matin et apresmidi
-					$duree-=1;
-				}
-			}
-			else if($dateDebutAbs<=$jour['date_jourOff']&&$dateFinAbs>=$jour['date_jourOff']){
-				//echo "boucle4";
-				if($jour['moment']=='allday'){
-					$duree-=1;
-				}else{
-					$duree-=0.5;
-				}
-			}
-		}
-		}
-
-		return $duree;*/
-	}
-
 
 	function calculJoursTravailles(&$PDOdb, $duree, $date_debut, $date_fin, &$absence){
 		/*
@@ -2175,6 +2054,17 @@ class TRH_Absence extends TObjetStd {
 			}
 
 			return $sql;
+	}
+	
+	function load(&$PDOdb, $id) {
+		
+		$res = parent::load($PDOdb, $id);
+		
+		$this->typeAbsence = new TRH_TypeAbsence;
+		$this->typeAbsence->load_by_type($PDOdb, $this->type);
+		$this->isPresence = $this->typeAbsence->isPresence;
+		
+		return $res;
 	}
 
 	//	fonction permettant le chargement de l'absence pour un utilisateur si celle-ci existe
