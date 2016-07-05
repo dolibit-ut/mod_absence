@@ -227,9 +227,9 @@ function saveLibelle($type){ //TODO deprecated
 }
 
 //fonction qui permet de renvoyer le code de l'absence
-function saveCodeTypeAbsence(&$ATMdb, $type){ // TODO deprecated
+function saveCodeTypeAbsence(&$PDOdb, $type){ // TODO deprecated
 	$ta = new TRH_TypeAbsence;
-	$ta->load_by_type($ATMdb, $type);
+	$ta->load_by_type($PDOdb, $type);
 	
 	return $ta->codeAbsence;					
 }
@@ -362,8 +362,9 @@ function mailConges(&$absence,$presence=false){
 		);
 		//echo $message;exit;
 		if($conf->global->ABSENCE_ALERT_OTHER_VALIDEUR) {
-			$ATMdb=new TPDOdb;
-			$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
+			dol_include_once('/valideur/class/valideur.class.php');
+			$PDOdb=new TPDOdb;
+			$TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges');
 			
 			foreach($TValideur as $fk_valideur) {
 				$valideur=new User($db);
@@ -450,17 +451,17 @@ function absenceCreateICS(&$absence){
 	return $tmfile;
 }
 //fonction permettant la récupération
-function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
+function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 	global $conf,$user;
 
 	dol_include_once('/valideur/class/valideur.class.php');
-	$TValideur = TRH_valideur_groupe::getUserValideur($ATMdb, $user, $absence, 'Conges');
+	$TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges');
 
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_SUPERIOR && $absence->code=='nonjustifiee') {
 		$sql="SELECT fk_user FROM ".MAIN_DB_PREFIX."user WHERE rowid=".(int)$absence->fk_user;
-		$ATMdb->Execute($sql);
-		$ATMdb->Get_line();
-		$fk_sup = $ATMdb->Get_field('fk_user');
+		$PDOdb->Execute($sql);
+		$PDOdb->Get_line();
+		$fk_sup = $PDOdb->Get_field('fk_user');
 		if(!empty($fk_sup) && !in_array($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER, $TValideur)) $TValideur[] = $fk_sup;
 	}
 
@@ -470,7 +471,7 @@ function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
-			envoieMailValideur($ATMdb, $absence, $idVal,$presence);
+			envoieMailValideur($PDOdb, $absence, $idVal,$presence);
 		}
 	}
 	
@@ -478,7 +479,7 @@ function mailCongesValideur(&$ATMdb, &$absence,$presence=false){
 
 
 //fonction permettant l'envoi de mail aux valideurs de la demande d'absence
-function envoieMailValideur(&$ATMdb, &$absence, $idValideur,$presence=false){
+function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
 	global $db, $langs, $user, $conf;
 		
 	$from = !empty($user->email) ? $user->email : $conf->global->MAIN_MAIL_EMAIL_FROM;
@@ -614,14 +615,14 @@ function php2Date($phpDate){
     return date("Y-m-d H:i:s", $phpDate);
 }
 function getHistoryCompteurForUser($fk_user,$id_absence,$duree=null,$type=null, $etat=null) {
-global $compteurCongeResteCurrentUser,$ATMdb_getHistoryCompteurForUser;
+global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 
-	if(!isset($ATMdb_getHistoryCompteurForUser)) $ATMdb_getHistoryCompteurForUser=new TPDOdb;
+	if(!isset($PDOdb_getHistoryCompteurForUser)) $PDOdb_getHistoryCompteurForUser=new TPDOdb;
 
 	if(!isset($compteurCongeResteCurrentUser)) {
 		
 		$compteur =new TRH_Compteur;
-		$compteur->load_by_fkuser($ATMdb_getHistoryCompteurForUser, $fk_user);
+		$compteur->load_by_fkuser($PDOdb_getHistoryCompteurForUser, $fk_user);
 
 		$congePrecTotal = $compteur->acquisExerciceNM1 + $compteur->acquisAncienneteNM1 + $compteur->acquisHorsPeriodeNM1 + $compteur->reportCongesNM1;
 		$compteurCongeResteCurrentUser = $congePrecTotal - $compteur->congesPrisNM1;
@@ -630,7 +631,7 @@ global $compteurCongeResteCurrentUser,$ATMdb_getHistoryCompteurForUser;
 		
 	if(is_null($duree) || is_null($etat) || is_null($type)) {
 		$absence = new TRH_Absence;
-		$absence->load($ATMdb_getHistoryCompteurForUser, $id_absence);
+		$absence->load($PDOdb_getHistoryCompteurForUser, $id_absence);
 		
 		$duree = $absence->duree;
 		$etat = $absence->etat;
@@ -648,7 +649,7 @@ global $compteurCongeResteCurrentUser,$ATMdb_getHistoryCompteurForUser;
 	
 }
 
-function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
+function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
 	global $db, $langs;	
 	
 	if(empty($date_debut)) return false;
@@ -656,7 +657,7 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 	$date_debut = date('Y-m-d', Tools::get_time($date_debut));
 	$date_fin = date('Y-m-d', Tools::get_time($date_fin));
 	
-	$TStatPlanning = TRH_Absence::getPlanning($ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
+	$TStatPlanning = TRH_Absence::getPlanning($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
 //var_dump($TStatPlanning);
 	$first=true;
 
@@ -724,7 +725,7 @@ function _recap_abs(&$ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 	return $html;
 }
 
-function getPlanningAbsence(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche) {
+function getPlanningAbsence(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche) {
 global $conf,$db,$user;
 	
 		$html='';
@@ -756,7 +757,7 @@ global $conf,$db,$user;
 			
 			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
 			
-			$html.= _planning($ATMdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
+			$html.= _planning($PDOdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
 		
 			$annee_old = $annee;
 		
@@ -764,7 +765,7 @@ global $conf,$db,$user;
 			$t_current=strtotime('+1 month', $t_current);
 		}
 
-		if($user->rights->absence->myactions->creerAbsenceCollaborateur) $html.= _recap_abs($ATMdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
+		if($user->rights->absence->myactions->creerAbsenceCollaborateur) $html.= _recap_abs($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
 		
 		return $html;
 	
@@ -906,7 +907,7 @@ function _getSQLListValidation($userid) {
 	
 }
 
-function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {
+function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {
 	global $langs,$user,$db;
 	
 	dol_include_once('/valideur/class/valideur.class.php');
@@ -917,7 +918,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	if(array_sum($idGroupeRecherche)>0) $idUserRecherche = 0; // si un groupe est sélectionner on ne prend pas en compte l'utilisateur
 
 
-	$TPlanningUser=$absence->requetePlanningAbsence($ATMdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
+	$TPlanningUser=$absence->requetePlanningAbsence($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
 
 	
 	$TJourTrans=array(
@@ -950,7 +951,7 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	global $TCacheUser;
 	if(empty($TCacheUser)) $TCacheUser=array();
 	
-	$isValideur =  TRH_valideur_groupe::isValideur($ATMdb, $user->id, $idGroupeRecherche);
+	$isValideur =  TRH_valideur_groupe::isValideur($PDOdb, $user->id, $idGroupeRecherche);
 	
 	foreach($tabUserMisEnForme as $idUser => $planning){
 		
@@ -973,9 +974,9 @@ function _planning(&$ATMdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 			
 			$std = new TObjetStd;
 			$std->set_date('date_jour', $dateJour);
-			if(TRH_JoursFeries::estFerie($ATMdb, $std->get_date('date_jour','Y-m-d') )) { $isFerie = 1; $class .= ' jourFerie';  } else { $isFerie = 0; }	
+			if(TRH_JoursFeries::estFerie($PDOdb, $std->get_date('date_jour','Y-m-d') )) { $isFerie = 1; $class .= ' jourFerie';  } else { $isFerie = 0; }	
 			
-			$estUnJourTravaille = TRH_EmploiTemps::estTravaille($ATMdb, $idUser, $std->get_date('date_jour','Y-m-d')); // OUI/NON/AM/PM
+			$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $idUser, $std->get_date('date_jour','Y-m-d')); // OUI/NON/AM/PM
 			$classTravail= ' jourTravaille'.$estUnJourTravaille;
 			
 			
