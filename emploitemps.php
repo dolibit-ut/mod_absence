@@ -246,7 +246,8 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$THoraire=array();
 	foreach($emploiTemps->TJour as $jour) {
 		foreach(array('dam','fam','dpm','fpm') as $pm) {
-			$THoraire[$jour.'_heure'.$pm]=$form->timepicker('','date_'.$jour.'_heure'.$pm, date('H:i',$emploiTemps->{'date_'.$jour.'_heure'.$pm}) ,5,5);
+			$pm2 = strpos($pm ,'pm') !==false ? 'pm' : 'am';
+			$THoraire[$jour.'_heure'.$pm]=$emploiTemps->{$jour.$pm2} || $mode =='edit'  ? $form->timepicker('','date_'.$jour.'_heure'.$pm, date('H:i',$emploiTemps->{'date_'.$jour.'_heure'.$pm}) ,5,5) : ' - ';
 		}
 	} 
 
