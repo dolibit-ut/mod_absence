@@ -179,7 +179,7 @@ function _liste(&$PDOdb, &$emploiTemps) {
 			,'login'=> $langs->trans('Login')
 		)
 		,'translate'=>array()
-		,'hide'=>array('DateCre','ID', 'Id Utilisateur')
+		,'hide'=>array('DateCre','ID', 'Id Utilisateur','fk_user')
 		,'type'=>array()
 		,'liste'=>array(
 			'titre'=> $langs->trans('CollabScheduleList')
