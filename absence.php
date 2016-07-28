@@ -349,7 +349,8 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
 				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
-			WHERE 1";
+			WHERE 1
+			LIMIT 1000";
 	
 	
 	$TOrder = array('date_debut'=>'DESC');
