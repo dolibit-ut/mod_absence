@@ -206,10 +206,10 @@
 	
 function _valideMultiple(&$PDOdb) {
 	global $user,$langs,$conf,$db;
-	if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')) {
+	if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
 				
 		if(empty($_POST['TAbsenceAccept'])) {
-			setEventMessage($langs->trans('NoAbsenceChecked'),'errors');
+			setEventMessage($langs->trans('NoAbsenceChecked'),'warnings');
 		}
 		else {
 			foreach($_POST['TAbsenceAccept'] as $fk_absence) {
@@ -349,8 +349,8 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
 				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
-			WHERE 1
-			LIMIT 1000";
+			WHERE 1 ";
+			//LIMIT 1000";
 	
 	
 	$TOrder = array('date_debut'=>'DESC');
@@ -366,11 +366,12 @@ function _listeAdmin(&$PDOdb, &$absence) {
 		$THide[] = 'action';
 	}
 	//echo $sql;exit;
-
+//$PDOdb->debug=true;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
+			,'global'=>1000
 		)
 		,'link'=>array(
 			'libelle'=>'<a href="@isPresence@.php?id=@ID@&action=view">@val@</a>'
@@ -426,14 +427,14 @@ function _listeAdmin(&$PDOdb, &$absence) {
 		
 	));
 	?><div class="tabsAction" >
-		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
 		<?php
 		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
 			
-			echo $form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all');	
+			echo '<div style="float:right">&nbsp;&nbsp;&nbsp;'.$form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all').'</div>';	
 			
 		}
 		?>
+		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
 	</div>	
 	<div style="clear:both"></div><?php
 	$form->end();
