@@ -20,6 +20,7 @@
 	$object = $absence;
 	
 	$upload_dir = DOL_DATA_ROOT.'/absence/regle';
+	include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
 	
 	llxHeader('', $langs->trans('Documents'));
@@ -29,7 +30,7 @@
 	$ATMdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$absence) {
+	function _fiche(&$ATMdb, &$object) {
 		global $db,$user,$conf,$langs;
 		
 		$id = GETPOST('id', 'int');
