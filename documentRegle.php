@@ -15,6 +15,14 @@
 	
 	$ATMdb=new TPDOdb;
 	$absence=new TRH_Absence;
+	$absence->id = 1;
+	$absence->element = "regle";
+	$object = $absence;
+	
+	$upload_dir = DOL_DATA_ROOT.'/absence/regle';
+	include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+	
+	llxHeader('', $langs->trans('Documents'));
 	
 	_fiche($ATMdb, $absence);
 	
@@ -23,7 +31,6 @@
 	
 	function _fiche(&$ATMdb, &$absence) {
 		global $db,$user,$conf,$langs;
-		llxHeader('', $langs->trans('Documents'));
 		
 		$id = GETPOST('id', 'int');
 		$ref = GETPOST('ref', 'alpha');
@@ -41,10 +48,6 @@
 		
 		$upload_dir = DOL_DATA_ROOT.'/absence/regle';
 		
-		$absence->id = 0;
-		$absence->element = "regle";
-		$object = $absence;
-		
 		$modulepart = 'absence';
 
 		$permission  = $user->rights->absence->myactions->uploadFilesRegle;
@@ -52,11 +55,16 @@
 		
 		// Construit liste des fichiers
 		$filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
+		
 		$totalsize=0;
-		foreach($filearray as $key => $file)
+		foreach($filearray as $key => &$file)
 		{
+			//$file['name']='regle/'.$file['name'];
 			$totalsize+=$file['size'];
 		}
+		//var_dump($filearray);
+		
+		$relativepathwithnofile='regle/';
 		
 		include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
 		
