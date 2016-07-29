@@ -19,13 +19,17 @@
 	$absence->element = "regle";
 	$object = $absence;
 	
+	$action=GETPOST('action');
+	$confirm=GETPOST('confirm');
+	
 	$upload_dir = DOL_DATA_ROOT.'/absence/regle';
-	include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
-	include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+	
+	if(is_file( DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_pre_headers.tpl.php')) include_once DOL_DOCUMENT_ROOT. '/core/tpl/document_actions_pre_headers.tpl.php';
+	if(is_file( DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php')) include_once DOL_DOCUMENT_ROOT. '/core/actions_linkedfiles.inc.php';
 	
 	llxHeader('', $langs->trans('Documents'));
 	
-	_fiche($ATMdb, $absence);
+	_fiche($ATMdb, $object);
 	
 	$ATMdb->close();
 	llxFooter();
