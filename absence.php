@@ -206,7 +206,7 @@
 	
 function _valideMultiple(&$PDOdb) {
 	global $user,$langs,$conf,$db;
-	if(!empty($user->rights->absence->myactions->valideurConges) && GETPOST('bt_accept_all')!='') {
+	if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur) && GETPOST('bt_accept_all')!='') {
 				
 		if(empty($_POST['TAbsenceAccept'])) {
 			setEventMessage($langs->trans('NoAbsenceChecked'),'warnings');
