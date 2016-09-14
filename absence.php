@@ -358,7 +358,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;	
-	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','post');		
+	$form=new TFormCore($_SERVER['PHP_SELF'].'?action=listeAdmin','formtranslateList','post');		
 	echo $form->hidden('action', 'listeAdmin');
 	
 	$THide = array('isPresence','DateCre', 'fk_user', 'ID','typeAbsence');
