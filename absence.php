@@ -319,7 +319,7 @@ function _liste(&$PDOdb, &$absence) {
 		
 	));
 	?><div class="tabsAction" >
-		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
+		<a class="butAction" href="?id=<?php echo $absence->getId(); ?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
 	</div><div style="clear:both"></div><?php
 	$form->end();
 	
@@ -434,7 +434,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			
 		}
 		?>
-		<a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
+		<a class="butAction" href="?id=<?php echo $absence->getId(); ?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
 	</div>	
 	<div style="clear:both"></div><?php
 	$form->end();
@@ -978,9 +978,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		
 		$(document).ready(function() {
 		
-			$('#user-planning-dialog div.content').before( "<?=addslashes($popinExisteDeja) ?>" );
+			$('#user-planning-dialog div.content').before( "<?php echo addslashes($popinExisteDeja); ?>" );
 		
-			$('#user-planning-dialog div.content').load('planningUser.php?fk_user=<?=$existeDeja[2] ?>&date_debut=<?=__get('date_debut') ?>&date_fin=<?=__get('date_fin') ?> #plannings');
+			$('#user-planning-dialog div.content').load('planningUser.php?fk_user=<?php echo $existeDeja[2]; ?>&date_debut=<?php echo __get('date_debut'); ?>&date_fin=<?php echo __get('date_fin'); ?> #plannings');
 		
 			$('#user-planning-dialog').dialog({
 				title: "<?php echo $langs->trans('CreationError'); ?>"	
@@ -1016,7 +1016,7 @@ function _ficheCommentaire(&$PDOdb, &$absence, $mode) {
 	<textarea name="commentValid" rows="3" cols="40"><?php echo $absence->commentaireValideur; ?></textarea><br><br>
 	<INPUT class="button" TYPE="submit"   id="commentaire" VALUE="<?php echo $langs->trans('Continue'); ?>">
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	
-	<INPUT class="button" TYPE="button" id="newAsk" VALUE="<?php echo $langs->trans('NewRequestOnSameUser'); ?>" onclick="document.location.href='absence.php?action=new&fk_user=<?=$absence->fk_user ?>'">	
+	<INPUT class="button" TYPE="button" id="newAsk" VALUE="<?php echo $langs->trans('NewRequestOnSameUser'); ?>" onclick="document.location.href='absence.php?action=new&fk_user=<?php echo $absence->fk_user; ?>'">	
 	<br><br>
 
 	<?php
