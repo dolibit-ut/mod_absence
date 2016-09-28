@@ -84,7 +84,7 @@ global $db,$langs,$conf;
 		<script type="text/javascript">
 			function signFeuille() {
 				
-				if(window.confirm("<?=$langs->transnoentities('SigningDeclarationTime') ?>")) {
+				if(window.confirm("<?php echo $langs->transnoentities('SigningDeclarationTime'); ?>")) {
 					
 					document.forms['formDeclaration'].elements['action'].value="SAVE";
 					document.forms['formDeclaration'].submit();
@@ -154,8 +154,8 @@ global $db,$langs,$conf;
 		?>
 		<tr>
 			<th>Total</th>
-			<th align="right"><?=convertSecondToTime( $total * 3600, 'allhourmin' ) ?></th>
-			<th align="right"><?= ( $totaldiff<0?'-':''  ). convertSecondToTime( abs($totaldiff) * 3600, 'allhourmin' ) ?></th>
+			<th align="right"><?php echo convertSecondToTime( $total * 3600, 'allhourmin' ); ?></th>
+			<th align="right"><?php echo ( $totaldiff<0?'-':''  ). convertSecondToTime( abs($totaldiff) * 3600, 'allhourmin' ); ?></th>
 			<th>  </th>
 		</tr>
 		</table>
