@@ -158,6 +158,18 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '</tr>';
 		
+		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)) {
+			print '<tr>';
+			print '<td>';
+			print $langs->trans('RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE');
+			print '</td>';
+			print '<td>';
+			print ajax_constantonoff('RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE');
+			//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
+			print '</td>';
+			print '</tr>';
+		}
+		
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceExportDecoupeAbsenceMappingUsed')
