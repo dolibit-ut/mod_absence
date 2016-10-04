@@ -118,8 +118,6 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 		
 		if($row->isPresence==1) {
 	
-			$color= $row->colorId;
-			
 			$time_debut_jour = strtotime($row->date_debut);
 			$time_fin_jour = strtotime($row->date_fin);
 			
@@ -151,7 +149,8 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 				
 				if(mb_detect_encoding($label,'UTF-8', true) === false  ) $label = utf8_encode($label);
 				
-				
+				if(empty($row->colorId)) $color = '#66ff66';
+				else $color = TRH_TypeAbsence::getColor($row->colorId);
 				
 				$TEvent[]=array(
 					'id'=>$row->rowid
@@ -186,13 +185,16 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 			
 			switch($row->etat){
 				case 'Avalider' : 
-					$color = '#ff44ff';
+					$color = '#668cd9';
 					break;
 				case 'Refusee':
 					$color = '#ff4444';
 					break;
 				default:
-					$color='';
+					
+					if(empty($row->colorId)) $color = '#65ad89';
+					else $color = TRH_TypeAbsence::getColor($row->colorId);
+					
 					break;
 			}
 			
