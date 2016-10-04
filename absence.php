@@ -238,12 +238,18 @@ function _liste(&$PDOdb, &$absence) {
 
 	//LISTE D'ABSENCES DU COLLABORATEUR
 	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.fk_user, a.date_cre as 'DateCre',a.date_debut , a.date_fin, 
-			a.libelle,a.duree, a.etat,a.type, 'Compteur', u.login, u.firstname, u.lastname,
-			 a.avertissement
+			a.libelle,a.duree, a.etat,a.type, 'Compteur', u.login, u.firstname, u.lastname ";
+			
+	if($conf->multicompany->enabled) $sql.=",e.label as entity";
+	
+	$sql.=",a.avertissement
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
-				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
-			WHERE a.fk_user=".$user->id;
+				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type) ";
+			
+	if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
+				
+	$sql.= "WHERE a.fk_user=".$user->id;
 	
 	
 	$TOrder = array('date_debut'=>'DESC');
@@ -298,6 +304,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'etat'		 	 => $langs->trans('RequestStatus')
 			,'duree' 	 	 => $langs->trans('CountedInDaysDuration')
 			,'Compteur'		 => $langs->trans('AvailableHolidayBeforeRequest')
+			,'entity'		 => $langs->trans('Entity')
 		)
 		,'search'=>array(
 			'date_debut'=>array('recherche'=>'calendar')
@@ -345,11 +352,18 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.date_cre as 'DateCre',a.date_debut , a.date_fin, 
 		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
-		  	a.etat, a.avertissement,'' as 'action',ta.typeAbsence
+		  	a.etat ";
+			
+	if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+	
+	$sql.= ", a.avertissement,'' as 'action',ta.typeAbsence
 			FROM ".MAIN_DB_PREFIX."rh_absence as a
 				LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (u.rowid=a.fk_user)
-				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)
-			WHERE 1 ";
+				LEFT JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence = a.type)";
+			
+	if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
+				
+	$sql.= "WHERE 1 ";
 			//LIMIT 1000";
 	
 	
@@ -406,6 +420,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 			,'login'=> $langs->trans('Login')
 			,'duree'=> $langs->trans('DurationInDays')
 			,'etat'=> $langs->trans('RequestStatus')
+			,'entity'=> $langs->trans('Entity')
 			,'action'=>img_help('','Cocher pour valider en bloc')
 		)
 		,'search'=>array(
@@ -525,6 +540,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,'messageNothing'=> $langs->trans('MessageNothingAbsence')
 				,'order_down'=>img_picto('','1downarrow.png', '', 0)
 				,'order_up'=>img_picto('','1uparrow.png', '', 0)
+				
 				/*,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
 			)
 			,'title'=>array(
@@ -536,6 +552,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 				,'libelle'=>'Type absence'
 				,'etat'=> $langs->trans('RequestStatus')
 				,'typeAbsence'=>$langs->trans('AbsenceType')
+				,'entity'=> $langs->trans('Entity')
 				,'action'=>img_help('','Cocher pour valider en bloc')
 			)
 			,'search'=>array(
