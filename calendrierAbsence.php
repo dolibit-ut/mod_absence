@@ -11,26 +11,10 @@
 	
 	$langs->load('absence@absence');
 	
-//print_r(get_defined_vars());	
-	//TODO replace wdcalendar with fullcalendar
-	
-
+	list($langjs,$dummy) =explode('_', $langs->defaultlang);
 	llxHeader('', $langs->trans('AbsencesPresencesCalendar'), '', '', 0,0,
-		array(//"/library/wdCalendar/src/jquery.js"   
-			"/rhlibrary/wdCalendar/src/Plugins/Common.js"    
-			,"/rhlibrary/wdCalendar/src/Plugins/datepicker_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.datepicker.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.alert.js"   
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.ifrmdailog.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/wdCalendar_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.calendar.js" )
-	
-	
-		,array("/rhlibrary/wdCalendar/css/dailog.css" 
-			,"/rhlibrary/wdCalendar/css/calendar.css"
-			,"/rhlibrary/wdCalendar/css/dp.css" 
-			,"/rhlibrary/wdCalendar/css/alert.css" 
-			,"/rhlibrary/wdCalendar/css/main.css")
+		array('/fullcalendar/lib/moment/min/moment.min.js', '/fullcalendar/lib/fullcalendar/dist/fullcalendar.min.js','/fullcalendar/lib/fullcalendar/dist/lang/'.$langjs.'.js')
+		,array('/fullcalendar/lib/fullcalendar/dist/fullcalendar.min.css','/fullcalendar/css/fullcalendar.css')
 	);
 		
 	$ATMdb=new TPDOdb;
@@ -38,8 +22,9 @@
 	$absence=new TRH_absence;
 	if(isset($_REQUEST['id'])){
 		$absence->load($ATMdb, $_REQUEST['id']);
-	}else{
-		$absence->load($ATMdb, $user->id);
+	}
+	else{
+		$absence->load($ATMdb, $user->id); // ?
 	}
 	
 	$idGroupe= isset($_REQUEST['groupe']) ? $_REQUEST['groupe'] : 0;
@@ -48,12 +33,9 @@
 	
 	$typeAbsence= isset($_REQUEST['typeAbsence']) ? $_REQUEST['typeAbsence'] : 'Tous';
 	
-	$form=new TFormCore($_SERVER['PHP_SELF'],'form2','GET');
+	$form=new TFormCore($_SERVER['PHP_SELF'],'formAgenda','GET');
 	echo $form->hidden('action', 'afficher');
 	echo $form->hidden('id',$absence->getId());
-	
-	
-	
 	
 	$TabGroupe=array();
 	$TabGroupe[0] = 'Tous';
@@ -141,6 +123,192 @@
 			)
 		)
 	);
+
+	$defaultDay = date('d');
+?>
+<script type="text/javascript">
+
+var year = '<?php echo date('Y') ?>';
+var month = '<?php echo date('m') ?>';
+var defaultDate = year+'-'+month+'-<?php echo $defaultDay ?>';
+var defaultView='month';
+var currentsource = '<?php echo dol_buildpath('/absence/script/absenceCalendarDataFeed.php',1) ?>'+'?'+$('form[name=formAgenda]').serialize();
+
+$('#fullcalendar').fullCalendar({
+	        header:{
+	        	left:   'title',
+			    center: 'agendaDay,agendaWeek,month',
+			    right:  'prev,next today'
+	        }
+	        ,defaultDate:defaultDate
+	        ,businessHours: {
+	        	start:'<?php echo $hourStart.':00'; ?>'
+	        	,end:'<?php echo $hourEnd.':00'; ?>'
+	        	,dow:[1,2,3,4,5]
+	        }
+	        <?php
+				if(!empty($conf->global->FULLCALENDAR_SHOW_THIS_HOURS)) {
+						list($hourShowStart, $hourShowEnd) = explode('-', $conf->global->FULLCALENDAR_SHOW_THIS_HOURS);
+						if(!empty($hourShowStart) && !empty($hourShowEnd)) {
+		        			?>,minTime:'<?php echo $hourShowStart.':00:00'; ?>'
+		        			,maxTime:'<?php echo $hourShowEnd.':00:00'; ?>'<?php
+						}
+				}
+
+		   /* if(!empty($user->array_options['options_googlecalendarapi'])) {
+		    	?>
+		    	,googleCalendarApiKey: '<?php echo $user->array_options['options_googlecalendarapi']; ?>'
+		    	,eventSources: [
+	            	{
+	                	googleCalendarId: '<?php echo $user->array_options['options_googlecalendarurl']; ?>'
+	            	}
+	            ]
+		    	<?php
+		    }*/
+
+		    if(!empty($conf->global->FULLCALENDAR_DURATION_SLOT)) {
+
+				echo ',slotDuration:"'.$conf->global->FULLCALENDAR_DURATION_SLOT.'"';
+
+		    }
+
+
+			?>
+
+	        ,lang: 'fr'
+	        ,weekNumbers:true
+			,defaultView:'month'
+			,eventSources : [currentsource]
+			,eventLimit : <?php echo !empty($conf->global->AGENDA_MAX_EVENTS_DAY_VIEW) ? $conf->global->AGENDA_MAX_EVENTS_DAY_VIEW : 3; ?>
+			,dayRender:function(date, cell) {
+
+				if(date.format('YYYYMMDD') == moment().format('YYYYMMDD')) {
+					cell.css('background-color', '#ddddff');
+				}
+				else if(date.format('E') >=6) {
+					cell.css('background-color', '#999');
+				}
+				else {
+					cell.css('background-color', '#fff');
+				}
+			}
+			<?php
+				if(!empty($conf->global->FULLCALENDAR_HIDE_DAYS)) {
+
+					?>
+					,hiddenDays: [ <?php echo $conf->global->FULLCALENDAR_HIDE_DAYS ?> ]
+					<?php
+
+				}
+			?>
+			,eventAfterRender:function( event, element, view ) {
+				console.log(element);
+				if(event.colors!=""){
+					console.log(event.id,event.colors);
+					element.css({
+						"background-color":""
+						,"border":""
+						,"background":event.colors
+
+					});
+
+				}
+
+
+				if(event.isDarkColor == 1) {
+					element.css({ color : "#fff" });
+
+					element.find('a').css({
+						color:"#fff"
+					});
+				}
+
+			}
+			,eventRender:function( event, element, view ) {
+
+				var note = "";
+				<?php
+
+				if($conf->global->FULLCALENDAR_USE_HUGE_WHITE_BORDER) {
+					echo 'element.css({
+						"border":""
+						,"border-radius":"0"
+						,"border":"1px solid #fff"
+						,"border-left":"2px solid #fff"
+					});';
+
+				}
+
+				?>
+				if(event.note) note+=event.note;
+
+				if(event.fk_soc>0){
+					 element.append('<div>'+event.societe+'</div>');
+					 note += '<div>'+event.societe+'</div>';
+				}
+				if(event.fk_contact>0){
+					 element.append('<div>'+event.contact+'</div>');
+					 note += '<div>'+event.contact+'</div>';
+				}
+				<?php
+				if(!empty($conf->global->FULLCALENDAR_SHOW_AFFECTED_USER)) {
+
+					?>
+					if(event.fk_user>0){
+						 element.append('<div>'+event.user+'</div>');
+						 note += '<div>'+event.user+'</div>';
+					}
+					<?php
+
+				}
+
+				if(!empty($conf->global->FULLCALENDAR_SHOW_PROJECT)) {
+
+					?>
+					if(event.fk_project>0){
+						 element.append('<div>'+event.project+'</div>');
+						 note = '<div>'+event.project+'</div>'+note;
+					}
+					<?php
+				}
+
+				?>
+				if(event.more)  {
+					 element.append('<div>'+event.more+'</div>');
+					 note = note+'<div>'+event.more+'</div>';
+				}
+
+				element.prepend('<div style="float:right;">'+event.statut+'</div>');
+
+				element.tipTip({
+					maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50
+					,content : '<strong>'+event.title+'</strong><br />'+ note
+				});
+
+				element.find(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+				element.find(".classforcustomtooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 5000});
+
+			 }
+			,loading(isLoading, view) {
+
+				if(!isLoading && defaultView != 'month') {
+					$('#fullcalendar').fullCalendar( 'changeView', defaultView ); // sinon problème de positionnement
+				}
+
+				if(defaultView == 'month') {
+					$('#fullcalendar').fullCalendar( 'option', 'height', 'auto');
+
+				}
+
+			}
+	       
+
+	    });   
+       
+       
+   
+</script>    
+<?php
 
 	llxFooter();
 
