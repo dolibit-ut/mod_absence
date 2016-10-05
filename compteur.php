@@ -197,9 +197,9 @@ function _listeAdmin(&$PDOdb, &$compteur) {
 	
 	$fk_group = GETPOST('fk_group');
 	
-	$sql="SELECT  DISTINCT r.rowid as 'ID', login, firstname, lastname, ";
-	if($conf->multicompany->enabled) $sql.= " IF(c.entity=0,'Toutes',e.label) as 'Entité', ";
-	$sql .=	" '' as 'Compteur',
+	$sql="SELECT  DISTINCT r.rowid as 'ID', login, firstname, lastname ";
+	if($conf->multicompany->enabled) $sql.= " ,IF(c.entity=0,'Toutes',e.label) as 'Entité' ";
+	$sql .=	", '' as 'Compteur',
 		r.date_cre as 'DateCre', CAST(r.acquisExerciceN as DECIMAL(16,1)) as 'Congés acquis N', 
 		CAST(r.acquisAncienneteN as DECIMAL(16,1)) as 'Congés Ancienneté', 
 		CAST(r.acquisExerciceNM1 as DECIMAL(16,1)) as 'Conges Acquis N-1', 

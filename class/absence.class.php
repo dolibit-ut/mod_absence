@@ -140,8 +140,14 @@ class TRH_Compteur extends TObjetStd {
 
 		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
 		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
-
+		$this->congePrecTotal=$this->acquisExerciceNM1 +$this->acquisAncienneteNM1+$this->acquisHorsPeriodeNM1+$this->reportCongesNM1;
+		$this->congePrecReste=$this->congePrecTotal-$this->congesPrisNM1;
+		
 		parent::save($db);
+		
+		$this->updateDolibarr(4, $this->rttCumuleTotal + $this->rttNonCumuleTotal);
+		$this->updateDolibarr(5, $this->congePrecReste);
+		
 		TRH_CompteurLog::log($db, $this->getId(), 'compteur', $this->acquisExerciceN, 'sauvegarde compteur ');
 	}
 
@@ -197,9 +203,15 @@ class TRH_Compteur extends TObjetStd {
 
 	//	fonction permettant le chargement du compteur pour un utilisateur si celui-ci existe
 	function load_by_fkuser(&$PDOdb, $fk_user){
-
+		global $conf;
+		
 		$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_compteur
 		WHERE fk_user=".(int)$fk_user;
+
+
+		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode) && !empty($conf->global->RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE)) {
+			$sql.=" AND entity = ".$conf->entity;	
+		}
 
 		$PDOdb->Execute($sql);
 		if ($obj = $PDOdb->Get_line()) {
@@ -281,7 +293,24 @@ class TRH_Compteur extends TObjetStd {
 		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
 		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
 
+		$this->congePrecTotal=$this->acquisExerciceNM1 +$this->acquisAncienneteNM1+$this->acquisHorsPeriodeNM1+$this->reportCongesNM1;
+		$this->congePrecReste=$this->congePrecTotal-$this->congesPrisNM1;
+		
 		return $res;
+	}
+
+	private function updateDolibarr($type, $value) {
+		global $conf,$db,$langs,$user;
+		
+		dol_include_once('/holiday/class/holiday.class.php');
+		
+		if(class_exists('Holiday')) {
+			$holiday = new Holiday($db);
+			//TODO log et configuration type
+			if(method_exists($holiday, 'updateSoldeCP')) $holiday->updateSoldeCP($this->fk_user, $value, $type);
+			
+		}
+		
 	}
 
 	function add(&$PDOdb, $type, $duree, $motif) {
@@ -291,7 +320,7 @@ class TRH_Compteur extends TObjetStd {
 			$this->rttCumuleTotal -= $duree;
 
 			$this->save($PDOdb);
-
+			
 			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
 
 		}
