@@ -201,8 +201,10 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 			$timeDebut = strtotime($row->date_debut);
 			$timeFin = strtotime($row->date_fin)+86399; // par défaut 23:59:59
 			
-			if($row->ddMoment=='apresmidi')$timeDebut += (3600 * 12) ; //+12h
-			if($row->dfMoment=='matin')$timeFin -= (3600 * 12) ; //-12h
+			$allDay = 1;
+			
+			if($row->ddMoment=='apresmidi'){$timeDebut += (3600 * 12) ; $allDay = 0; }//+12h
+			if($row->dfMoment=='matin'){$timeFin -= (3600 * 12) ;  $allDay = 0; }//-12h
 	
 
 					
@@ -231,7 +233,7 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 			$TEvent[]=array(
 				'id'=>$row->rowid
 				,'title'=>$label
-				,'allDay'=>0
+				,'allDay'=>$allDay
 				,'start'=>(empty($timeDebut) ? '' : date('Y-m-d H:i:s',(int)$timeDebut))
 				,'end'=>(empty($timeFin) ? '' : date('Y-m-d H:i:s',(int)$timeFin))
 				,'url'=>$url
