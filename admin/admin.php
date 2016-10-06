@@ -179,6 +179,7 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '<td>';
 		print $doliform->selectarray('TConst[RH_EXPORT_ABSENCE_DECOUPE_USED_MAPPING]', array(''=>'', 'CPRO'=>"Kiwi", 'VALRIM'=>'Banane'), $conf->global->RH_EXPORT_ABSENCE_DECOUPE_USED_MAPPING);
+		print $form->texte('', 'TConst[RH_EXPORT_ABSENCE_DECOUPE_USED_NUM_DOSSIER]', $conf->global->RH_EXPORT_ABSENCE_DECOUPE_USED_NUM_DOSSIER,6,255);
 		print '</td>';
 		print '</tr>';
 		
