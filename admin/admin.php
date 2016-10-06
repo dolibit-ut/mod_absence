@@ -93,6 +93,7 @@ function showParameters(&$form, &$doliform) {
 			,'RH_CODEPRODUIT_TICKET_RESTO'
 			,'RH_CODECLIENT_TICKET_RESTO'
 			,'TIMESHEET_WORKING_HOUR_PER_DAY'
+			,'RH_USER_MAIL_OVERWRITE'
 	);
 	
 	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="load-<?php echo $typeDoc ?>" method="POST" enctype="multipart/form-data">
