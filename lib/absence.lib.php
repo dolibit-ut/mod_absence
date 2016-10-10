@@ -805,10 +805,10 @@ function _getSQLListValidation($userid) {
 				
 				$sql.= ", a.avertissement, ta.typeAbsence,'' as 'action'
 				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
-					INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
-					INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
-					INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=a.fk_user)
-					INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)
+				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
+				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
+				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
+				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)
 				";
 			
 				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
@@ -843,10 +843,10 @@ function _getSQLListValidation($userid) {
 				
 				$sql.= ", a.duree, ta.typeAbsence,'' as 'action'
 				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
-					INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
-					INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
-					INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=a.fk_user)
-					INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)";
+				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
+				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
+				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
+				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)";
 			
 				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
 							
@@ -904,22 +904,22 @@ function _getSQLListValidation($userid) {
 	}
 	else if($user->rights->absence->myactions->voirToutesAbsencesListe) {
 			 $sql=" SELECT DISTINCT a.fk_user,
-                                a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
-                                ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-                                a.etat";
-										
-								if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+                    a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
+                    ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
+                    a.etat";
+							
+					if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+					
+					$sql.= ", a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
+                    FROM ".MAIN_DB_PREFIX."rh_absence as a
+                	INNER JOIN ".MAIN_DB_PREFIX."user as s ON (a.fk_user = s.rowid)
+                	INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON ( ta.typeAbsence=a.type ) ";
+
+					if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
 								
-								$sql.= ", a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
-                                FROM ".MAIN_DB_PREFIX."rh_absence as a
-                                	INNER JOIN ".MAIN_DB_PREFIX."user as s ON (a.fk_user = s.rowid)
-                                	INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON ( ta.typeAbsence=a.type ) ";
-			
-								if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
-											
-								$sql.= "
-                                WHERE 1
-                                AND a.etat LIKE 'AValider'";
+					$sql.= "
+                    WHERE 1
+                    AND a.etat LIKE 'AValider'";
 
 		return $sql;
 	}
