@@ -1,12 +1,12 @@
 <?php
 
-	if(is_file('../main.inc.php'))$dir = '../';
-	else if(is_file( '../../main.inc.php')) $dir = '../../';
-	else  if(is_file('../../../main.inc.php'))$dir = '../../../';
-	else  if(is_file('../../../../main.inc.php'))$dir = '../../../../';
-	else  if(is_file('../../../../../main.inc.php'))$dir = '../../../../../';
+	if(is_file(__DIR__.'/../main.inc.php'))$dir = '../';
+	else if(is_file( __DIR__.'/../../main.inc.php')) $dir = '../../';
+	else  if(is_file(__DIR__.'/../../../main.inc.php'))$dir = '../../../';
+	else  if(is_file(__DIR__.'/../../../../main.inc.php'))$dir = '../../../../';
+	else  if(is_file(__DIR__.'/../../../../../main.inc.php'))$dir = '../../../../../';
 	else {
-		exit('Impossible to find main.inc');
+		exit('Absence Impossible to find main.inc '.__DIR__);
 	}
 	if(!defined('INC_FROM_DOLIBARR') && defined('INC_FROM_CRON_SCRIPT')) {
 		include($dir."master.inc.php");
