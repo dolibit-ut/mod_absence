@@ -142,12 +142,12 @@ class TRH_Compteur extends TObjetStd {
 		$this->rttNonCumuleTotal=$this->rttNonCumuleAcquis+$this->rttNonCumuleReportNM1-$this->rttNonCumulePris;
 		$this->congePrecTotal=$this->acquisExerciceNM1 +$this->acquisAncienneteNM1+$this->acquisHorsPeriodeNM1+$this->reportCongesNM1;
 		$this->congePrecReste=$this->congePrecTotal-$this->congesPrisNM1;
-		
+
 		parent::save($db);
-		
+
 		$this->updateDolibarr(4, $this->rttCumuleTotal + $this->rttNonCumuleTotal);
 		$this->updateDolibarr(5, $this->congePrecReste);
-		
+
 		TRH_CompteurLog::log($db, $this->getId(), 'compteur', $this->acquisExerciceN, 'sauvegarde compteur ');
 	}
 
@@ -204,13 +204,13 @@ class TRH_Compteur extends TObjetStd {
 	//	fonction permettant le chargement du compteur pour un utilisateur si celui-ci existe
 	function load_by_fkuser(&$PDOdb, $fk_user){
 		global $conf;
-		
+
 		$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_compteur
 		WHERE fk_user=".(int)$fk_user;
 
 
 		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode) && !empty($conf->global->RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE)) {
-			$sql.=" AND entity = ".$conf->entity;	
+			$sql.=" AND entity = ".$conf->entity;
 		}
 
 		$PDOdb->Execute($sql);
@@ -295,22 +295,22 @@ class TRH_Compteur extends TObjetStd {
 
 		$this->congePrecTotal=$this->acquisExerciceNM1 +$this->acquisAncienneteNM1+$this->acquisHorsPeriodeNM1+$this->reportCongesNM1;
 		$this->congePrecReste=$this->congePrecTotal-$this->congesPrisNM1;
-		
+
 		return $res;
 	}
 
 	private function updateDolibarr($type, $value) {
 		global $conf,$db,$langs,$user;
-		
+
 		dol_include_once('/holiday/class/holiday.class.php');
-		
+
 		if(class_exists('Holiday')) {
 			$holiday = new Holiday($db);
 			//TODO log et configuration type
 			if(method_exists($holiday, 'updateSoldeCP')) $holiday->updateSoldeCP($this->fk_user, $value, $type);
-			
+
 		}
-		
+
 	}
 
 	function add(&$PDOdb, $type, $duree, $motif) {
@@ -320,7 +320,7 @@ class TRH_Compteur extends TObjetStd {
 			$this->rttCumuleTotal -= $duree;
 
 			$this->save($PDOdb);
-			
+
 			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
 
 		}
@@ -357,8 +357,8 @@ class TRH_Compteur extends TObjetStd {
 
 	function getNomUrl($picto=  1) {
 		global $langs;
-		
-		$url = '<a href="'.dol_buildpath('/absence/compteur.php?id='.$this->getId().'&action=view',1).'">'.( $picto ?img_picto('', 'compteur.png@absence'). ' ' : '' ).$langs->trans('Counter').'</a>'; 
+
+		$url = '<a href="'.dol_buildpath('/absence/compteur.php?id='.$this->getId().'&action=view',1).'">'.( $picto ?img_picto('', 'compteur.png@absence'). ' ' : '' ).$langs->trans('Counter').'</a>';
 		return $url;
 	}
 
@@ -651,7 +651,7 @@ class TRH_Absence extends TObjetStd {
 	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
 		global $db, $langs,$user,$conf;
 
-		if($this->etat=='Validee') return false;		
+		if($this->etat=='Validee') return false;
 
 		$this->etat='Validee';
 		$this->libelleEtat = $langs->trans('Accepted');
@@ -662,7 +662,7 @@ class TRH_Absence extends TObjetStd {
 		// Appel des triggers
 		dol_include_once('/core/class/interfaces.class.php');
 		$interface = new Interfaces($db);
-		
+
 		$result = $interface->run_triggers('ABSENCE_BEFOREVALIDATE',$this,$user,$langs,$conf);
 
 		if ($result < 0) {
@@ -935,7 +935,7 @@ class TRH_Absence extends TObjetStd {
 	}
 
 	function getNbJourPresence(&$PDOdb) {
-		
+
 		global $langs;
 
 		$TJourSemaine = array('dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi');
@@ -957,29 +957,29 @@ class TRH_Absence extends TObjetStd {
 		while($t_current<=$t_end) {
 				$dureeJour=0;
 				$estTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $this->fk_user, date('Y-m-d',$t_current));
-		
+
                 if( ($t_current==$t_start && $this->ddMoment=='matin') || $t_current>$t_start  ) {
                     // si l'absence démarre aujorud'hui et qu'elle commence le matin ou bien qu'elle a déjà commencée, je test le matin
 
                     if(isset($TJourFerie[ date('Y-m-d', $t_current) ]['am']) || $estTravaille=='NON' || $estTravaille=='PM'  ) {
                             $dureeJour+=.5;
-                         
+
                     }
                 }
 
                 if(($t_current==$t_end && $this->dfMoment=='apresmidi') || $t_current<$t_end  ) {
                 // si l'absence se termine aujourd'hui et cet après midi ou bien que l'absence se termine dans le futur, alors je test l'après-midi
 
-                   
+
                     if(isset($TJourFerie[ date('Y-m-d', $t_current) ]['pm']) || $estTravaille=='NON' || $estTravaille=='AM'  ) {
                             $dureeJour+=.5;
-                           
+
                     }
 
                 }
 
             $duree+=$dureeJour;
-			
+
 			//$this->TDureePresenceUser[date('Y', $t_current)][date('m', $t_current)] += $dureeJour;
 
 			$t_current = strtotime('+1day',$t_current);
@@ -988,14 +988,14 @@ class TRH_Absence extends TObjetStd {
 		$this->dureePresence = $duree; // Attention, je rajoute ça ici car semble normal, vérif pas effets de bord
 
 		return $duree;
-		
+
 	}
 
 	function calculDureePresence(&$PDOdb) {
 		//TODO delete
 		// Cette fonction est une blague de MP bien moisie
-		
-		
+
+
 		$typeAbs = new TRH_TypeAbsence;
 		$typeAbs->load_by_type($PDOdb, $this->type);
 
@@ -2084,15 +2084,15 @@ class TRH_Absence extends TObjetStd {
 
 			return $sql;
 	}
-	
-	function load(&$PDOdb, $id) {
-		
+
+	function load(&$PDOdb, $id, $loadChild = true) {
+
 		$res = parent::load($PDOdb, $id);
-		
+
 		$this->typeAbsence = new TRH_TypeAbsence;
 		$this->typeAbsence->load_by_type($PDOdb, $this->type);
 		$this->isPresence = $this->typeAbsence->isPresence;
-		
+
 		return $res;
 	}
 
@@ -2108,11 +2108,11 @@ class TRH_Absence extends TObjetStd {
 		}
 		return false;
 	}
-	
+
 	function getICS() {
-		
+
 		global $langs,$db,$conf;
-		
+
 		if($this->ddMoment=='apresmidi')	{
 			$date_debut = strtotime( date('Y-m-d 12:00:00', $this->date_debut) );
 		}
@@ -2126,10 +2126,10 @@ class TRH_Absence extends TObjetStd {
 		else {
 			$date_fin = strtotime( date('Y-m-d 23:59:59', $this->date_fin) );
 		}
-			
+
 		$u=new User($db);
 		$u->fetch($this->fk_user);
-		
+
 		$uid = $this->getId(). md5($this.time()).rand(0,1000). '@mondynamicrh.fr';
 /*
 BEGIN:VCALENDAR
@@ -2143,8 +2143,8 @@ DTSTART:19970714T170000Z
 DTEND:19970715T035959Z
 SUMMARY:Bastille Day Party
 END:VEVENT
-END:VCALENDAR 
-*/		
+END:VCALENDAR
+*/
 		$Tab=array();
 		$Tab[]='BEGIN:VCALENDAR';
 		$Tab[]='PRODID:-//ATM Consulting//DynamicRH//FR';
@@ -2167,17 +2167,17 @@ END:VCALENDAR
 		$Tab[]='TRANSP:OPAQUE';
 		$Tab[]='END:VEVENT';
 		$Tab[]='END:VCALENDAR';
-	
-		return implode("\r\n",$Tab);	
+
+		return implode("\r\n",$Tab);
 	}
 	function getNomUrl($picto=1, $fulltext = false) {
 		global $langs;
-		
+
 		$url = '<a href="'.dol_buildpath('/absence/absence.php?id='.$this->getId().'&action=view',1).'">'
 			.( $picto ?img_picto('', 'absenceicon.png@absence'). ' ' : '' )
 			.($fulltext ? $this->__toString() : $this->libelle)
 			.'</a>';
-			 
+
 		return $url;
 	}
 	function __toString() {
@@ -2201,7 +2201,7 @@ END:VCALENDAR
 		}
 
 		return $this->libelle.'( '.dol_print_date($date_debut).' '.$ddMoment.' '.$langs->transnoentities('AbsenceTo').' '.dol_print_date($date_fin).' '.$dfMoment.' ) ';
-		
+
 	}
 
 	//fonction qui renvoie 1 si une absence existe déjà pendant la date que l'on veut ajouter, 0 sinon
