@@ -126,6 +126,12 @@
 
 	$defaultDay = date('d');
 ?>
+<style style="text/css">
+a.fc-day-grid-event,a.fc-time-grid-event  {
+	color:#000;
+	font-weight:normal;
+}
+</style>
 <script type="text/javascript">
 
 var year = '<?php echo date('Y') ?>';
