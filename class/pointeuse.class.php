@@ -58,8 +58,26 @@ class TRH_Pointeuse extends TObjetStd {
 				$type=new TRH_TypeAbsence;
 				$type->load_by_type($ATMdb, $row->type);
 				if($type->isPresence) {
+					dol_include_once('/core/lib/date.lib.php');
+			
+					list($h1, $m1) = explode(':', date('H:i', strtotime( $row->date_hourStart)));
+					list($h2, $m2) = explode(':', date('H:i',strtotime( $row->date_hourEnd)));
+					list($h3, $m3) = explode(':', date('H:i',strtotime( $row->date_lunchBreak)));
 					
-					$ttr = strtotime($row->date_hourEnd) - strtotime($row->date_hourStart);
+					$time1 = convertTime2Seconds($h1, $m1);
+					$time2 = convertTime2Seconds($h2, $m2);
+					$time3 = convertTime2Seconds($h3, $m3);
+					
+					$time_total = $time2 - $time1 - $time3;
+					
+					if($time_total>0) {
+						$ttr = $time_total;
+						
+					}
+					else{
+						$ttr = strtotime($row->date_hourEnd) - strtotime($row->date_hourStart);	
+					}
+					
 					
 				}
 				
