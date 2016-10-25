@@ -295,7 +295,7 @@ $('#fullcalendar').fullCalendar({
 				element.find(".classforcustomtooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 5000});
 
 			 }
-			,loading(isLoading, view) {
+			,loading:function(isLoading, view) {
 
 				if(!isLoading && defaultView != 'month') {
 					$('#fullcalendar').fullCalendar( 'changeView', defaultView ); // sinon problème de positionnement
