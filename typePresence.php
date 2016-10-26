@@ -68,6 +68,7 @@
 			
 			,'hourStart'=>$form->timepicker('', 'TTypeAbsence['.$absenceType->getId().'][date_hourStart]', $absenceType->get_date('date_hourStart','H:i') , 5,10)
 			,'hourEnd'=>$form->timepicker('', 'TTypeAbsence['.$absenceType->getId().'][date_hourEnd]', $absenceType->get_date('date_hourEnd','H:i'), 5,10)
+			,'lunchBreak'=>$form->timepicker('', 'TTypeAbsence['.$absenceType->getId().'][date_lunchBreak]',  $absenceType->get_date('date_lunchBreak','H:i'), 5,10)
 			
 			,'colorId'=>$form->combo('', 'TTypeAbsence['.$absenceType->getId().'][colorId]', $absenceTypeDummy->TColorId , $absenceType->colorId)
 			
@@ -86,6 +87,7 @@
 			,'unite'=>$form->combo('', 'TTypeAbsenceNew[unite]', $absenceTypeDummy->TUnite , null)
 			,'hourStart'=>$form->timepicker('', 'TTypeAbsenceNew[date_hourStart]', '8:00', 5,10)
 			,'hourEnd'=>$form->timepicker('', 'TTypeAbsenceNew[date_hourEnd]', '18:00', 5,10)
+			,'lunchBreak'=>$form->timepicker('', 'TTypeAbsenceNew[date_lunchBreak]', '2:00', 5,10)
 			,'decompteNormal'=>$form->hidden('TTypeAbsenceNew[decompteNormal]', 'oui')
 			,'isPresence'=>$form->hidden('TTypeAbsenceNew[isPresence]', 1)
 			,'admin'=>$form->combo('', 'TTypeAbsenceNew[admin]', $absenceTypeDummy->TForAdmin , null)
@@ -112,6 +114,7 @@
 				'Unit' => $langs->trans('Unit'),
 				'StartHour' => $langs->trans('StartHour'),
 				'EndHour' => $langs->trans('EndHour'),
+				'lunchBreak' => $langs->trans('lunchBreak'),
 				'AccountingOfficerCode' => $langs->trans('AccountingOfficerCode'),
 				'ColorCode' => $langs->trans('ColorCode'),
 				'AskReservedAdmin' => $langs->transnoentities('AskReservedAdmin'),

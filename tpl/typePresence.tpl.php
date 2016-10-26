@@ -10,6 +10,7 @@
 				<th>[translate.Unit;strconv=no]</th>
 				<th>[translate.StartHour;strconv=no]</th>
 				<th>[translate.EndHour;strconv=no]</th>
+				<th>[translate.lunchBreak;strconv=no]</th>
 				
 				<th>[translate.AccountingOfficerCode]</th>
 				<th>[translate.ColorCode]</th>
@@ -25,6 +26,7 @@
 				<td>[typeAbsence.unite; strconv=no]</td>
 				<td>[typeAbsence.hourStart; strconv=no]</td>
 				<td>[typeAbsence.hourEnd; strconv=no]</td>
+				<td>[typeAbsence.lunchBreak; strconv=no]</td>
 				<td>[typeAbsence.codeAbsence; strconv=no]</td>
 				<td>[typeAbsence.colorId; strconv=no]</td>
 			
@@ -40,6 +42,7 @@
 				<td>[typeAbsenceNew.unite; strconv=no]</td>
 				<td>[typeAbsenceNew.hourStart; strconv=no]</td>
 				<td>[typeAbsenceNew.hourEnd; strconv=no]</td>
+				<td>[typeAbsenceNew.lunchBreak; strconv=no]</td>
 				<td>[typeAbsenceNew.codeAbsence; strconv=no]</td>
 				<td>[typeAbsenceNew.colorId; strconv=no]</td>
 				<td>[typeAbsenceNew.admin; strconv=no][typeAbsenceNew.decompteNormal; strconv=no][typeAbsenceNew.isPresence; strconv=no]</td>

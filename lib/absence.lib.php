@@ -14,16 +14,29 @@ function absencePrepareHead(&$obj, $type='absence') {
 	
 	switch ($type) {
 		case 'absence':
-			return array(
-				array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
-				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
-			);
+			
+			if($obj->getId()>0) {
+				return array(
+					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
+					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
+				);
+				
+			}
+			else{
+				return array();
+			}
+			
 			break;
 		case 'presence':
+			if($obj->getId()>0) {
 			return array(
 				array(dol_buildpath('/absence/presence.php?id='.$obj->getId()."&action=view",1), $langs->trans('Card'),'fiche')
 				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
 			);
+			}
+			else{
+				return array();
+			}
 			break;
 		case 'absenceCreation':
 			return array(
