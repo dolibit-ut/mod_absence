@@ -20,8 +20,16 @@ class TRH_Pointeuse extends TObjetStd {
 		
 		
 	}
-	function loadByDate(&$ATMdb, $date) {
-		return $this->loadBy($ATMdb, $date, 'date_jour');
+	function loadByDate(&$ATMdb, $date, $fk_user = 0) {
+//		return $this->loadBy($ATMdb, $date, 'date_jour');
+
+		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE date_jour=".$date;
+		if($fk_user>0) $sql.=" AND fk_user=".(int)$fk_user;
+		$ATMdb->Execute($sql);
+		if($obj  = $ATMdb->Get_line()) {
+			return $this->load($ATMdb, $obj->rowid);
+		}
+
 	}
 	
 	function save(&$ATMdb) {
@@ -56,7 +64,7 @@ class TRH_Pointeuse extends TObjetStd {
 		if($defaultTR)$ttr = $defaultTR;
 		
 		$pointeuse=new TRH_Pointeuse;
-		if($pointeuse->loadByDate($ATMdb, $date)) {
+		if($pointeuse->loadByDate($ATMdb, $date, $fk_user)) {
 			$pointeuse->get_time_presence();
 			$ttr = $pointeuse->time_presence;
 		}
