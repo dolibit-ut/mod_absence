@@ -136,8 +136,9 @@ function _liste(&$ATMdb, &$pointeuse) {
 			,time_presence as 'Temps de présence'
 			,date_jour
 			FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE 1 ";
-			
-	$sql.=" AND fk_user=".$user->id; // TODO mode admin
+	
+	if($user->admin) null;		
+	else $sql.=" AND fk_user=".$user->id; // TODO mode admin
 	
 	
 	$TOrder = array('date_jour'=>'DESC');
