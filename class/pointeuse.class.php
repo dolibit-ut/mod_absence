@@ -29,12 +29,25 @@ class TRH_Pointeuse extends TObjetStd {
 		parent::save($ATMdb);
 	}
 	function get_time_presence() {
+			
+		$this->uniformdate();	
+		
 		if($this->date_fin_am==0 || $this->date_deb_pm==0) {
 			$this->time_presence = $this->date_fin_pm - $this->date_deb_am;
 		}
 		else {
 			$this->time_presence = ($this->date_fin_am - $this->date_deb_am) + ( $this->date_fin_pm - $this->date_deb_pm );
 		}	
+	}
+	
+	private function uniformdate() {
+			
+		$Tab=array('date_deb_am','date_fin_am','date_deb_pm','date_fin_pm');	
+			
+		foreach($Tab as $f) {
+			if(!empty($this->{$f})) $this->{$f} = strtotime( date('Y-m-d', $this->date_jour).' '.date('H:i:s', $this->{$f}) );
+		}
+		
 	}
 	
 	static function tempsTravailReelDuJour(&$ATMdb, $fk_user, $date, $defaultTR=0) {
