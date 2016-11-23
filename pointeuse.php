@@ -19,7 +19,7 @@
 				break;	
 
 			case 'imcomming':
-				$pointeuse->loadByDate($ATMdb, date('Y-m-d'));
+				$pointeuse->loadByDate($ATMdb, date('Y-m-d'), $user->id);
 				
 				$pointeuse->set_date('date_jour', date('d/m/Y'));					
 				
@@ -47,7 +47,7 @@
 
 
 			case 'imleaving':
-				$pointeuse->loadByDate($ATMdb, date('Y-m-d'));
+				$pointeuse->loadByDate($ATMdb, date('Y-m-d'), $user->id);
 
 				$planing = new TRH_EmploiTemps;
 				$planing->loadByuser($ATMdb, $user->id);
