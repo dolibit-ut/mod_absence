@@ -23,10 +23,11 @@ class TRH_Pointeuse extends TObjetStd {
 	function loadByDate(&$ATMdb, $date, $fk_user = 0) {
 //		return $this->loadBy($ATMdb, $date, 'date_jour');
 
-		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE date_jour=".$date;
+		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE date_jour LIKE '".$date."%'";
 		if($fk_user>0) $sql.=" AND fk_user=".(int)$fk_user;
 		$ATMdb->Execute($sql);
-		if($obj  = $ATMdb->Get_line()) {
+		
+		if($obj = $ATMdb->Get_line()) {
 			return $this->load($ATMdb, $obj->rowid);
 		}
 
@@ -46,6 +47,9 @@ class TRH_Pointeuse extends TObjetStd {
 		else {
 			$this->time_presence = ($this->date_fin_am - $this->date_deb_am) + ( $this->date_fin_pm - $this->date_deb_pm );
 		}	
+		
+		if($this->time_presence<0 || $this->time_presence>86400) $this->time_presence = 0;
+		
 	}
 	
 	private function uniformdate() {
