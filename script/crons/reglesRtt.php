@@ -38,6 +38,8 @@
 			$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $ATMdb->Get_field('rttAcquisAnnuelNonCumuleInit');
 			$Tab[$ATMdb->Get_field('fk_user')]['fk_user'] = $ATMdb->Get_field('fk_user');
 	}
+	
+	$mars=date("dm");
 
 	foreach($Tab as $TabRtt )
 	{
@@ -47,7 +49,8 @@
 		
 		
 		$dateMD=date("dm",$date);
-
+		
+		
 		//on reporte les RTT pour ceux pour qui c'est autorisé
 		if($mars==$dateMD){
 			//on remet à 5 et à 7 des rtt cumules/noncumules les compteurs par exemple, dépend de ce qui est entré sur le compteur
@@ -60,7 +63,7 @@
 		
 		//COMPTEUR MENSUEL
 		////// 1er mars, tous les rtt de l'année N sont remis à 0 pour ceux qui les accumulent par mois, sauf si reportRtt=1
-		$mars=date("dm");
+		
 		if($mars==$dateMD){
 			//on remet à 0 les compteurs
 			$sqlRaz="UPDATE ".MAIN_DB_PREFIX."rh_compteur 
