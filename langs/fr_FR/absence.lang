@@ -522,3 +522,5 @@ AbsenceCopy=Copie
 absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
 recupRulesDeclare=Sur déclaration du temps de travail
 recupRulesAuto=Sur déclaration d'une présence sur un temps non travaillé
+RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE=AJouter un compteur par entité en mode transverse
+lunchBreak=Pause de midi

@@ -30,7 +30,7 @@
 						
 						$typeAbs = new TRH_TypeAbsence;
 						$typeAbs->load_by_type($ATMdb, $absence->type);
-						
+						$absence->isPresence = 1;
 						//if ($typeAbs->isPresence) {
 							//$absence->duree = $absence->calculDureePresence($ATMdb);
 						//} else {
@@ -246,7 +246,7 @@ function _liste(&$ATMdb, &$absence) {
 		,'orderBy'=>$TOrder
 		
 	));
-	?><a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a><div style="clear:both"></div><?php
+	?><a class="butAction" href="?id=<?php echo $absence->getId(); ?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a><div style="clear:both"></div><?php
 	$form->end();
 	
 	
@@ -334,7 +334,7 @@ function _listeAdmin(&$ATMdb, &$absence) {
 		,'orderBy'=>$TOrder
 		
 	));
-	?><a class="butAction" href="?id=<?=$absence->getId()?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a><div style="clear:both"></div><?php
+	?><a class="butAction" href="?id=<?php echo $absence->getId(); ?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a><div style="clear:both"></div><?php
 	$form->end();
 	
 	
@@ -551,7 +551,7 @@ function _ficheCommentaire(&$ATMdb, &$absence, $mode) {
 	<textarea name="commentValid" rows="3" cols="40"></textarea><br><br>
 	<INPUT class="button" TYPE="submit"   id="commentaire" VALUE="<?php echo $langs->trans('Continue'); ?>">
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	
-	<INPUT class="button" TYPE="button" id="newAsk" VALUE="<?php echo $langs->trans('NewRequestOnSameUser'); ?>" onclick="document.location.href='presence.php?action=new&fk_user=<?=$absence->fk_user ?>'">	
+	<INPUT class="button" TYPE="button" id="newAsk" VALUE="<?php echo $langs->trans('NewRequestOnSameUser'); ?>" onclick="document.location.href='presence.php?action=new&fk_user=<?php echo $absence->fk_user; ?>'">	
 	<br><br>
 
 	<?php
@@ -666,7 +666,7 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 				,'date_debut'=> $form->calendrier('', 'date_debut', $absence->date_debut,12)
 				,'date_fin'=> $form->calendrier('', 'date_fin', $absence->date_fin, 12)
 				
-				,'hourStart'=>$form->timepicker('', 'date_hourStart', $absence->date_hourStart,5)
+				,'hourStart'=>$form->timepicker('', 'date_hourStart', $absence->date_hourStart,5).' - '.$langs->trans('lunchBreak').' : '.$form->timepicker('', 'date_lunchBreak', $absence->date_lunchBreak,5)
 				,'hourEnd'=>$form->timepicker('', 'date_hourEnd', $absence->date_hourEnd,5)
 				
 				,'idUser'=>$user->id
@@ -760,9 +760,9 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 		
 		$(document).ready(function() {
 		
-			$('#user-planning-dialog div.content').before( "<?=addslashes($popinExisteDeja) ?>" );
+			$('#user-planning-dialog div.content').before( "<?php echo addslashes($popinExisteDeja); ?>" );
 		
-			$('#user-planning-dialog div.content').load('planningUser.php?fk_user=<?=$existeDeja[2] ?>&date_debut=<?=__get('date_debut') ?>&date_fin=<?=__get('date_fin') ?> #plannings');
+			$('#user-planning-dialog div.content').load('planningUser.php?fk_user=<?php echo $existeDeja[2]; ?>&date_debut=<?php echo __get('date_debut'); ?>&date_fin=<?php echo __get('date_fin'); ?> #plannings');
 		
 			$('#user-planning-dialog').dialog({
 				title: "<?php echo $langs->trans('CreationError'); ?>"	

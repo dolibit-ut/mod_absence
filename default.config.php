@@ -1,12 +1,12 @@
 <?php
 
 	if(is_file('../main.inc.php'))$dir = '../';
-	else if(is_file( '../../main.inc.php')) $dir = '../../';
+	else  if(is_file('../../main.inc.php'))$dir = '../../';
 	else  if(is_file('../../../main.inc.php'))$dir = '../../../';
 	else  if(is_file('../../../../main.inc.php'))$dir = '../../../../';
 	else  if(is_file('../../../../../main.inc.php'))$dir = '../../../../../';
 	else {
-		exit('Impossible to find main.inc');
+		exit('Absence Impossible to find main.inc '.__DIR__);
 	}
 	if(!defined('INC_FROM_DOLIBARR') && defined('INC_FROM_CRON_SCRIPT')) {
 		include($dir."master.inc.php");
@@ -25,17 +25,17 @@
 		define('DB_PASS',$dolibarr_main_db_pass);
 		define('DB_DRIVER',$dolibarr_main_db_type);
 	}
-	
+
 	define('USE_CALENDAR', true);
 	dol_include_once('/abricot/inc.core.php');
-	
+
 	define('DOL_ADMIN_USER', __val($conf->global->RH_DOL_ADMIN_USER, 'admin') );
-	
+
 	define('USER_MAIL_SENDER', __val($conf->global->RH_USER_MAIL_SENDER,'webmaster@atm-consulting.fr'));
-	
+
 	define('DATE_RTT_CLOTURE', __val($conf->global->RH_DATE_RTT_CLOTURE,'28-02-2014'));
 	define('DATE_CONGES_CLOTURE', __val($conf->global->RH_DATE_CONGES_CLOTURE,'31-05-2014'));
-	
+
 	$TJourNonTravailleEntreprise= explode(',', __val($conf->global->RH_JOURS_NON_TRAVAILLE,'aucun'))  ;//array('samedi','dimanche');
 
 	$TTypeMetier=array(

@@ -14,16 +14,29 @@ function absencePrepareHead(&$obj, $type='absence') {
 	
 	switch ($type) {
 		case 'absence':
-			return array(
-				array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
-				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
-			);
+			
+			if($obj->getId()>0) {
+				return array(
+					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
+					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
+				);
+				
+			}
+			else{
+				return array();
+			}
+			
 			break;
 		case 'presence':
+			if($obj->getId()>0) {
 			return array(
 				array(dol_buildpath('/absence/presence.php?id='.$obj->getId()."&action=view",1), $langs->trans('Card'),'fiche')
 				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
 			);
+			}
+			else{
+				return array();
+			}
 			break;
 		case 'absenceCreation':
 			return array(
@@ -799,15 +812,23 @@ function _getSQLListValidation($userid) {
 		$sql=" SELECT DISTINCT u.fk_user, 
 				a.rowid as 'ID', a.date_cre  as 'DateCre',a.date_debut, a.date_fin, a.duree,
 			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.etat, a.avertissement, ta.typeAbsence,'' as 'action'
-				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v, ".MAIN_DB_PREFIX."usergroup_user as u, 
-				".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta 
+			 	a.etat";
+			
+				if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+				
+				$sql.= ", a.avertissement, ta.typeAbsence,'' as 'action'
+				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
+				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
+				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
+				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
+				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)
+				";
+			
+				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
+							
+				$sql.= "
 				WHERE v.fk_user=".$userid." 
-				AND v.fk_usergroup=u.fk_usergroup
-				AND u.fk_user=a.fk_user 
-				AND u.fk_user=s.rowid
 				AND a.etat LIKE 'AValider'
-				AND ta.typeAbsence=a.type
 				AND v.fk_usergroup=".$TabGroupe[0]['fk_usergroup'];
 				
 				if($TabGroupe[0]['level']==1){	//on teste le niveau de validation : si il est de niveau 1, il faut qu'il puisse voir le 2 et 3
@@ -829,14 +850,21 @@ function _getSQLListValidation($userid) {
 		$sql=" SELECT DISTINCT u.fk_user, 
 				a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin, 
 			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.etat, a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
-				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v, ".MAIN_DB_PREFIX."usergroup_user as u, 
-				".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta 
+			 	a.etat, a.avertissement";
+			
+				if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+				
+				$sql.= ", a.duree, ta.typeAbsence,'' as 'action'
+				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
+				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
+				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
+				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
+				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)";
+			
+				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
+							
+				$sql.= " 
 				WHERE v.fk_user=".$userid." 
-				AND v.fk_usergroup=u.fk_usergroup
-				AND u.fk_user=a.fk_user 
-				AND u.fk_user=s.rowid
-				AND ta.typeAbsence=a.type
 				AND a.etat LIKE 'AValider'";
  		
  		$j=0;
@@ -889,14 +917,22 @@ function _getSQLListValidation($userid) {
 	}
 	else if($user->rights->absence->myactions->voirToutesAbsencesListe) {
 			 $sql=" SELECT DISTINCT a.fk_user,
-                                a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
-                                ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-                                a.etat, a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
-                                FROM ".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as s,".MAIN_DB_PREFIX."rh_type_absence as ta
-                                WHERE 1
-                                AND a.fk_user=s.rowid
-                                AND ta.typeAbsence=a.type
-                                AND a.etat LIKE 'AValider'";
+                    a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
+                    ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
+                    a.etat";
+							
+					if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
+					
+					$sql.= ", a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
+                    FROM ".MAIN_DB_PREFIX."rh_absence as a
+                	INNER JOIN ".MAIN_DB_PREFIX."user as s ON (a.fk_user = s.rowid)
+                	INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON ( ta.typeAbsence=a.type ) ";
+
+					if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
+								
+					$sql.= "
+                    WHERE 1
+                    AND a.etat LIKE 'AValider'";
 
 		return $sql;
 	}
