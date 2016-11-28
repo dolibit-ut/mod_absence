@@ -93,6 +93,7 @@ function showParameters(&$form, &$doliform) {
 			,'RH_CODEPRODUIT_TICKET_RESTO'
 			,'RH_CODECLIENT_TICKET_RESTO'
 			,'TIMESHEET_WORKING_HOUR_PER_DAY'
+			,'RH_USER_MAIL_OVERWRITE'
 	);
 	
 	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="load-<?php echo $typeDoc ?>" method="POST" enctype="multipart/form-data">
@@ -158,6 +159,18 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '</tr>';
 		
+		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)) {
+			print '<tr>';
+			print '<td>';
+			print $langs->trans('RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE');
+			print '</td>';
+			print '<td>';
+			print ajax_constantonoff('RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE');
+			//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
+			print '</td>';
+			print '</tr>';
+		}
+		
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceExportDecoupeAbsenceMappingUsed')
@@ -166,6 +179,9 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '<td>';
 		print $doliform->selectarray('TConst[RH_EXPORT_ABSENCE_DECOUPE_USED_MAPPING]', array(''=>'', 'CPRO'=>"Kiwi", 'VALRIM'=>'Banane'), $conf->global->RH_EXPORT_ABSENCE_DECOUPE_USED_MAPPING);
+		if($conf->global->RH_EXPORT_ABSENCE_DECOUPE_USED_MAPPING === 'VALRIM') {
+			print $form->texte('', 'TConst[RH_EXPORT_ABSENCE_DECOUPE_USED_NUM_DOSSIER]', $conf->global->RH_EXPORT_ABSENCE_DECOUPE_USED_NUM_DOSSIER,6,255);
+		}
 		print '</td>';
 		print '</tr>';
 		

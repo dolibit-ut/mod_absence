@@ -1,0 +1,4 @@
+10      0       *       *       *       /home/client/[installDolibarr]/dolibarr/htdocs/custom/absence/script/crons/init-compteur.php
+0       1       *       *       *       /home/client/[installDolibarr]/dolibarr/htdocs/custom/absence/script/crons/reglesRtt.php
+0       1       *       *       *       /home/client/[installDolibarr]/dolibarr/htdocs/custom/absence/script/crons/reglesCongesMensuel.php
+20      1       *       *       *       /home/client/[installDolibarr]/dolibarr/htdocs/custom/absence/script/crons/reglesCongesFinCloture.php

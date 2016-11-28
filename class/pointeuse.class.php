@@ -20,8 +20,17 @@ class TRH_Pointeuse extends TObjetStd {
 		
 		
 	}
-	function loadByDate(&$ATMdb, $date) {
-		return $this->loadBy($ATMdb, $date, 'date_jour');
+	function loadByDate(&$ATMdb, $date, $fk_user = 0) {
+//		return $this->loadBy($ATMdb, $date, 'date_jour');
+
+		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE date_jour LIKE '".$date."%'";
+		if($fk_user>0) $sql.=" AND fk_user=".(int)$fk_user;
+		$ATMdb->Execute($sql);
+		
+		if($obj = $ATMdb->Get_line()) {
+			return $this->load($ATMdb, $obj->rowid);
+		}
+
 	}
 	
 	function save(&$ATMdb) {
@@ -29,12 +38,28 @@ class TRH_Pointeuse extends TObjetStd {
 		parent::save($ATMdb);
 	}
 	function get_time_presence() {
+			
+		$this->uniformdate();	
+		
 		if($this->date_fin_am==0 || $this->date_deb_pm==0) {
 			$this->time_presence = $this->date_fin_pm - $this->date_deb_am;
 		}
 		else {
 			$this->time_presence = ($this->date_fin_am - $this->date_deb_am) + ( $this->date_fin_pm - $this->date_deb_pm );
 		}	
+		
+		if($this->time_presence<0 || $this->time_presence>86400) $this->time_presence = 0;
+		
+	}
+	
+	private function uniformdate() {
+			
+		$Tab=array('date_deb_am','date_fin_am','date_deb_pm','date_fin_pm');	
+			
+		foreach($Tab as $f) {
+			if(!empty($this->{$f})) $this->{$f} = strtotime( date('Y-m-d', $this->date_jour).' '.date('H:i:s', $this->{$f}) );
+		}
+		
 	}
 	
 	static function tempsTravailReelDuJour(&$ATMdb, $fk_user, $date, $defaultTR=0) {
@@ -43,7 +68,7 @@ class TRH_Pointeuse extends TObjetStd {
 		if($defaultTR)$ttr = $defaultTR;
 		
 		$pointeuse=new TRH_Pointeuse;
-		if($pointeuse->loadByDate($ATMdb, $date)) {
+		if($pointeuse->loadByDate($ATMdb, $date, $fk_user)) {
 			$pointeuse->get_time_presence();
 			$ttr = $pointeuse->time_presence;
 		}
@@ -58,8 +83,26 @@ class TRH_Pointeuse extends TObjetStd {
 				$type=new TRH_TypeAbsence;
 				$type->load_by_type($ATMdb, $row->type);
 				if($type->isPresence) {
+					dol_include_once('/core/lib/date.lib.php');
+			
+					list($h1, $m1) = explode(':', date('H:i', strtotime( $row->date_hourStart)));
+					list($h2, $m2) = explode(':', date('H:i',strtotime( $row->date_hourEnd)));
+					list($h3, $m3) = explode(':', date('H:i',strtotime( $row->date_lunchBreak)));
 					
-					$ttr = strtotime($row->date_hourEnd) - strtotime($row->date_hourStart);
+					$time1 = convertTime2Seconds($h1, $m1);
+					$time2 = convertTime2Seconds($h2, $m2);
+					$time3 = convertTime2Seconds($h3, $m3);
+					
+					$time_total = $time2 - $time1 - $time3;
+					
+					if($time_total>0) {
+						$ttr = $time_total;
+						
+					}
+					else{
+						$ttr = strtotime($row->date_hourEnd) - strtotime($row->date_hourStart);	
+					}
+					
 					
 				}
 				

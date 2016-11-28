@@ -19,7 +19,7 @@
 				break;	
 
 			case 'imcomming':
-				$pointeuse->loadByDate($ATMdb, date('Y-m-d'));
+				$pointeuse->loadByDate($ATMdb, date('Y-m-d'), $user->id);
 				
 				$pointeuse->set_date('date_jour', date('d/m/Y'));					
 				
@@ -47,7 +47,7 @@
 
 
 			case 'imleaving':
-				$pointeuse->loadByDate($ATMdb, date('Y-m-d'));
+				$pointeuse->loadByDate($ATMdb, date('Y-m-d'), $user->id);
 
 				$planing = new TRH_EmploiTemps;
 				$planing->loadByuser($ATMdb, $user->id);
@@ -132,13 +132,16 @@ function _liste(&$ATMdb, &$pointeuse) {
 
 	$r = new TSSRenderControler($pointeuse);
 
-	$sql="SELECT rowid as 'Id', date_deb_am,date_fin_am,date_deb_pm,date_fin_pm
+	$sql="SELECT rowid as 'Id', fk_user, date_deb_am,date_fin_am,date_deb_pm,date_fin_pm
 			,time_presence as 'Temps de présence'
 			,date_jour
 			FROM ".MAIN_DB_PREFIX."rh_pointeuse WHERE 1 ";
-			
-	$sql.=" AND fk_user=".$user->id; // TODO mode admin
 	
+	if($user->admin) null;		
+	else {
+		$sql.=" AND fk_user=".$user->id; // TODO mode admin
+		$THide = array('fk_user');
+	}
 	
 	$TOrder = array('date_jour'=>'DESC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
@@ -149,7 +152,7 @@ function _liste(&$ATMdb, &$pointeuse) {
 	?><div style="text-align: right">
 		<a class="butAction" href="?action=imcomming"><?php echo $langs->trans('ImComing'); ?></a>
 		<a class="butAction" href="?action=imleaving"><?php echo $langs->trans('ImLeaving'); ?></a>
-		<a class="butAction" href="?id=<?=$pointeuse->getId()?>&action=new"><?php echo $langs->trans('NewClocking'); ?></a><div style="clear:both"></div>
+		<a class="butAction" href="?id=<?php echo $pointeuse->getId(); ?>&action=new"><?php echo $langs->trans('NewClocking'); ?></a><div style="clear:both"></div>
 	</div><?php
 	
 	$r->liste($ATMdb, $sql, array(
@@ -161,18 +164,14 @@ function _liste(&$ATMdb, &$pointeuse) {
 			'Id'=>'<a href="?id=@val@&action=view">@val@</a>'
 		)
 		
-		,'hide'=>array()
+		,'hide'=>$THide
 		,'type'=>array('date_deb_am'=>'hour', 'date_fin_am'=>'hour', 'date_deb_pm'=>'hour', 'date_fin_pm'=>'hour', 'date_jour'=>'date')
 		,'liste'=>array(
 			'titre'=> $langs->trans('ListOfAbsence')
 			,'image'=>img_picto('','title.png', '', 0)
-			,'picto_precedent'=>img_picto('','previous.png', '', 0)
-			,'picto_suivant'=>img_picto('','next.png', '', 0)
 			,'noheader'=> (int)isset($_REQUEST['socid'])
 			,'messageNothing'=> $langs->trans('MessageNothingAbsence')
-			,'order_down'=>img_picto('','1downarrow.png', '', 0)
-			,'order_up'=>img_picto('','1uparrow.png', '', 0)
-			,'picto_search'=>'<img src="../../theme/rh/img/search.png">'
+			
 			
 		)
 		,'title'=>array(
@@ -181,12 +180,14 @@ function _liste(&$ATMdb, &$pointeuse) {
 			, 'date_deb_pm'=> $langs->trans('AfternoonArrival')
 			, 'date_fin_pm'=> $langs->trans('AfternoonLeaving')
 			, 'date_jour'=> $langs->trans('Day')
+			, 'fk_user'=> $langs->trans('User')
 		)
 		,'search'=>array(
 			'date_jour'=>array('recherche'=>'calendar')
 		)
 		,'eval'=>array(
 			'Temps de présence'=>"_get_temps_presence(@val@)"
+			,'fk_user'=>'_get_user(@val@)'
 		)
 		,'orderBy'=>$TOrder
 		
@@ -195,6 +196,23 @@ function _liste(&$ATMdb, &$pointeuse) {
 	
 	llxFooter();
 }	
+
+function _get_user($fk_user) {
+		global $db,$TCacheUserPointeur;
+		
+		if(empty($TCacheUserPointeur))$TCacheUserPointeur=array();
+		
+		if(!isset($TCacheUserPointeur[$fk_user])) {
+			$TCacheUserPointeur[$fk_user]=new User($db);
+			$TCacheUserPointeur[$fk_user]->fetch($fk_user);
+		}
+		
+		$u = & $TCacheUserPointeur[$fk_user];
+		
+		return $u->getNomUrl(1);
+		
+	
+}
 function _get_temps_presence($time_presence) {
 			
 	return date('H\h i\m', $time_presence + strtotime(date('Y-01-01')));
