@@ -92,8 +92,12 @@
 				break;
 				
 			case 'view':
-				$absence->load($PDOdb, $_REQUEST['id']);
-				_fiche($PDOdb, $absence,'view');
+				if($absence->load($PDOdb, $_REQUEST['id'])) {
+					_fiche($PDOdb, $absence,'view');
+				}
+				else{
+					exit('Absence supprimée');
+				}
 				break;
 
 			case 'delete':
