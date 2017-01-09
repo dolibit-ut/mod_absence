@@ -14,7 +14,7 @@ class ActionsAbsence
     	global $db;
 		
 		if($parameters['currentcontext'] == 'actioncard') {
-			
+		
 			// On cherche s'il existe une absence liée :
 			$object->fetchObjectLinked(null,'rh_absence',$object->id,'action');
 			
@@ -57,9 +57,9 @@ class ActionsAbsence
 				}
 			}
 
+			return 1;
 		}
 		
-		return 1;
 	}
-
+	
 }
