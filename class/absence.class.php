@@ -414,7 +414,7 @@ class TRH_Absence extends TObjetStd {
 		parent::add_champs('type',array('type'=>'string','length'=>50, 'index'=>true));				//type de congé
 		parent::add_champs('libelle');				//type de congé
 		parent::add_champs('date_debut,date_fin,date_validation',array('type'=>'date', 'index'=>true));	//dates debut fin de congés
-		parent::add_champs('date_hourStart,date_hourEnd',array('type'=>'date'));	//dates debut fin de congés
+		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak',array('type'=>'date'));	//dates debut fin de congés
 		parent::add_champs('ddMoment, dfMoment',array('type'=>'string','length'=>10));		//moment (matin ou après midi)
 		parent::add_champs('duree,congesPrisNM1,congesPrisN',array('type'=>'float'));
 		parent::add_champs('dureeHeure');
@@ -459,6 +459,10 @@ class TRH_Absence extends TObjetStd {
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array(); //cf. loadTypeAbsencePerTypeUser
 
 		$this->typeAbsence=null;
+		
+		$this->date_hourStart = strtotime(date('Y-m-d 8:00:00'));
+		$this->date_hourEnd = strtotime(date('Y-m-d 17:00:00'));
+		$this->date_lunchBreak = strtotime(date('Y-m-d 1:30:00'));
 	}
 
 	function delete(&$PDOdb)
@@ -804,6 +808,32 @@ class TRH_Absence extends TObjetStd {
 
 	}
 
+	private function getHeurePeriode(&$emploiTemps,$current_day,$ampm) {
+		/*
+		if($this->isPresence) {
+			dol_include_once('/core/lib/date.lib.php');
+			
+			list($h1, $m1) = explode(':', date('H:i',$this->date_hourStart));
+			list($h2, $m2) = explode(':', date('H:i',$this->date_hourEnd));
+			list($h3, $m3) = explode(':', date('H:i',$this->date_lunchBreak));
+			
+			$time1 = convertTime2Seconds($h1, $m1);
+			$time2 = convertTime2Seconds($h2, $m2);
+			$time3 = convertTime2Seconds($h3, $m3);
+			
+			$time_total = $time2 - $time1 - $time3;
+			
+			if($time_total>0) {
+				var_dump($time_total, $time_total / 3600 / 2);exit;
+				return $time_total / 3600 / 2; // en heure et à la demie journée car toujours ainsi
+				
+			}
+			
+		}
+		*/
+		return $emploiTemps->getHeurePeriode($current_day,$ampm);
+	}
+
 	function calculDureeAbsenceParAddition(&$PDOdb, $dateN=0, $dateTooOld = 0) {
 		global $TJourNonTravailleEntreprise, $langs;
 
@@ -839,8 +869,8 @@ class TRH_Absence extends TObjetStd {
 
 				if($emploiTemps->estJourTempsPartiel($current_day) && empty($TJourFerie[date('Y-m-d', $t_current)])) {
 					$dureeJour += 1;
-					$this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"am");
-	                $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"pm");
+					$this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"am");
+	                $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"pm");
 				}
 				else {
 
@@ -852,8 +882,8 @@ class TRH_Absence extends TObjetStd {
 	                            && ($emploiTemps->{$current_day.'am'} == 1 || $emploiTemps->{$current_day.'pm'} == 1) // et qu'on travail au moins une demie-journée
 	                        ) {
 	                            $dureeJour+=1; // je compte la journée entière car insécable
-	                            $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"am");
-	                            $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"pm");
+	                            $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"am");
+	                            $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"pm");
 	                        }
 
 	                }
@@ -866,11 +896,11 @@ class TRH_Absence extends TObjetStd {
 
 	                            if($emploiTemps->{$current_day.'am'} == 1 ) {
 	                                $dureeJour+=.5;
-	                                $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"am");
+	                                $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"am");
 	                            }
 	                            else if($typeAbs->decompteNormal=='non' && $emploiTemps->{$current_day.'am'}==0 ) {
 	                                $dureeJour+=.5;
-	                                $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"am");
+	                                $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"am");
 	                            }
 
 	                        }
@@ -883,11 +913,11 @@ class TRH_Absence extends TObjetStd {
 
 	                            if($emploiTemps->{$current_day.'pm'}==1 ) {
 	                                $dureeJour+=.5;
-	                                $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"pm");
+	                                $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"pm");
 	                            }
 	                            else if($typeAbs->decompteNormal=='non' && $emploiTemps->{$current_day.'pm'}==0 ) {
 	                                $dureeJour+=.5;
-	                                $this->dureeHeure += $emploiTemps->getHeurePeriode($current_day,"pm");
+	                                $this->dureeHeure += $this->getHeurePeriode($emploiTemps,$current_day,"pm");
 	                            }
 
 	                        }
@@ -2064,7 +2094,7 @@ class TRH_Absence extends TObjetStd {
 			global $conf, $langs;
 
 			//on recherche les absences d'un utilisateur pendant la période
-			$sql="SELECT a.rowid as 'ID',  u.login, u.lastname, u.firstname,a.type,a.date_hourStart,a.date_hourEnd,
+			$sql="SELECT a.rowid as 'ID',  u.login, u.lastname, u.firstname,a.type,a.date_hourStart,a.date_hourEnd,a.date_lunchBreak,
 				DATE_FORMAT(a.date_debut, '%d/%m/%Y') as date_debut,
 				DATE_FORMAT(a.date_fin, '%d/%m/%Y') as date_fin, a.libelle, a.libelleEtat
 				FROM ".MAIN_DB_PREFIX."rh_absence as a, ".MAIN_DB_PREFIX."user as u
@@ -2993,7 +3023,7 @@ class TRH_TypeAbsence extends TObjetStd {
 
 		parent::add_champs('decompteNormal','type=chaine;');
 
-		parent::add_champs('date_hourStart,date_hourEnd','type=date;');
+		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak','type=date;');
 
 		parent::_init_vars();
 		parent::start();

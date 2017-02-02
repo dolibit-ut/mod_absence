@@ -14,16 +14,29 @@ function absencePrepareHead(&$obj, $type='absence') {
 	
 	switch ($type) {
 		case 'absence':
-			return array(
-				array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
-				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
-			);
+			
+			if($obj->getId()>0) {
+				return array(
+					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
+					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
+				);
+				
+			}
+			else{
+				return array();
+			}
+			
 			break;
 		case 'presence':
+			if($obj->getId()>0) {
 			return array(
 				array(dol_buildpath('/absence/presence.php?id='.$obj->getId()."&action=view",1), $langs->trans('Card'),'fiche')
 				,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
 			);
+			}
+			else{
+				return array();
+			}
 			break;
 		case 'absenceCreation':
 			return array(
@@ -697,7 +710,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		
 			@$stat['presence']+=$row['nb_jour_presence'];
 			@$stat['presence_heure']+=$row['nb_heure_presence'];
-			@$stat['absence']+=$row['nb_jour_absence'];
+			@$stat['absence']+=(empty($row['typeAbsence']->isPresence) ? $row['nb_jour_absence'] : 0);
 			@$stat['absence_heure']+=$row['nb_heure_absence'];
 			@$stat['presence+ferie']+=$row['nb_jour_presence'] + $row['nb_jour_ferie'];
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
