@@ -116,9 +116,17 @@ class box_absence extends ModeleBoxes {
 		
 	}
 
-	function showBox($head = null, $contents = null)
+	/**
+	 * Method to show a box (usage by boxes not mandatory, a box can still use its own showBox function)
+	 *
+	 * @param   array   $head       Array with properties of box title
+	 * @param   array   $contents   Array with properties of box lines
+	 * @param	int		$nooutput	No print, only return string
+	 * @return  string
+	 */
+	function showBox($head = null, $contents = null, $nooutput=0)
 	{
-		parent::showBox($this->info_box_head, $this->info_box_contents);
+		parent::showBox($this->info_box_head, $this->info_box_contents, $nooutput);
 	}
 
 }
