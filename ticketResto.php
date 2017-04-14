@@ -339,7 +339,7 @@ function _ticket(&$ATMdb) {
 
 	$TON = array('O'=> $langs->trans('Yes'), 'N'=> $langs->trans('No'));
 
-	dol_include_once('/user/class/usergroup.class.php');
+	require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 
 	$group = new UserGroup($db);
 	$group->fetch($idGroup);
