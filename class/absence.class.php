@@ -1672,6 +1672,9 @@ class TRH_Absence extends TObjetStd {
 	}
 	function mailAlertEffectif($idGroup) {
 		global $db;
+		if (!class_exists('UserGroup')) {
+			require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+		}
 		$g=new UserGroup($db);
 		$g->fetch($idGroup);
 
@@ -1720,7 +1723,10 @@ class TRH_Absence extends TObjetStd {
 		$user->fetch($this->fk_user);
 
 		if($user->id>0) {
-
+			
+			if (!class_exists('UserGroup')) {
+				require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+			}
 			$g=new UserGroup($db);
 			$TGroup = $g->listGroupsForUser($user->id);
 
@@ -1922,6 +1928,9 @@ class TRH_Absence extends TObjetStd {
 
 		$tabRegles = array();
 
+		if (!class_exists('UserGroup')) {
+			require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+		}
 		$user_group = new UserGroup($db);
 		$TGroups_of_user = $user_group->listGroupsForUser($user->id);
 		if(count($TGroups_of_user) > 0) $TGroups_of_user = array_keys($TGroups_of_user);

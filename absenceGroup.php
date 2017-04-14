@@ -80,6 +80,9 @@ function _view(&$PDOdb, &$absence, $fk_group) {
     
     if($fk_group>0) {
         
+    	if (!class_exists('UserGroup')) {
+    		require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+    	}
         $group = new UserGroup($db);
         $group->fetch($fk_group);
         $TUser = $group->listUsersForGroup('',1);
