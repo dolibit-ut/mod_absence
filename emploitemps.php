@@ -20,8 +20,7 @@
                     
                     $emploiTemps->loadByuser($PDOdb, $fk_user);
                     
-                    dol_include_once('/user/class/usergroup.class.php');
-                    
+                    require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
                     $group = new UserGroup($db);
                     $group->fetch($fk_group);
                     $TUser = $group->listUsersForGroup('',1);
