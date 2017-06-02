@@ -59,7 +59,7 @@
 			$compteur=new TRH_Compteur;
 			$compteur->load_by_fkuser($PDOdb, $idUser);
 			$compteur->reportCongesNM1 = 0;
-			$compteur->congesPrisNM1=$compteur->congesPrisN;
+			$compteur->congesPrisNM1=$compteur->congesPrisN-$compteur->congePrecReste;
 			
 			$compteur->acquisExerciceNM1 = ceil($compteur->acquisExerciceN) + $compteur->nombrecongesAcquisAnnuel;
 			
