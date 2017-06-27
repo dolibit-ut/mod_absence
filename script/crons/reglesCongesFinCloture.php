@@ -58,8 +58,16 @@
 
 			$compteur=new TRH_Compteur;
 			$compteur->load_by_fkuser($PDOdb, $idUser);
-			$compteur->reportCongesNM1 = 0;
-			$compteur->congesPrisNM1=$compteur->congesPrisN;
+			
+			// report des congés autorisé, uniquement des congés positif, car les négatif passeront en déjà pris sur N
+			if(!empty($conf->global->ABSENCE_REPORT_CONGE) && $compteur->congePrecReste>0) {
+				$compteur->reportCongesNM1 = $compteur->congePrecReste;
+				$compteur->congePrecReste = 0;
+			}
+			else {
+				$compteur->reportCongesNM1 = 0;
+			}
+			$compteur->congesPrisNM1=$compteur->congesPrisN - $compteur->congePrecReste; // ex : -4, incrémente le déjà pris de 4
 			
 			$compteur->acquisExerciceNM1 = ceil($compteur->acquisExerciceN) + $compteur->nombrecongesAcquisAnnuel;
 			
