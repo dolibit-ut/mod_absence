@@ -66,6 +66,7 @@
 			}
 			else {
 				$compteur->reportCongesNM1 = 0;
+				if($compteur->congePrecReste>0) $compteur->congePrecReste = 0;
 			}
 			$compteur->congesPrisNM1=$compteur->congesPrisN - $compteur->congePrecReste; // ex : -4, incrémente le déjà pris de 4
 			
