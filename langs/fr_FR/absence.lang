@@ -525,3 +525,5 @@ recupRulesAuto=Sur déclaration d'une présence sur un temps non travaillé
 RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE=AJouter un compteur par entité en mode transverse
 lunchBreak=Pause de midi
 RH_JOURS_NON_TRAVAILLE=Jour(s) non travaillé(s) (déprécié)
+
+ABSENCE_REPORT_CONGE=Autorisé le report de congés non consommé N-1
