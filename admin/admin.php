@@ -159,6 +159,17 @@ function showParameters(&$form, &$doliform) {
 		print '</td>';
 		print '</tr>';
 		
+		
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('ABSENCE_REPORT_CONGE');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_REPORT_CONGE');
+		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
+		print '</td>';
+		print '</tr>';
+		
 		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)) {
 			print '<tr>';
 			print '<td>';
