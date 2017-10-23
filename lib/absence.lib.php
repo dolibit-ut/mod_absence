@@ -393,7 +393,6 @@ function mailConges(&$absence,$presence=false){
 				
 			}
 			
-			
 		}		
 		
 	}
@@ -470,18 +469,19 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 	dol_include_once('/valideur/class/valideur.class.php');
 	$TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges');
 
-	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_SUPERIOR && $absence->code=='nonjustifiee') {
+	//if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_SUPERIOR && $absence->code=='nonjustifiee') {
 		$sql="SELECT fk_user FROM ".MAIN_DB_PREFIX."user WHERE rowid=".(int)$absence->fk_user;
 		$PDOdb->Execute($sql);
 		$PDOdb->Get_line();
 		$fk_sup = $PDOdb->Get_field('fk_user');
 		if(!empty($fk_sup) && !in_array($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER, $TValideur)) $TValideur[] = $fk_sup;
-	}
+	//}
 
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER && $absence->code=='nonjustifiee') {
 		if(!in_array($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER, $TValideur))  $TValideur[] = $conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER;
 	}
-
+	//var_dump($TValideur);
+	//exit;
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
 			envoieMailValideur($PDOdb, $absence, $idVal,$presence);
@@ -500,7 +500,10 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
 
 	$userr = new User($db);  
 	$userr->fetch($absence->fk_user);
-
+	
+	var_dump($userr->lastname);
+	var_dump($userr->firstname);
+	
 	$name=$userr->lastname;
 	$firstname=$userr->firstname;
 
@@ -570,6 +573,7 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
 	if(!$dont_send_mail){
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
 	    	$result = $mail->send(true, 'utf-8');
+	    	//var_dump($mail);exit;
 		if($result) setEventMessage('Email envoyé avec succès au valideur '.$sendto);
                 else setEventMessage('Erreur lors de l\'envoi du mail à un valideur '.$sendto,'errors');
 	}
