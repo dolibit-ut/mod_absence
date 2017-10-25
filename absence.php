@@ -65,6 +65,8 @@
 							}
 							else if($absence->fk_user==$user->id){	//on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
 							
+
+							
 								mailConges($absence);
 								mailCongesValideur($PDOdb,$absence);
 							}
