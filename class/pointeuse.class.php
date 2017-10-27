@@ -109,7 +109,10 @@ class TRH_Pointeuse extends TObjetStd {
 			}
 			
 		}
-		
+		// arrondi à 5 décimale pour une bonne précision
+                $virgule = ceil((($ttr % 3600)/3600)*100000)/100000;
+                $ttr = $ttr - ($ttr % 3600) + $virgule * 3600;
+
 		return $ttr / 3600;
 		
 	}
