@@ -112,6 +112,10 @@
 					<td>[rttCourant.cumulePris;strconv=no;protect=no]	</td>
 				</tr>
 				<tr>
+					<td>[translate.langs.transnoentities(CumulatedDayOffTakenNextYear)] N+1</td>
+					<td>[rttCourant.cumulePrisN1;strconv=no;protect=no]	</td>
+				</tr>
+				<tr>
 					<td>[translate.PostponedCumulatedDayOff;strconv=no;protect=no] N-1</td>
 					<td>[rttCourant.cumuleReport;strconv=no;protect=no]	</td>
 				</tr>
@@ -130,6 +134,10 @@
 				<tr>
 					<td>[translate.NonCumulatedDayOffTaken;strconv=no;protect=no]</td>
 					<td>[rttCourant.nonCumulePris;strconv=no;protect=no]	</td>
+				</tr>
+				<tr>
+					<td>[translate.langs.transnoentities(NonCumulatedDayOffTakenNextYear)] N+1</td>
+					<td>[rttCourant.nonCumulePrisN1;strconv=no;protect=no]	</td>
 				</tr>
 				<tr>
 					<td>[translate.PostponedNonCumulatedDayOff;strconv=no;protect=no] N-1</td>

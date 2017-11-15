@@ -101,8 +101,16 @@
 					<td id="cumule"></td>
 				</tr>
 				<tr>
+					<td>[translate.langs.transnoentities(CumulatedDayOffTakenNextYear)]</td>
+					<td id="cumuleN1"></td>
+				</tr>
+				<tr>
 					<td>[translate.NonCumulatedDayOff]</td>
 					<td id="noncumule"></td>
+				</tr>
+				<tr>
+					<td>[translate.langs.transnoentities(NonCumulatedDayOffTakenNextYear)]</td>
+					<td id="noncumuleN1"></td>
 				</tr>
 				<tr>
 					<td>[translate.acquisRecuperation;strconv=no;protect=no]</td>
@@ -276,8 +284,10 @@
 						else $('#reste').css({'color':'black', 'font-weight':'normal'});
 						
 						$('#cumule').html(liste.annuelCumule);
-						
 						$('#noncumule').html(liste.annuelNonCumule);
+						$('#cumuleN1').html(liste.annuelN1Cumule);
+						$('#noncumuleN1').html(liste.annuelN1NonCumule);
+
 						$('#recup').html(liste.acquisRecuperation);
 						
 						$('#mensuel').html(liste.mensuel); //TODO n'existe pas ?
