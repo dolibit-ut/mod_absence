@@ -527,3 +527,6 @@ lunchBreak=Pause de midi
 RH_JOURS_NON_TRAVAILLE=Jour(s) non travaillé(s) (déprécié)
 
 ABSENCE_REPORT_CONGE=Autorisé le report de congés non consommé N-1
+
+CumulatedDayOffTakenNextYear=Jours RTT cumulés pris sur la période suivante
+NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suivante
