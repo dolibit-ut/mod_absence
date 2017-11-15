@@ -19,8 +19,8 @@ if(isset($_REQUEST['user'])) {
             ,'acquisRecuperation'=>round2Virgule($c->acquisRecuperation)
             ,'annuelCumule'=>round2Virgule($c->rttCumuleAcquis+$c->rttCumuleReportNM1-$c->rttCumulePris)
             ,'annuelNonCumule'=>round2Virgule($c->rttNonCumuleAcquis+$c->rttNonCumuleReportNM1-$c->rttNonCumulePris)
-        	,'annuelN1Cumule'=>round2Virgule(0-$c->rttCumulePrisN1)
-        	,'annuelN1NonCumule'=>round2Virgule(0-$c->rttNonCumulePrisN1)
+        	,'annuelN1Cumule'=>round2Virgule($c->rttCumulePrisN1)
+        	,'annuelN1NonCumule'=>round2Virgule($c->rttNonCumulePrisN1)
         	,'link'=> (!empty($user->rights->absence->myactions->modifierCompteur) ? ' - '.$c->getNomUrl(1) : '')
         ));
         
