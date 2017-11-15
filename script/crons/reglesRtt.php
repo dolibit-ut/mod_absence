@@ -24,23 +24,23 @@
 	require('../../config.php');
 	require('../../class/absence.class.php');
 
-	$ATMdb=new TPDOdb;
-	$ATMdb->db->debug=true;
+	$PDOdb=new TPDOdb;
+	$PDOdb->db->debug=true;
 
 	$o=new TRH_Compteur;
-	$o->init_db_by_vars($ATMdb);
+	$o->init_db_by_vars($PDOdb);
 	
 	
 	//on récupère la date de fin de cloture des RTT
 	$k=0;
 	$sqlReqCloture="SELECT fk_user, date_rttCloture, rttAcquisAnnuelCumuleInit, rttAcquisAnnuelNonCumuleInit FROM ".MAIN_DB_PREFIX."rh_compteur";
-	$ATMdb->Execute($sqlReqCloture);
+	$PDOdb->Execute($sqlReqCloture);
 	$Tab=array();
-	while($ATMdb->Get_line()) {
-			$Tab[$ATMdb->Get_field('fk_user')]['date_rttCloture'] = $ATMdb->Get_field('date_rttCloture');
-			$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisAnnuelCumuleInit'] = $ATMdb->Get_field('rttAcquisAnnuelCumuleInit');
-			$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $ATMdb->Get_field('rttAcquisAnnuelNonCumuleInit');
-			$Tab[$ATMdb->Get_field('fk_user')]['fk_user'] = $ATMdb->Get_field('fk_user');
+	while($PDOdb->Get_line()) {
+			$Tab[$PDOdb->Get_field('fk_user')]['date_rttCloture'] = $PDOdb->Get_field('date_rttCloture');
+			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelCumuleInit');
+			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelNonCumuleInit');
+			$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
 	}
 	
 	$mars=date("dm");
@@ -59,7 +59,7 @@
 			echo 'ok';
 			
 			$c=new TRH_Compteur;
-			if($c->load_by_fkuser($ATMdb, $idUser)) {
+			if($c->load_by_fkuser($PDOdb, $idUser)) {
 				
 				if($c->reportRtt==1) {
 					$c->rttNonCumuleReportNM1=$c->rttNonCumuleTotal;
@@ -88,7 +88,7 @@
 				$c->rttCumulePrisN1 = 0;
 				$c->rttNonCumulePrisN1 = 0;
 				
-				$c->save($ATMdb);
+				$c->save($PDOdb);
 				
 			}
 			else{
@@ -109,22 +109,22 @@
 		$sqlMois="SELECT fk_user, rttAcquisMensuelInit 
 		FROM ".MAIN_DB_PREFIX."rh_compteur 
 		WHERE rttTypeAcquisition='Mensuel'";
-		$ATMdb->Execute($sqlMois);
+		$PDOdb->Execute($sqlMois);
 		$Tab=array();
-		while($ATMdb->Get_line()) {
-				$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisMensuelInit'] = $ATMdb->Get_field('rttAcquisMensuelInit');
-				$Tab[$ATMdb->Get_field('fk_user')]['fk_user'] = $ATMdb->Get_field('fk_user');
+		while($PDOdb->Get_line()) {
+				$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisMensuelInit'] = $PDOdb->Get_field('rttAcquisMensuelInit');
+				$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
 		}
 
 		foreach($Tab as $idUser=>$TabMois){
 			
 			$c=new TRH_Compteur;
-			if($c->load_by_fkuser($ATMdb, $idUser)) {
+			if($c->load_by_fkuser($PDOdb, $idUser)) {
 				
 				if($c->rttTypeAcquisition == 'Mensuel') {
 				
 					$c->rttCumuleAcquis+=$c->rttAcquisMensuelInit;
-					$c->save($ATMdb);
+					$c->save($PDOdb);
 					
 				}
 				
@@ -143,7 +143,7 @@
 	if($annee=="0101"){
 		//on transfère les jours N-1 non pris vers jours report
 		$sqlAnnee="UPDATE ".MAIN_DB_PREFIX."rh_compteur SET rttannee=rttannee+1";
-		$ATMdb->Execute($sqlAnnee);
+		$PDOdb->Execute($sqlAnnee);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
