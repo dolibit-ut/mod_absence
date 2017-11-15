@@ -326,8 +326,8 @@ class TRH_Compteur extends TObjetStd {
 
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. 'N');
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. 'N1');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. ' N1');
 
 		}
 		else if($type=='rttnoncumule') {
@@ -340,8 +340,8 @@ class TRH_Compteur extends TObjetStd {
 			
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. 'N');
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. 'N1');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. ' N1');
 		}
 		else if($type=='recup') {
 			$this->acquisRecuperation -= $duree;
@@ -358,8 +358,8 @@ class TRH_Compteur extends TObjetStd {
 
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif . 'NM1');
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif . 'N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif . ' NM1');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif . ' N');
 
 
 		}

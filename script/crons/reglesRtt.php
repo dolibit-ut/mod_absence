@@ -83,8 +83,10 @@
 					
 					$c->rttCumuleTotal=$c->rttCumuleAcquis+$c->rttCumuleReportNM1-$c->rttCumulePris;
 					$c->rttNonCumuleTotal=$c->rttNonCumuleAcquis+$c->rttNonCumuleReportNM1-$c->rttNonCumulePris;
-					
 				}
+				
+				$c->rttCumulePrisN1 = 0;
+				$c->rttNonCumulePrisN1 = 0;
 				
 				$c->save($ATMdb);
 				
@@ -97,7 +99,7 @@
 			echo 'ko';
 		}
 		 
-		echo '<br />';
+		echo "<br />\r\n";
 	}
 		
 	
