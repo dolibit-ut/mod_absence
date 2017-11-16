@@ -363,6 +363,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'cumuleAcquisInit'=>$form->texte('','rttAcquisAnnuelCumuleInit',round2Virgule($compteur->rttAcquisAnnuelCumuleInit),10,50,'')
 				,'cumuleAcquis'=>$form->texte('','rttCumuleAcquis',round2Virgule($compteur->rttCumuleAcquis),10,50,'')
 				,'cumulePris'=>$form->texte('','rttCumulePris',round2Virgule($compteur->rttCumulePris),10,50,'')
+				,'cumulePrisN1'=>$form->texte('','rttCumulePrisN1',round2Virgule($compteur->rttCumulePrisN1),10,50,'')
+					
 				,'cumuleReport'=>$form->texte('','rttCumuleReportNM1',round2Virgule($compteur->rttCumuleReportNM1),10,50,'')
 				,'cumuleTotal'=>round2Virgule($compteur->rttCumuleTotal)
 
@@ -370,6 +372,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'nonCumuleAcquisInit'=>$form->texte('','rttAcquisAnnuelNonCumuleInit',round2Virgule($compteur->rttAcquisAnnuelNonCumuleInit),10,50,'')
 				,'nonCumuleAcquis'=>$form->texte('','rttNonCumuleAcquis',round2Virgule($compteur->rttNonCumuleAcquis),10,50,'')
 				,'nonCumulePris'=>$form->texte('','rttNonCumulePris',round2Virgule($compteur->rttNonCumulePris),10,50,'')
+				,'nonCumulePrisN1'=>$form->texte('','rttNonCumulePrisN1',round2Virgule($compteur->rttNonCumulePrisN1),10,50,'')
 				,'nonCumuleReport'=>$form->texte('','rttNonCumuleReportNM1',round2Virgule($compteur->rttNonCumuleReportNM1),10,50,'')
 				,'nonCumuleTotal'=>round2Virgule($compteur->rttNonCumuleTotal)
 
@@ -429,6 +432,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'Total'							=> $langs->transnoentities('Total'),
 				'NonCumulatedDaysOffToTake'		=> $langs->transnoentities('NonCumulatedDaysOffToTake'),
 				'acquisRecuperation'=>$langs->transnoentities('acquisRecuperation'),
+				'langs'=>$langs
 			)
 		)	
 		
