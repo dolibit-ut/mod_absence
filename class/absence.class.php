@@ -69,58 +69,59 @@ class TRH_Compteur extends TObjetStd {
 
 		//conges N
 		parent::set_table(MAIN_DB_PREFIX.'rh_compteur');
-		parent::add_champs('acquisExerciceN,acquisRecuperation','type=float;');
-		parent::add_champs('acquisAncienneteN','type=float;');
-		parent::add_champs('acquisHorsPeriodeN','type=float;');
-		parent::add_champs('anneeN','type=entier;');
-		parent::add_champs('dureeN','type=entier;');
-		parent::add_champs('date_congesCloture','type=date;');	//date de clôture période rtt
-		parent::add_champs('nombreCongesAcquisMensuel,nombrecongesAcquisAnnuel','type=float;');
+		parent::add_champs('acquisExerciceN,acquisRecuperation',array('type'=>'float'));
+		parent::add_champs('acquisAncienneteN',array('type'=>'float'));
+		parent::add_champs('acquisHorsPeriodeN',array('type'=>'float'));
+		parent::add_champs('anneeN',array('type'=>'integer'));
+		parent::add_champs('dureeN',array('type'=>'integer'));
+		parent::add_champs('date_congesCloture',array('type'=>'date'));	//date de clôture période rtt
+		parent::add_champs('nombreCongesAcquisMensuel,nombrecongesAcquisAnnuel',array('type'=>'float'));
 
 		//conges N-1
-		parent::add_champs('acquisExerciceNM1','type=float;');
-		parent::add_champs('acquisAncienneteNM1','type=float;');
-		parent::add_champs('acquisHorsPeriodeNM1','type=float;');
-		parent::add_champs('reportCongesNM1','type=float;');
-		parent::add_champs('congesPrisNM1','type=float;');
-		parent::add_champs('congesPrisN','type=float;');
-		parent::add_champs('congesTotalNM1','type=float;');
-		parent::add_champs('congesResteNM1','type=float;');
-		parent::add_champs('anneeNM1','type=entier;');
-		parent::add_champs('dureeNM1','type=entier;');
+		parent::add_champs('acquisExerciceNM1',array('type'=>'float'));
+		parent::add_champs('acquisAncienneteNM1',array('type'=>'float'));
+		parent::add_champs('acquisHorsPeriodeNM1',array('type'=>'float'));
+		parent::add_champs('reportCongesNM1',array('type'=>'float'));
+		parent::add_champs('congesPrisNM1',array('type'=>'float'));
+		parent::add_champs('congesPrisN',array('type'=>'float'));
+		parent::add_champs('congesTotalNM1',array('type'=>'float'));
+		parent::add_champs('congesResteNM1',array('type'=>'float'));
+		parent::add_champs('anneeNM1',array('type'=>'integer'));
+		parent::add_champs('dureeNM1',array('type'=>'integer'));
 
 		//RTT cumulés
-		parent::add_champs('rttCumulePris','type=float;');
-		parent::add_champs('rttAcquisAnnuelCumuleInit,rttAcquisAnnuelNonCumuleInit','type=float;');
-		parent::add_champs('rttCumuleReportNM1','type=float;');
-		parent::add_champs('rttCumuleTotal','type=float;');
-		parent::add_champs('rttCumuleAcquis','type=float;');
-
+		parent::add_champs('rttCumulePris',array('type'=>'float'));
+		parent::add_champs('rttAcquisAnnuelCumuleInit,rttAcquisAnnuelNonCumuleInit',array('type'=>'float'));
+		parent::add_champs('rttCumuleReportNM1',array('type'=>'float'));
+		parent::add_champs('rttCumuleTotal',array('type'=>'float'));
+		parent::add_champs('rttCumuleAcquis',array('type'=>'float'));
+		parent::add_champs('rttCumulePrisN1',array('type'=>'float'));
 
 
 		//RTT non cumulés
-		parent::add_champs('rttNonCumulePris','type=float;');
-		parent::add_champs('rttAcquisAnnuelNonCumuleInit','type=float;');
-		parent::add_champs('rttNonCumuleReportNM1','type=float;');
-		parent::add_champs('rttNonCumuleTotal','type=float;');
-		parent::add_champs('rttNonCumuleAcquis','type=float;');
-
+		parent::add_champs('rttNonCumulePris',array('type'=>'float'));
+		parent::add_champs('rttAcquisAnnuelNonCumuleInit',array('type'=>'float'));
+		parent::add_champs('rttNonCumuleReportNM1',array('type'=>'float'));
+		parent::add_champs('rttNonCumuleTotal',array('type'=>'float'));
+		parent::add_champs('rttNonCumuleAcquis',array('type'=>'float'));
+		parent::add_champs('rttNonCumulePrisN1',array('type'=>'float'));
+		
 
 		//RTT mensuels
-		parent::add_champs('rttAcquisMensuelInit','type=float;');
+		parent::add_champs('rttAcquisMensuelInit',array('type'=>'float'));
 
 
 
-		parent::add_champs('rttTypeAcquisition','type=chaine;');				//annuel, mensuel...
-		parent::add_champs('fk_user','type=entier;index;');			//utilisateur concerné
-		parent::add_champs('rttannee','type=entier;');
-		parent::add_champs('rttMetier','type=chaine;');
-		parent::add_champs('date_rttCloture','type=date;');	//date de clôture période rtt
+		parent::add_champs('rttTypeAcquisition',array('type'=>'string'));				//annuel, mensuel...
+		parent::add_champs('fk_user',array('index'=>true,'type'=>'integer'));			//utilisateur concerné
+		parent::add_champs('rttannee',array('type'=>'integer'));
+		parent::add_champs('rttMetier',array('type'=>'string'));
+		parent::add_champs('date_rttCloture',array('type'=>'date'));	//date de clôture période rtt
 
-		parent::add_champs('reportRtt','type=entier;');	//entier (0 ou 1) pour savoir si l'on reporte les RTT d'une année à l'autre
+		parent::add_champs('reportRtt',array('type'=>'integer'));	//entier (0 ou 1) pour savoir si l'on reporte les RTT d'une année à l'autre
 
 
-		parent::add_champs('entity','type=entier;');
+		parent::add_champs('entity',array('type'=>'integer'));
 
 
 		parent::_init_vars();
@@ -315,22 +316,32 @@ class TRH_Compteur extends TObjetStd {
 
 	function add(&$PDOdb, $type, $duree, $motif) {
 
-		if($type=="rttcumule"){
-			$this->rttCumulePris += $duree;
-			$this->rttCumuleTotal -= $duree;
+		if($type=='rttcumule'){
+			list($congesPrisNM1, $congesPrisN) = $duree;
+			
+			$this->rttCumulePris+= $congesPrisNM1;
+			$this->rttCumulePrisN1+= $congesPrisN;
+			
+			$this->rttCumuleTotal -= $congesPrisNM1+ $congesPrisN;
 
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. ' N1');
 
 		}
 		else if($type=='rttnoncumule') {
-			$this->rttNonCumulePris += $duree;
-			$this->rttNonCumuleTotal -= $duree;
-
+			list($congesPrisNM1, $congesPrisN) = $duree;
+			
+			$this->rttNonCumulePris+= $congesPrisNM1;
+			$this->rttNonCumulePrisN1+= $congesPrisN;
+			
+			$this->rttNonCumuleTotal-= $congesPrisNM1+ $congesPrisN;
+			
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. ' N1');
 		}
 		else if($type=='recup') {
 			$this->acquisRecuperation -= $duree;
@@ -347,8 +358,8 @@ class TRH_Compteur extends TObjetStd {
 
 			$this->save($PDOdb);
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif . 'NM1');
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif . 'N');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif . ' NM1');
+			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif . ' N');
 
 
 		}
@@ -371,10 +382,10 @@ class TRH_CompteurLog extends TObjetStd {
 
 		//conges N
 		parent::set_table(MAIN_DB_PREFIX.'rh_compteur_log');
-		parent::add_champs('fk_compteur','type=entier;index;');			//utilisateur concerné
-		parent::add_champs('nb','type=float;');
-		parent::add_champs('type','type=chaine;index;');
-		parent::add_champs('motif','type=chaine;');
+		parent::add_champs('fk_compteur',array('index'=>true,'type'=>'integer'));			//utilisateur concerné
+		parent::add_champs('nb',array('type'=>'float'));
+		parent::add_champs('type',array('index'=>true,'type'=>'string'));
+		parent::add_champs('motif',array('type'=>'string'));
 
 
 		parent::_init_vars();
@@ -469,6 +480,8 @@ class TRH_Absence extends TObjetStd {
 	{
 		global $db, $user,$langs,$conf;
 
+		$this->recrediterHeure($PDOdb);
+		
 		dol_include_once('/valideur/class/valideur.class.php');
 		dol_include_once('/core/class/interfaces.class.php');
 
@@ -538,7 +551,7 @@ class TRH_Absence extends TObjetStd {
 		WHERE r.choixApplication LIKE 'user' AND r.fk_user=".$fk_user."
 		OR (r.choixApplication LIKE 'all')
 		OR (r.choixApplication LIKE 'group' AND g.fk_user=".$fk_user.")
-		AND r.entity IN (".getEntity().")
+		AND r.entity IN (".getEntity('absence').")
 		ORDER BY r.nbJourCumulable";
 
 		$PDOdb->Execute($sql);
@@ -573,7 +586,7 @@ class TRH_Absence extends TObjetStd {
 		global $conf;
 		$sql="SELECT DATE_FORMAT(date_debut, '%d/%m/%Y') as 'dateD',
 		DATE_FORMAT(date_fin, '%d/%m/%Y')  as 'dateF', libelle, libelleEtat
-		FROM `".MAIN_DB_PREFIX."rh_absence` WHERE fk_user=".$fk_user." AND entity IN (".getEntity().")
+		FROM `".MAIN_DB_PREFIX."rh_absence` WHERE fk_user=".$fk_user." AND entity IN (".getEntity('absence').")
 		GROUP BY date_cre LIMIT 0,10";
 
 		$PDOdb->Execute($sql);
@@ -599,7 +612,9 @@ class TRH_Absence extends TObjetStd {
 		$compteur =new TRH_Compteur;
 		$compteur->load_by_fkuser($PDOdb, $userConcerne);
 
-		$dureeAbsenceCourante = $this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_congesCloture);
+		$dateCloture = ($this->type=='rttcumule' || $this->type=='rttnoncumule' ) ? $compteur->date_rttCloture :  $compteur->date_congesCloture;
+		
+		$dureeAbsenceCourante = $this->calculDureeAbsenceParAddition($PDOdb, $dateCloture);
 
 		$conges_nm1_restants = $compteur->acquisExerciceNM1+$compteur->acquisAncienneteNM1+$compteur->acquisHorsPeriodeNM1+$compteur->reportCongesNM1-$compteur->congesPrisNM1;
 
@@ -619,12 +634,12 @@ class TRH_Absence extends TObjetStd {
 
 		///////décompte des congés
 		if($this->type=="rttcumule"){
-			$compteur->add($PDOdb, $this->type, $dureeAbsenceCourante, 'Prise de RTT');
+			$compteur->add($PDOdb, $this->type, array($this->congesPrisNM1,  $this->congesPrisN), 'Prise de RTT');
 
 		}
 		else if($this->type=="rttnoncumule"){
 
-			$compteur->add($PDOdb, $this->type, $dureeAbsenceCourante, 'Prise de RTT non cumulé');
+			$compteur->add($PDOdb, $this->type, array($this->congesPrisNM1,  $this->congesPrisN), 'Prise de RTT non cumulé');
 
 		}
 		else if($this->type=="recup"){
@@ -1605,13 +1620,13 @@ class TRH_Absence extends TObjetStd {
 
 			switch($this->type){
 				case "rttcumule" :
-
-						$compteur->add($PDOdb, $this->type, -$this->duree, 'Refus rtt cumulé');
+					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture);
+					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus rtt cumulé');
 
 				break;
 				case "rttnoncumule" :
-
-						$compteur->add($PDOdb, $this->type, -$this->duree, 'Refus rtt non cumulé');
+					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture);
+					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus rtt non cumulé');
 
 				break;
 				case 'conges':
@@ -2621,12 +2636,12 @@ END:VCALENDAR
 class TRH_AdminCompteur extends TObjetStd {
 	function __construct() {
 		parent::set_table(MAIN_DB_PREFIX.'rh_admin_compteur');
-		parent::add_champs('congesAcquisMensuelInit,congesAcquisAnnuelInit','type=float;');
-		parent::add_champs('rttCumuleInit,rttNonCumuleInit','type=float;');
-		parent::add_champs('date_rttClotureInit','type=date;');
-		parent::add_champs('date_congesClotureInit','type=date;');
+		parent::add_champs('congesAcquisMensuelInit,congesAcquisAnnuelInit',array('type'=>'float'));
+		parent::add_champs('rttCumuleInit,rttNonCumuleInit',array('type'=>'float'));
+		parent::add_champs('date_rttClotureInit',array('type'=>'date'));
+		parent::add_champs('date_congesClotureInit',array('type'=>'date'));
 
-		parent::add_champs('entity','type=entier;index;');
+		parent::add_champs('entity',array('index'=>true,'type'=>'integer'));
 
 
 		parent::_init_vars();
@@ -2668,23 +2683,23 @@ class TRH_EmploiTemps extends TObjetStd {
 		//demi-journées de travail
 		$this->TJour = array('lundi','mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche');
 		foreach ($this->TJour as $jour) {
-			parent::add_champs($jour.'am','type=entier;');
-			parent::add_champs($jour.'pm','type=entier;');
-			parent::add_champs($jour.'_is_tempspartiel','type=entier;');
+			parent::add_champs($jour.'am',array('type'=>'integer'));
+			parent::add_champs($jour.'pm',array('type'=>'integer'));
+			parent::add_champs($jour.'_is_tempspartiel',array('type'=>'integer'));
 		}
 
 		//horaires de travail
 		foreach ($this->TJour as $jour) {
-			parent::add_champs('date_'.$jour.'_heuredam','type=date;');
-			parent::add_champs('date_'.$jour.'_heurefam','type=date;');
-			parent::add_champs('date_'.$jour.'_heuredpm','type=date;');
-			parent::add_champs('date_'.$jour.'_heurefpm','type=date;');
+			parent::add_champs('date_'.$jour.'_heuredam',array('type'=>'date'));
+			parent::add_champs('date_'.$jour.'_heurefam',array('type'=>'date'));
+			parent::add_champs('date_'.$jour.'_heuredpm',array('type'=>'date'));
+			parent::add_champs('date_'.$jour.'_heurefpm',array('type'=>'date'));
 		}
 
-		parent::add_champs('fk_user','type=entier;index;');	//utilisateur concerné
-		parent::add_champs('tempsHebdo','type=float;');
+		parent::add_champs('fk_user',array('index'=>true,'type'=>'integer'));	//utilisateur concerné
+		parent::add_champs('tempsHebdo',array('type'=>'float'));
 
-		parent::add_champs('is_archive','type=entier;index;');
+		parent::add_champs('is_archive',array('index'=>true,'type'=>'integer'));
 
 		parent::add_champs('date_debut,date_fin', array('type'=>'date','index'=>true));
 
@@ -2944,13 +2959,13 @@ class TRH_RegleAbsence extends TObjetStd {
 		global $langs;
 
 		parent::set_table(MAIN_DB_PREFIX.'rh_absence_regle');
-		parent::add_champs('typeAbsence','type=chaine;');
-		parent::add_champs('choixApplication,periode','type=chaine;index;');
-		parent::add_champs('nbJourCumulable','type=float;index;');
-		parent::add_champs('restrictif,contigue,contigueNoJNT','type=entier;');
-		parent::add_champs('fk_user','type=entier;index;');	//utilisateur concerné
-		parent::add_champs('fk_usergroup','type=entier;index;');	//utilisateur concerné
-		parent::add_champs('entity','type=entier;index;');
+		parent::add_champs('typeAbsence',array('type'=>'string'));
+		parent::add_champs('choixApplication,periode',array('index'=>true,'type'=>'string'));
+		parent::add_champs('nbJourCumulable',array('type'=>'float','index'=>true));
+		parent::add_champs('restrictif,contigue,contigueNoJNT',array('type'=>'integer'));
+		parent::add_champs('fk_user',array('index'=>true,'type'=>'integer'));	//utilisateur concerné
+		parent::add_champs('fk_usergroup',array('index'=>true,'type'=>'integer'));	//utilisateur concerné
+		parent::add_champs('entity',array('index'=>true,'type'=>'integer'));
 
 
 		parent::_init_vars();
@@ -3023,16 +3038,16 @@ class TRH_TypeAbsence extends TObjetStd {
 		global $langs;
 
 		parent::set_table(MAIN_DB_PREFIX.'rh_type_absence');
-		parent::add_champs('typeAbsence','type=chaine;index;');
-		parent::add_champs('libelleAbsence','type=chaine;index;');
-		parent::add_champs('codeAbsence','type=chaine;index;');
-		parent::add_champs('admin,insecable','type=entier;index;');
-		parent::add_champs('unite','type=chaine;');
-		parent::add_champs('entity,isPresence,colorId','type=entier;index;');
+		parent::add_champs('typeAbsence',array('index'=>true,'type'=>'string'));
+		parent::add_champs('libelleAbsence',array('index'=>true,'type'=>'string'));
+		parent::add_champs('codeAbsence',array('index'=>true,'type'=>'string'));
+		parent::add_champs('admin,insecable',array('index'=>true,'type'=>'integer'));
+		parent::add_champs('unite',array('type'=>'string'));
+		parent::add_champs('entity,isPresence,colorId',array('index'=>true,'type'=>'integer'));
 
-		parent::add_champs('decompteNormal','type=chaine;');
+		parent::add_champs('decompteNormal',array('type'=>'string'));
 
-		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak','type=date;');
+		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak',array('type'=>'date'));
 
 		parent::_init_vars();
 		parent::start();

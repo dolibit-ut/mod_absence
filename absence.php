@@ -107,7 +107,6 @@
 				//$PDOdb->db->debug=true;
 				//avant de supprimer, on récredite les heures d'absences qui avaient été décomptées. (que si l'absence n'a pas été refusée, dans quel cas 
 				//les heures seraient déjà recréditées)
-				$absence->recrediterHeure($PDOdb);
 				
 				if($absence->fk_user == $user->id) { // Si le collaborateur supprime sa demande d'absence on prévient les valideurs
 
