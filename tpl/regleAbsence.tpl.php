@@ -64,11 +64,11 @@
 		<td>[newRule.periode;strconv=no]</td>
 	</tr>
 	<tr>
-		<td>Prendre en compte la durée contigue (jour fériés, absences ou jour non travaillé les jours précédents ou suivants)</td>
+		<td>Prendre en compte la durée contiguë (jours fériés, absences ou jours non travaillés les jours précédents ou suivants)</td>
 		<td>[newRule.contigue;strconv=no]</td>
 	</tr>
 	<tr>
-		<td>Ne pas considéré les jours non travaillé comme contigue</td>
+		<td>Ne pas considérer les jours non travaillés comme contigus</td>
 		<td>[newRule.contigueNoJNT;strconv=no]</td>
 	</tr>
 	 
