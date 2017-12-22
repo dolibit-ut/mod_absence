@@ -4,6 +4,8 @@
  * SCRIPT 3 à exécuter
  * 
  */
+	if(!isset($_REQUEST['force_for_test'])) {
+
 	$sapi_type = php_sapi_name();
         $script_file = basename(__FILE__);
         $path=dirname(__FILE__).'/';
@@ -13,6 +15,8 @@
                 exit(-1);
         }
 
+	}
+	
  	define('INC_FROM_CRON_SCRIPT', true);
 	
 	chdir(__DIR__);
@@ -20,84 +24,82 @@
 	require('../../config.php');
 	require('../../class/absence.class.php');
 
-	$ATMdb=new TPDOdb;
-	$ATMdb->db->debug=true;
+	$PDOdb=new TPDOdb;
+	$PDOdb->db->debug=true;
 
 	$o=new TRH_Compteur;
-	$o->init_db_by_vars($ATMdb);
+	$o->init_db_by_vars($PDOdb);
 	
 	
 	//on récupère la date de fin de cloture des RTT
 	$k=0;
 	$sqlReqCloture="SELECT fk_user, date_rttCloture, rttAcquisAnnuelCumuleInit, rttAcquisAnnuelNonCumuleInit FROM ".MAIN_DB_PREFIX."rh_compteur";
-	$ATMdb->Execute($sqlReqCloture);
+	$PDOdb->Execute($sqlReqCloture);
 	$Tab=array();
-	while($ATMdb->Get_line()) {
-			$Tab[$ATMdb->Get_field('fk_user')]['date_rttCloture'] = $ATMdb->Get_field('date_rttCloture');
-			$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisAnnuelCumuleInit'] = $ATMdb->Get_field('rttAcquisAnnuelCumuleInit');
-			$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $ATMdb->Get_field('rttAcquisAnnuelNonCumuleInit');
-			$Tab[$ATMdb->Get_field('fk_user')]['fk_user'] = $ATMdb->Get_field('fk_user');
+	while($PDOdb->Get_line()) {
+			$Tab[$PDOdb->Get_field('fk_user')]['date_rttCloture'] = $PDOdb->Get_field('date_rttCloture');
+			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelCumuleInit');
+			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelNonCumuleInit');
+			$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
 	}
 	
 	$mars=date("dm");
 
-	foreach($Tab as $TabRtt )
+	foreach($Tab as $idUser=>$TabRtt )
 	{
-	   	//echo $idUser." ".$dateCloture. "<br/>";
-		$date=strtotime($TabRtt['date_rttCloture']);
+	    $date=strtotime($TabRtt['date_rttCloture']);
 		$date=strtotime('+1day',$date);
-		
 		
 		$dateMD=date("dm",$date);
 		
+		echo $idUser." ".dol_print_date($date,'day').' '.$dateMD. " == ".$mars." : ";
 		
-		//on reporte les RTT pour ceux pour qui c'est autorisé
-		if($mars==$dateMD){
-			//on remet à 5 et à 7 des rtt cumules/noncumules les compteurs par exemple, dépend de ce qui est entré sur le compteur
-			$sqlTransfert='UPDATE '.MAIN_DB_PREFIX.'rh_compteur 
-			SET rttNonCumuleReportNM1=rttNonCumuleTotal,  rttCumuleReportNM1=rttCumuleTotal
-			WHERE fk_user ='.$TabRtt['fk_user']." AND reportRtt='1'";
-			$ATMdb->Execute($sqlTransfert);
-		}	
-		
-		
-		//COMPTEUR MENSUEL
-		////// 1er mars, tous les rtt de l'année N sont remis à 0 pour ceux qui les accumulent par mois, sauf si reportRtt=1
-		
-		if($mars==$dateMD){
-			//on remet à 0 les compteurs
-			$sqlRaz="UPDATE ".MAIN_DB_PREFIX."rh_compteur 
-			SET  rttCumulePris=0, rttNonCumulePris=0, rttCumuleAcquis=0, rttNonCumuleAcquis=0
-			WHERE rttTypeAcquisition='Mensuel' 
-			AND reportRtt!='1' 
-			AND fk_user =".$TabRtt['fk_user'];
-			$ATMdb->Execute($sqlRaz);
+		if($mars==$dateMD || isset($_REQUEST['force_for_test'])){
+			
+			echo 'ok';
+			
+			$c=new TRH_Compteur;
+			if($c->load_by_fkuser($PDOdb, $idUser)) {
+				
+				if($c->reportRtt==1) {
+					$c->rttNonCumuleReportNM1=$c->rttNonCumuleTotal;
+					$c->rttCumuleReportNM1=$c->rttCumuleTotal;
+				}
+				
+				if($c->reportRtt!=1 && $c->rttTypeAcquisition == 'Mensuel') {
+					$c->rttCumulePris = $c->rttCumulePrisN1;
+					$c->rttNonCumulePris= $c->rttNonCumulePrisN1;
+					
+					$c->rttCumuleAcquis = 0;
+					$c->rttNonCumuleAcquis= 0;
+				}
+				
+				if($c->rttTypeAcquisition == 'Annuel') {
+					$c->rttCumulePris = $c->rttCumulePrisN1;
+					$c->rttNonCumulePris= $c->rttNonCumulePrisN1;
+					
+					$c->rttCumuleAcquis=$c->rttAcquisAnnuelCumuleInit;
+					$c->rttNonCumuleAcquis=$c->rttAcquisAnnuelNonCumuleInit;
+					
+					$c->rttCumuleTotal=$c->rttCumuleAcquis+$c->rttCumuleReportNM1-$c->rttCumulePris;
+					$c->rttNonCumuleTotal=$c->rttNonCumuleAcquis+$c->rttNonCumuleReportNM1-$c->rttNonCumulePris;
+				}
+				
+				$c->rttCumulePrisN1 = 0;
+				$c->rttNonCumulePrisN1 = 0;
+				
+				$c->save($PDOdb);
+				
+			}
+			else{
+				print $langs->trans('ErrImpossibleLoadCounter') . ' ' . $idUser . '\n';
+			}
 		}
-		
-
-		//COMPTEUR ANNUEL
-		////// 1er mars, tous les rtt de l'année N sont donnés à ceux qui les accumulent par année
-		if($mars==$dateMD){
-			//on remet à 5 et à 7 des rtt cumules/noncumules les compteurs par exemple, dépend de ce qui est entré sur le compteur
-			$sqlTransfert='UPDATE '.MAIN_DB_PREFIX.'rh_compteur 
-			SET rttCumulePris=0, rttNonCumulePris=0, 
-			rttCumuleAcquis=rttAcquisAnnuelCumuleInit ,rttNonCumuleAcquis=rttAcquisAnnuelNonCumuleInit
-			WHERE rttTypeAcquisition="Annuel" 
-			AND fk_user ='.$TabRtt['fk_user'];
-			$ATMdb->Execute($sqlTransfert);
-		}	
-		
-		
-		//on recalcule les totaux des RTT
-		if($mars==$dateMD){
-			//on remet à 5 et à 7 des rtt cumules/noncumules les compteurs par exemple, dépend de ce qui est entré sur le compteur
-			$sqlTransfert='UPDATE '.MAIN_DB_PREFIX.'rh_compteur 
-			SET rttCumuleTotal=rttCumuleAcquis+rttCumuleReportNM1-rttCumulePris,  
-			rttNonCumuleTotal=rttNonCumuleAcquis+rttNonCumuleReportNM1-rttNonCumulePris
-			WHERE fk_user ='.$TabRtt['fk_user'].' AND rttTypeAcquisition="Annuel"';
-			$ATMdb->Execute($sqlTransfert);
+		else {
+			echo 'ko';
 		}
-			    
+		 
+		echo "<br />\r\n";
 	}
 		
 	
@@ -107,20 +109,30 @@
 		$sqlMois="SELECT fk_user, rttAcquisMensuelInit 
 		FROM ".MAIN_DB_PREFIX."rh_compteur 
 		WHERE rttTypeAcquisition='Mensuel'";
-		$ATMdb->Execute($sqlMois);
+		$PDOdb->Execute($sqlMois);
 		$Tab=array();
-		while($ATMdb->Get_line()) {
-				$Tab[$ATMdb->Get_field('fk_user')]['rttAcquisMensuelInit'] = $ATMdb->Get_field('rttAcquisMensuelInit');
-				$Tab[$ATMdb->Get_field('fk_user')]['fk_user'] = $ATMdb->Get_field('fk_user');
+		while($PDOdb->Get_line()) {
+				$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisMensuelInit'] = $PDOdb->Get_field('rttAcquisMensuelInit');
+				$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
 		}
 
-		foreach($Tab as $TabMois){
-			//on incrémente de 1 par exemple, suivant ce qui est donné dans la base
-			$sqlIncr='UPDATE '.MAIN_DB_PREFIX.'rh_compteur 
-			SET rttCumuleAcquis=rttCumuleAcquis+'.$TabMois['rttAcquisMensuelInit'].' 
-			WHERE rttTypeAcquisition="Mensuel" 
-			AND fk_user='.$TabMois['fk_user'];
-			$ATMdb->Execute($sqlIncr);
+		foreach($Tab as $idUser=>$TabMois){
+			
+			$c=new TRH_Compteur;
+			if($c->load_by_fkuser($PDOdb, $idUser)) {
+				
+				if($c->rttTypeAcquisition == 'Mensuel') {
+				
+					$c->rttCumuleAcquis+=$c->rttAcquisMensuelInit;
+					$c->save($PDOdb);
+					
+				}
+				
+			}
+			else{
+				print $langs->trans('ErrImpossibleLoadCounter') . ' ' . $idUser . '\n';
+			}
+			
 		}
 		
 	}
@@ -131,7 +143,7 @@
 	if($annee=="0101"){
 		//on transfère les jours N-1 non pris vers jours report
 		$sqlAnnee="UPDATE ".MAIN_DB_PREFIX."rh_compteur SET rttannee=rttannee+1";
-		$ATMdb->Execute($sqlAnnee);
+		$PDOdb->Execute($sqlAnnee);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
