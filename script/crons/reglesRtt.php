@@ -49,15 +49,16 @@ if ($resql)
 }
 
 
-$now = dol_now(); // timestamp
-$first_day_of_now = dol_get_first_day(date('Y', $now), date('m', $now)); // timestamp
+$now = new DateTime();
+$now->setTime(0, 0, 0); // H:i:s => 00:00:00
 
-$md_now = date('md', $now); // je récupère le mois et jour pour savoir si je suis sur un 1er jour du mois (cumul des RTT mensuel)
+$first_day_of_now = dol_get_first_day($now->format('Y'), $now->format('m')); // timestamp
+
+$md_now = $now->format('md'); // je récupère le mois et jour pour savoir si je suis sur un 1er jour du mois (cumul des RTT mensuel)
 $md_first_day_of_now = date('md', $first_day_of_now);
 
-echo 'Date du jour = '.dol_print_date($now, 'day')."<br />\n";
+echo 'Date du jour = '.dol_print_date($now->getTimestamp(), 'day')."<br />\n";
 
-$error = 0;
 $PDOdb->beginTransaction();
 foreach ($TCompteur as $compteur)
 {
@@ -65,25 +66,26 @@ foreach ($TCompteur as $compteur)
 
 	$date_rttCloture = new DateTime();
 	$date_rttCloture->setTimestamp($compteur->date_rttCloture);
+	$date_congesCloture->modify('+1 day');
 	$date_rttCloture->setTime(0, 0, 0); // H:i:s => 00:00:00
 	
-	// Si le script est exécuté et que la date de cloture RTT du compteur est antérieur (donc bascule)
-	if ($date_rttCloture->getTimestamp() <= $now || isset($_REQUEST['force_bascule']))
+	// Bascule UNIQUEMENT si le lendemain de ma date de cloture est égale à la date d'exécution du script (pas de <= pour éviter les bascules intempestives en cours d'année si un compteur est mal init)
+	if ($date_rttCloture->getTimestamp() === $now->getTimestamp() || isset($_REQUEST['force_bascule']))
 	{
-		if (isset($_REQUEST['force_bascule'])) echo '    => BASCULE force_bascule<br />'."\n";
-		else echo '    => BASCULE<br />'."\n";
+		if (isset($_REQUEST['force_bascule'])) echo '---- BASCULE force_bascule<br />'."\n";
+		else echo '---- BASCULE<br />'."\n";
 
-		echo '    Type acquisition = '.$compteur->rttTypeAcquisition."<br />\n";
+		echo '---- Type acquisition = '.$compteur->rttTypeAcquisition."<br />\n";
 		
 		if ($compteur->reportRtt == 1)
 		{
-			echo '    report RTT cumulés = '.$compteur->rttCumuleTotal.' & report RTT non cumulés = '.$compteur->rttNonCumuleTotal."<br />\n";
+			echo '---- report RTT cumulés = '.$compteur->rttCumuleTotal.' & report RTT non cumulés = '.$compteur->rttNonCumuleTotal."<br />\n";
 			$compteur->rttNonCumuleReportNM1 = $compteur->rttNonCumuleTotal;
 			$compteur->rttCumuleReportNM1 = $compteur->rttCumuleTotal;
 		}
 		
 		// A voir, pcq les RRT non cumulés ne sont pas init avec l'acquisition mensuelle, ça reste théoriquement de l'annuelle ($compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;)
-		if ($compteur->reportRtt != 1 && $compteur->rttTypeAcquisition == 'Mensuel')
+		if ($compteur->reportRtt != 1 && $compteur->rttTypeAcquisition === 'Mensuel')
 		{
 			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
 			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
@@ -92,7 +94,7 @@ foreach ($TCompteur as $compteur)
 			$compteur->rttNonCumuleAcquis = 0;
 		}
 
-		if ($compteur->rttTypeAcquisition == 'Annuel')
+		if ($compteur->rttTypeAcquisition === 'Annuel')
 		{
 			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
 			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
@@ -110,13 +112,16 @@ foreach ($TCompteur as $compteur)
 		$compteur->date_rttCloture = strtotime('+1 year', $compteur->date_rttCloture);
 		$compteur->rttannee += 1;
 
+		echo '---- Prochaine date_rttCloture = '.dol_print_date($compteur->date_rttCloture, 'day')."<br />\n";
+		
 		$compteur->save($PDOdb);
 	}
 
 
 	// Nous sommes sur un 1er jour du mois, donc on crédite les compteurs mensuel
-	if ($compteur->rttTypeAcquisition == 'Mensuel' && $md_now == $md_first_day_of_now && isset($_REQUEST['force_cumul_mensuel']))
+	if ($compteur->rttTypeAcquisition === 'Mensuel' && $md_now === $md_first_day_of_now && isset($_REQUEST['force_cumul_mensuel']))
 	{
+		echo '---- Cumul mensuel rttCumuleAcquis += '.$compteur->rttAcquisMensuelInit."<br />\n";
 		// Attention à prendre avec des pincettes car c'est du spécifique
 		$compteur->rttCumuleAcquis += $compteur->rttAcquisMensuelInit;
 		$compteur->save($PDOdb);
