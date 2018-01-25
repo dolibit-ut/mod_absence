@@ -1,149 +1,125 @@
 #!/usr/bin/php
 <?php
 /*
- * SCRIPT 3 à exécuter
+ * SCRIPT à exécuter avant "reglesCongesFinCloture.php"
+ * Gère la bascule ET le cumul mensuel
  * 
+ * $_REQUEST['force_http'] => permet de lancer le script via navigateur
+ * $_REQUEST['force_bascule'] => permet de déclancher la bascule de tous les compteurs (annuel & mensuel)
+ * $_REQUEST['force_cumul_mensuel'] => permet de déclancher un cumul des RTT cumulés mensuel (comme si nous étions le 1er d'un mois)
+ * $_REQUEST['force_rollback'] => permet de faire un rollback au lieu d'un commit (attention la table rh_compteur doit être en innoDB)
  */
-	if(!isset($_REQUEST['force_for_test'])) {
-
+if (!isset($_REQUEST['force_http']))
+{
 	$sapi_type = php_sapi_name();
-        $script_file = basename(__FILE__);
-        $path=dirname(__FILE__).'/';
-        // Test if batch mode
-        if (substr($sapi_type, 0, 3) != 'cli') {
-            echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
-                exit(-1);
-        }
-
-	}
-	
- 	define('INC_FROM_CRON_SCRIPT', true);
-	
-	chdir(__DIR__);
-	
-	require('../../config.php');
-	require('../../class/absence.class.php');
-
-	$PDOdb=new TPDOdb;
-	$PDOdb->db->debug=true;
-
-	$o=new TRH_Compteur;
-	$o->init_db_by_vars($PDOdb);
-	
-	
-	//on récupère la date de fin de cloture des RTT
-	$k=0;
-	$sqlReqCloture="SELECT fk_user, date_rttCloture, rttAcquisAnnuelCumuleInit, rttAcquisAnnuelNonCumuleInit FROM ".MAIN_DB_PREFIX."rh_compteur";
-	$PDOdb->Execute($sqlReqCloture);
-	$Tab=array();
-	while($PDOdb->Get_line()) {
-			$Tab[$PDOdb->Get_field('fk_user')]['date_rttCloture'] = $PDOdb->Get_field('date_rttCloture');
-			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelCumuleInit');
-			$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisAnnuelNonCumuleInit'] = $PDOdb->Get_field('rttAcquisAnnuelNonCumuleInit');
-			$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
-	}
-	
-	$mars=date("dm");
-
-	foreach($Tab as $idUser=>$TabRtt )
+	$script_file = basename(__FILE__);
+	$path = dirname(__FILE__).'/';
+	// Test if batch mode
+	if (substr($sapi_type, 0, 3) != 'cli')
 	{
-	    $date=strtotime($TabRtt['date_rttCloture']);
-		$date=strtotime('+1day',$date);
-		
-		$dateMD=date("dm",$date);
-		
-		echo $idUser." ".dol_print_date($date,'day').' '.$dateMD. " == ".$mars." : ";
-		
-		if($mars==$dateMD || isset($_REQUEST['force_for_test'])){
-			
-			echo 'ok';
-			
-			$c=new TRH_Compteur;
-			if($c->load_by_fkuser($PDOdb, $idUser)) {
-				
-				if($c->reportRtt==1) {
-					$c->rttNonCumuleReportNM1=$c->rttNonCumuleTotal;
-					$c->rttCumuleReportNM1=$c->rttCumuleTotal;
-				}
-				
-				if($c->reportRtt!=1 && $c->rttTypeAcquisition == 'Mensuel') {
-					$c->rttCumulePris = $c->rttCumulePrisN1;
-					$c->rttNonCumulePris= $c->rttNonCumulePrisN1;
-					
-					$c->rttCumuleAcquis = 0;
-					$c->rttNonCumuleAcquis= 0;
-				}
-				
-				if($c->rttTypeAcquisition == 'Annuel') {
-					$c->rttCumulePris = $c->rttCumulePrisN1;
-					$c->rttNonCumulePris= $c->rttNonCumulePrisN1;
-					
-					$c->rttCumuleAcquis=$c->rttAcquisAnnuelCumuleInit;
-					$c->rttNonCumuleAcquis=$c->rttAcquisAnnuelNonCumuleInit;
-					
-					$c->rttCumuleTotal=$c->rttCumuleAcquis+$c->rttCumuleReportNM1-$c->rttCumulePris;
-					$c->rttNonCumuleTotal=$c->rttNonCumuleAcquis+$c->rttNonCumuleReportNM1-$c->rttNonCumulePris;
-				}
-				
-				$c->rttCumulePrisN1 = 0;
-				$c->rttNonCumulePrisN1 = 0;
-				
-				$c->save($PDOdb);
-				
-			}
-			else{
-				print $langs->trans('ErrImpossibleLoadCounter') . ' ' . $idUser . '\n';
-			}
-		}
-		else {
-			echo 'ko';
-		}
-		 
-		echo "<br />\r\n";
+		echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
+		exit(-1);
 	}
-		
-	
-	/////chaque mois, les rtt sont incrémentés de 1 pour ceux qui les accumulent par mois
-	$jour=date("d");
-	if($jour=="01"){
-		$sqlMois="SELECT fk_user, rttAcquisMensuelInit 
-		FROM ".MAIN_DB_PREFIX."rh_compteur 
-		WHERE rttTypeAcquisition='Mensuel'";
-		$PDOdb->Execute($sqlMois);
-		$Tab=array();
-		while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('fk_user')]['rttAcquisMensuelInit'] = $PDOdb->Get_field('rttAcquisMensuelInit');
-				$Tab[$PDOdb->Get_field('fk_user')]['fk_user'] = $PDOdb->Get_field('fk_user');
-		}
+}
 
-		foreach($Tab as $idUser=>$TabMois){
-			
-			$c=new TRH_Compteur;
-			if($c->load_by_fkuser($PDOdb, $idUser)) {
-				
-				if($c->rttTypeAcquisition == 'Mensuel') {
-				
-					$c->rttCumuleAcquis+=$c->rttAcquisMensuelInit;
-					$c->save($PDOdb);
-					
-				}
-				
-			}
-			else{
-				print $langs->trans('ErrImpossibleLoadCounter') . ' ' . $idUser . '\n';
-			}
-			
-		}
-		
-	}
+define('INC_FROM_CRON_SCRIPT', true);
+
+chdir(__DIR__);
+
+require('../../config.php');
+require('../../class/absence.class.php');
+require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+
+$PDOdb = new TPDOdb;
+$PDOdb->db->debug = true;
+
+$TCompteur = array();
 
 
-	//on incrémente les années
-	$annee=date("dm");
-	if($annee=="0101"){
-		//on transfère les jours N-1 non pris vers jours report
-		$sqlAnnee="UPDATE ".MAIN_DB_PREFIX."rh_compteur SET rttannee=rttannee+1";
-		$PDOdb->Execute($sqlAnnee);
+$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'rh_compteur';
+$resql = $db->query($sql);
+if ($resql)
+{
+	while ($obj = $db->fetch_object($resql))
+	{
+		$o = new TRH_Compteur;
+		$o->load($PDOdb, $obj->rowid);
+		$TCompteur[] = $o;
 	}
-	
-	$PDOdb->close();
+}
+
+
+$now = dol_now(); // timestamp
+$first_day_of_now = dol_get_first_day(date('Y', $now), date('m', $now)); // timestamp
+
+$md_now = date('md', $now); // je récupère le mois et jour pour savoir si je suis sur un 1er jour du mois (cumul des RTT mensuel)
+$md_first_day_of_now = date('md', $first_day_of_now);
+
+echo 'Date du jour = '.dol_print_date($now, 'day')."<br />\n";
+
+$error = 0;
+$PDOdb->beginTransaction();
+foreach ($TCompteur as $compteur)
+{
+	echo '* Compteur id = '.$compteur->getId().' date_rttCloture = '.dol_print_date($compteur->date_rttCloture, 'day')."<br />\n";
+
+	// Si le script est exécuté et que la date de cloture RTT du compteur est antérieur (donc bascule)
+	if ($compteur->date_rttCloture <= $now || isset($_REQUEST['force_bascule']))
+	{
+		if (isset($_REQUEST['force_bascule'])) echo '    => BASCULE force_bascule<br />'."\n";
+		else echo '    => BASCULE<br />'."\n";
+
+		echo '    Type acquisition = '.$compteur->rttTypeAcquisition."<br />\n";
+		
+		if ($compteur->reportRtt == 1)
+		{
+			echo '    report RTT cumulés = '.$compteur->rttCumuleTotal.' & report RTT non cumulés = '.$compteur->rttNonCumuleTotal."<br />\n";
+			$compteur->rttNonCumuleReportNM1 = $compteur->rttNonCumuleTotal;
+			$compteur->rttCumuleReportNM1 = $compteur->rttCumuleTotal;
+		}
+		
+		// A voir, pcq les RRT non cumulés ne sont pas init avec l'acquisition mensuelle, ça reste théoriquement de l'annuelle ($compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;)
+		if ($compteur->reportRtt != 1 && $compteur->rttTypeAcquisition == 'Mensuel')
+		{
+			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
+			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
+
+			$compteur->rttCumuleAcquis = 0;
+			$compteur->rttNonCumuleAcquis = 0;
+		}
+
+		if ($compteur->rttTypeAcquisition == 'Annuel')
+		{
+			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
+			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
+
+			$compteur->rttCumuleAcquis = $compteur->rttAcquisAnnuelCumuleInit;
+			$compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;
+
+			$compteur->rttCumuleTotal = $compteur->rttCumuleAcquis + $compteur->rttCumuleReportNM1 - $compteur->rttCumulePris;
+			$compteur->rttNonCumuleTotal = $compteur->rttNonCumuleAcquis + $compteur->rttNonCumuleReportNM1 - $compteur->rttNonCumulePris;
+		}
+
+		$compteur->rttCumulePrisN1 = 0;
+		$compteur->rttNonCumulePrisN1 = 0;
+
+		$compteur->date_rttCloture = strtotime('+1 year', $compteur->date_rttCloture);
+		$compteur->rttannee += 1;
+
+		$compteur->save($PDOdb);
+	}
+
+
+	// Nous sommes sur un 1er jour du mois, donc on crédite les compteurs mensuel
+	if ($compteur->rttTypeAcquisition == 'Mensuel' && $md_now == $md_first_day_of_now && isset($_REQUEST['force_cumul_mensuel']))
+	{
+		// Attention à prendre avec des pincettes car c'est du spécifique
+		$compteur->rttCumuleAcquis += $compteur->rttAcquisMensuelInit;
+		$compteur->save($PDOdb);
+	}
+}
+
+if (isset($_REQUEST['force_rollback'])) $PDOdb->rollBack();
+else $PDOdb->commit();
+
+$PDOdb->close();
