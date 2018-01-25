@@ -63,8 +63,12 @@ foreach ($TCompteur as $compteur)
 {
 	echo '* Compteur id = '.$compteur->getId().' date_rttCloture = '.dol_print_date($compteur->date_rttCloture, 'day')."<br />\n";
 
+	$date_rttCloture = new DateTime();
+	$date_rttCloture->setTimestamp($compteur->date_rttCloture);
+	$date_rttCloture->setTime(0, 0, 0); // H:i:s => 00:00:00
+	
 	// Si le script est exécuté et que la date de cloture RTT du compteur est antérieur (donc bascule)
-	if ($compteur->date_rttCloture <= $now || isset($_REQUEST['force_bascule']))
+	if ($date_rttCloture->getTimestamp() <= $now || isset($_REQUEST['force_bascule']))
 	{
 		if (isset($_REQUEST['force_bascule'])) echo '    => BASCULE force_bascule<br />'."\n";
 		else echo '    => BASCULE<br />'."\n";
