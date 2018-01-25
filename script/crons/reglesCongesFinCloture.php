@@ -1,9 +1,16 @@
 #!/usr/bin/php
 <?php
 /*
- * SCRIPT 1 à exécuter
+ * SCRIPT à exécuter après "reglesRtt.php" & "reglesCongesMensuel.php"
+ * Gère UNIQUEMENT la bascule
  * 
+ * $_REQUEST['force_http'] => permet de lancer le script via navigateur
+ * $_REQUEST['force_bascule'] => permet de déclancher la bascule de tous les compteurs
+ * $_REQUEST['force_rollback'] => permet de faire un rollback au lieu d'un commit (attention la table rh_compteur doit être en innoDB)
  */
+
+if (!isset($_REQUEST['force_http']))
+{
         $sapi_type = php_sapi_name();
         $script_file = basename(__FILE__);
         $path=dirname(__FILE__).'/';
@@ -12,7 +19,7 @@
             echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
                 exit(-1);
         }
-
+}
 
  	define('INC_FROM_CRON_SCRIPT', true);
 	
@@ -23,41 +30,40 @@
 
 	$PDOdb=new TPDOdb;
 //	$PDOdb->debug=true;
-
+	
+	$now = new DateTime();
+	$now->setTime(0, 0, 0); // H:i:s => 00:00:00
+	
 	$o=new TRH_Compteur;
 	$o->init_db_by_vars($PDOdb); // TODO remove or not : on sait jamais, dans la nuit :-/
 	
 	
 	//on récupère la date de fin de cloture des congés
-	$sqlReqCloture="SELECT fk_user, date_congesCloture FROM ".MAIN_DB_PREFIX."rh_compteur";
+	$sqlReqCloture="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_compteur";
 	$PDOdb->Execute($sqlReqCloture);
 	$Tab=array();
 	while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('fk_user')] = $PDOdb->Get_field('date_congesCloture');
+		$Tab[] = $PDOdb->Get_field('rowid');
 	}
 
-	foreach($Tab as $idUser => $dateCloture )
+	$PDOdb->beginTransaction();
+	foreach($Tab as $fk_compteur)
 	{
-		$u=new User($db);
-		$u->fetch($idUser);
+		$compteur=new TRH_Compteur;
+		$compteur->load($PDOdb, $fk_compteur);
 		
-		if($u->id<=0)continue;
-
-	   	echo $u->getNomUrl(1)." ".$dateCloture. "...";
-
-		$date=strtotime('+1day',strtotime($dateCloture)); // Car on passe à 1h du matin le lendemain
-		$dateMD=date('Ymd',$date);
-		////// 1er juin, tous les congés de l'année N sont remis à 0, et sont transférés vers le compteur congés N-1
-		$juin=date('Ymd');
-//var_dump( $juin , $dateMD);
-		echo $juin.'?='.$dateMD.'...';	
-
-		if(!strcmp($juin,$dateMD)/* || isset($_REQUEST['force_for_test'])*/){
-			
-			echo 'Oui...';
-
-			$compteur=new TRH_Compteur;
-			$compteur->load_by_fkuser($PDOdb, $idUser);
+		echo '* Compteur id = '.$compteur->getId().' date_congesCloture = '.dol_print_date($compteur->date_congesCloture, 'day')."<br />\n";
+		
+		$date_congesCloture = new DateTime();
+		$date_congesCloture->setTimestamp($compteur->date_congesCloture);
+		$date_congesCloture->modify('+1 day');
+		$date_congesCloture->setTime(0, 0, 0); // H:i:s => 00:00:00
+		
+		// Bascule UNIQUEMENT si le lendemain de ma date de cloture est égale à la date d'exécution du script (pas de <= pour éviter les bascules intempestives en cours d'année si un compteur est mal init)
+		if($date_congesCloture->getTimestamp() === $now->getTimestamp() || isset($_REQUEST['force_bascule']))
+		{
+			if (isset($_REQUEST['force_bascule'])) echo '---- BASCULE force_bascule<br />'."\n";
+			else echo '---- BASCULE<br />'."\n";
 			
 			// report des congés autorisé, uniquement des congés positif, car les négatif passeront en déjà pris sur N
 			if(!empty($conf->global->ABSENCE_REPORT_CONGE) && $compteur->congePrecReste>0) {
@@ -78,15 +84,15 @@
 			$compteur->acquisExerciceN = 0;
 			$compteur->acquisHorsPeriodeN = 0;
 			$compteur->congesPrisN = 0;
-			$compteur->date_congesCloture = strtotime('+1 year',strtotime($dateCloture));
+			$compteur->date_congesCloture = strtotime('+1 year',$compteur->date_congesCloture);
+			
+			echo '---- Prochaine date_congesCloture = '.dol_print_date($compteur->date_congesCloture, 'day')."<br /><br />\n\n";
 			
 			$compteur->save($PDOdb);
 		}
-		else {
-			echo 'Non...';
-		}
-
-		echo '<br />';
 	}
-	
+
+if (isset($_REQUEST['force_rollback'])) $PDOdb->rollBack();
+else $PDOdb->commit();
+
 $PDOdb->close();
