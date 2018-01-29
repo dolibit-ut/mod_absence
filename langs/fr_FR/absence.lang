@@ -530,3 +530,7 @@ ABSENCE_REPORT_CONGE=Autorisé le report de congés non consommé N-1
 
 CumulatedDayOffTakenNextYear=Jours RTT cumulés pris sur la période suivante
 NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suivante
+
+
+
+absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du compteur

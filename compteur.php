@@ -8,70 +8,63 @@
 	$PDOdb=new TPDOdb;
 	$compteur=new TRH_Compteur;
 
+	$action = GETPOST('action');
+	$id = GETPOST('id');
+	$fk_user = GETPOST('fk_user');
 
-	if(isset($_REQUEST['action'])) {
-		
-		switch($_REQUEST['action']) {
-			
+	
+	if (!empty($id)) $compteur->load($PDOdb, $id);
+	elseif (!empty($fk_user)) $compteur->load_by_fkuser($PDOdb, $fk_user);
+	else $compteur->load_by_fkuser($PDOdb, $user->id);
+	
+	if ($compteur->getId() <= 0) accessforbidden($langs->trans('absence_load_compteur_error'));
+	
+	
+	if(!empty($action))
+	{
+		switch($action) {
 			case 'add':
 			case 'new':
 				_fiche($PDOdb, $compteur,'edit');
-				break;	
+				break;
+			
 			case 'compteurAdmin':
 				_listeAdmin($PDOdb, $compteur);
 				break;
+			
 			case 'edit'	:
-				$compteur->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $compteur,'edit');
 				break;
-				
+			
 			case 'save':
-				//$PDOdb->db->debug=true;
-				
-				$compteur->load($PDOdb, $_REQUEST['id']);
 				$compteur->reportRtt=0; // on remet à 0 la checkbox avant de setter la nouvelle valeur
 				//var_dump($_REQUEST);
 				$compteur->set_values($_REQUEST);
 				$compteur->save($PDOdb);
-				$compteur->load($PDOdb, $_REQUEST['id']);
-              //  var_dump($compteur);
-				$mesg = '<div class="ok">' . $langs->trans('ChangesMade') . '</div>';
-				_fiche($PDOdb, $compteur,'view');
-			
+				
+				setEventMessage($langs->trans('ChangesMade'));
+				
+				header('Location: '.dol_buildpath('/absence/compteur.php',1).'?id='.$compteur->getId().'&action=view');
+				exit;
+				
 				break;
 			
 			case 'view':
-				if(isset($_REQUEST['id'])){
-					$compteur->load($PDOdb, $_REQUEST['id']);
-				}
-				elseif(GETPOST('fk_user')>0){
-					//récupération compteur en cours
-					$compteur->load_by_fkuser($PDOdb, GETPOST('fk_user'));
-					
-				}
-				else{
-					$compteur->load_by_fkuser($PDOdb, $user->id);
-				}
-
-					_fiche($PDOdb, $compteur,'view');
-
+				_fiche($PDOdb, $compteur,'view');
 				break;
 
 			case 'log':
-				$compteur->load_by_fkuser($PDOdb, GETPOST('fk_user'));
 				_log($PDOdb, $compteur);
 				
 				break;
 
 			case 'delete':
-				
+				// Never ever delete
 				break;
 		}
 	}
-	elseif(isset($_REQUEST['id'])) {
-		
-	}
-	else {
+	else
+	{
 		//$PDOdb->db->debug=true;
 		_liste($PDOdb, $compteur);
 	}

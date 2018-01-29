@@ -451,3 +451,7 @@ YearlyNonCumulatedDaysOff=Jours RTT non cumulés annuels
 YourAbsPresences=Vos abs./présence
 ListUserAlreadyAccepted=Liste des valideurs ayant déjà accéptés
 RH_USER_MAIL_OVERWRITE=Forcer l'adresse mail lors d'une demande d'absence
+
+
+
+absence_load_compteur_error=Access denied<br />Error on load
