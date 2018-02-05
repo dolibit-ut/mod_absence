@@ -1,13 +1,13 @@
 
     [view.head;strconv=no]
 
-	[congesCourant.titreConges;strconv=no;protect=no] 
-	<br><br/>                     
-	
+<div class="fichecenter">
 		
-                       
+	[congesCourant.titreConges;strconv=no;protect=no]
+	
+		<div class="underbanner clearboth"></div>
 		<table class="border " style="width:100%;"  >
-				<tr>
+				<tr class="liste_titre">
 					<td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" > 
 				    [translate.Year;strconv=no;protect=no] N-1 (année en cours)</td> </div>
 				</tr>
@@ -44,7 +44,7 @@
 					<td><b>[congesPrec.reste;strconv=no;protect=no]</b></td>
 				</tr>
 
-				<tr>
+				<tr class="liste_titre">
 					<td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" > 
 						[translate.Year;strconv=no;protect=no] N (année suivante)   </td> 
 				</tr>
@@ -88,17 +88,15 @@
 					<td>[congesCourant.acquisRecuperation;strconv=no;protect=no]</td>
 				</tr>
 				
-				
+			</tbody>
 		</table>
-
+<br />
 
 	
-	<br/><br/>
-	
-	[rttCourant.titreRtt;strconv=no;protect=no]   
-	 <br/>                              
+	[rttCourant.titreRtt;strconv=no;protect=no]
+		<div class="underbanner clearboth"></div>
 		<table class="border" style="width:100%">
-				<tr>
+				<tr class="liste_titre">
 					 <td  colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.CounterCumulatedDayOff;strconv=no;protect=no] </td>
 				</tr>
@@ -123,7 +121,7 @@
 					<td><b>[translate.CumulatedDayOffToTake;strconv=no;protect=no]</b></td>
 					<td>[rttCourant.cumuleTotal;strconv=no;protect=no]</td>
 				</tr>
-				<tr>
+				<tr class="liste_titre">
 					 <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.CounterNonCumulatedDayOff;strconv=no;protect=no]</td>
 				</tr>
@@ -149,7 +147,7 @@
 				</tr>
 
 		             
-				<tr>
+				<tr class="liste_titre">
 					  <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.AcquisitionMethodOfDays;strconv=no;protect=no]</h2></td>
 				</tr>
@@ -191,8 +189,7 @@
 		</table>
 	       
 
-
-	
+</div>
 		
 		[onshow;block=begin;when [view.mode]=='edit']
 			<div class="tabsAction" >
@@ -269,4 +266,4 @@
 
 		});
 	</script>
-
+	
