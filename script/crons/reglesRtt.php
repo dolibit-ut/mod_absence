@@ -57,6 +57,7 @@ $first_day_of_now = dol_get_first_day($now->format('Y'), $now->format('m')); // 
 $md_now = $now->format('md'); // je récupère le mois et jour pour savoir si je suis sur un 1er jour du mois (cumul des RTT mensuel)
 $md_first_day_of_now = date('md', $first_day_of_now);
 
+if (!empty($conf->global->ABSENCE_HIDE_BASCULE_ALL_TO_ZERO)) echo 'WARNING : ABSENCE_HIDE_BASCULE_ALL_TO_ZERO is enable'."<br />\n";
 echo 'Date du jour = '.dol_print_date($now->getTimestamp(), 'day')."<br />\n";
 
 $PDOdb->beginTransaction();
@@ -66,7 +67,7 @@ foreach ($TCompteur as $compteur)
 
 	$date_rttCloture = new DateTime();
 	$date_rttCloture->setTimestamp($compteur->date_rttCloture);
-	$date_congesCloture->modify('+1 day');
+	$date_rttCloture->modify('+1 day');
 	$date_rttCloture->setTime(0, 0, 0); // H:i:s => 00:00:00
 	
 	// Bascule UNIQUEMENT si le lendemain de ma date de cloture est égale à la date d'exécution du script (pas de <= pour éviter les bascules intempestives en cours d'année si un compteur est mal init)
@@ -77,33 +78,51 @@ foreach ($TCompteur as $compteur)
 
 		echo '---- Type acquisition = '.$compteur->rttTypeAcquisition."<br />\n";
 		
-		if ($compteur->reportRtt == 1)
+		// Création de cette conf suite au tk7005
+		if (!empty($conf->global->ABSENCE_HIDE_BASCULE_ALL_TO_ZERO))
 		{
-			echo '---- report RTT cumulés = '.$compteur->rttCumuleTotal.' & report RTT non cumulés = '.$compteur->rttNonCumuleTotal."<br />\n";
-			$compteur->rttNonCumuleReportNM1 = $compteur->rttNonCumuleTotal;
-			$compteur->rttCumuleReportNM1 = $compteur->rttCumuleTotal;
-		}
-		
-		// A voir, pcq les RRT non cumulés ne sont pas init avec l'acquisition mensuelle, ça reste théoriquement de l'annuelle ($compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;)
-		if ($compteur->reportRtt != 1 && $compteur->rttTypeAcquisition === 'Mensuel')
-		{
-			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
-			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
-
+			$compteur->rttNonCumuleReportNM1 = 0;
+			$compteur->rttCumuleReportNM1 = 0;
+			$compteur->rttCumulePris = 0;
+			$compteur->rttNonCumulePris = 0;
 			$compteur->rttCumuleAcquis = 0;
 			$compteur->rttNonCumuleAcquis = 0;
+			$compteur->rttCumulePris = 0;
+			$compteur->rttCumuleTotal = 0;
+			$compteur->rttNonCumuleTotal = 0;
+			$compteur->rttAcquisAnnuelCumuleInit = 0;
+			$compteur->rttAcquisAnnuelNonCumuleInit = 0;
 		}
-
-		if ($compteur->rttTypeAcquisition === 'Annuel')
+		else // Comportement standard
 		{
-			$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
-			$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
+			if ($compteur->reportRtt == 1)
+			{
+				echo '---- report RTT cumulés = '.$compteur->rttCumuleTotal.' & report RTT non cumulés = '.$compteur->rttNonCumuleTotal."<br />\n";
+				$compteur->rttNonCumuleReportNM1 = $compteur->rttNonCumuleTotal;
+				$compteur->rttCumuleReportNM1 = $compteur->rttCumuleTotal;
+			}
 
-			$compteur->rttCumuleAcquis = $compteur->rttAcquisAnnuelCumuleInit;
-			$compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;
+			// A voir, pcq les RRT non cumulés ne sont pas init avec l'acquisition mensuelle, ça reste théoriquement de l'annuelle ($compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;)
+			if ($compteur->reportRtt != 1 && $compteur->rttTypeAcquisition === 'Mensuel')
+			{
+				$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
+				$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
 
-			$compteur->rttCumuleTotal = $compteur->rttCumuleAcquis + $compteur->rttCumuleReportNM1 - $compteur->rttCumulePris;
-			$compteur->rttNonCumuleTotal = $compteur->rttNonCumuleAcquis + $compteur->rttNonCumuleReportNM1 - $compteur->rttNonCumulePris;
+				$compteur->rttCumuleAcquis = 0;
+				$compteur->rttNonCumuleAcquis = 0;
+			}
+
+			if ($compteur->rttTypeAcquisition === 'Annuel')
+			{
+				$compteur->rttCumulePris = $compteur->rttCumulePrisN1;
+				$compteur->rttNonCumulePris = $compteur->rttNonCumulePrisN1;
+
+				$compteur->rttCumuleAcquis = $compteur->rttAcquisAnnuelCumuleInit;
+				$compteur->rttNonCumuleAcquis = $compteur->rttAcquisAnnuelNonCumuleInit;
+
+				$compteur->rttCumuleTotal = $compteur->rttCumuleAcquis + $compteur->rttCumuleReportNM1 - $compteur->rttCumulePris;
+				$compteur->rttNonCumuleTotal = $compteur->rttNonCumuleAcquis + $compteur->rttNonCumuleReportNM1 - $compteur->rttNonCumulePris;
+			}
 		}
 
 		$compteur->rttCumulePrisN1 = 0;

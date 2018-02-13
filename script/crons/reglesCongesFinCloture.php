@@ -30,7 +30,7 @@ if (!isset($_REQUEST['force_http']))
 
 	$PDOdb=new TPDOdb;
 //	$PDOdb->debug=true;
-	
+
 	$now = new DateTime();
 	$now->setTime(0, 0, 0); // H:i:s => 00:00:00
 	
@@ -46,6 +46,8 @@ if (!isset($_REQUEST['force_http']))
 		$Tab[] = $PDOdb->Get_field('rowid');
 	}
 
+	if (!empty($conf->global->ABSENCE_HIDE_BASCULE_ALL_TO_ZERO)) echo 'WARNING : ABSENCE_HIDE_BASCULE_ALL_TO_ZERO is enable'."<br />\n";
+	
 	$PDOdb->beginTransaction();
 	foreach($Tab as $fk_compteur)
 	{
@@ -67,20 +69,35 @@ if (!isset($_REQUEST['force_http']))
 			
 			// report des congés autorisé, uniquement des congés positif, car les négatif passeront en déjà pris sur N
 			if(!empty($conf->global->ABSENCE_REPORT_CONGE) && $compteur->congePrecReste>0) {
-				$compteur->reportCongesNM1 = $compteur->congePrecReste;
+				if (!empty($conf->global->ABSENCE_HIDE_BASCULE_ALL_TO_ZERO)) $compteur->reportCongesNM1 = 0;
+				else $compteur->reportCongesNM1 = $compteur->congePrecReste;
 				$compteur->congePrecReste = 0;
 			}
 			else {
 				$compteur->reportCongesNM1 = 0;
 				if($compteur->congePrecReste>0) $compteur->congePrecReste = 0;
 			}
-			$compteur->congesPrisNM1=$compteur->congesPrisN - $compteur->congePrecReste; // ex : -4, incrémente le déjà pris de 4
 			
-			$compteur->acquisExerciceNM1 = ceil($compteur->acquisExerciceN) + $compteur->nombrecongesAcquisAnnuel;
+			// Création de cette conf suite au tk7005
+			if (!empty($conf->global->ABSENCE_HIDE_BASCULE_ALL_TO_ZERO))
+			{
+				$compteur->congesPrisNM1 = 0;
+				$compteur->acquisExerciceNM1 = 0;
+				$compteur->acquisAncienneteNM1 = 0;
+				$compteur->acquisHorsPeriodeNM1 = 0;
+				$compteur->nombrecongesAcquisAnnuel = 0;
+				$compteur->nombreCongesAcquisMensuel = 0;
+			}
+			else
+			{
+				$compteur->congesPrisNM1=$compteur->congesPrisN - $compteur->congePrecReste; // ex : -4, incrémente le déjà pris de 4
 			
-			$compteur->acquisAncienneteNM1 = $compteur->acquisAncienneteN;
-			$compteur->acquisHorsPeriodeNM1 = $compteur->acquisHorsPeriodeN;
-			
+				$compteur->acquisExerciceNM1 = ceil($compteur->acquisExerciceN) + $compteur->nombrecongesAcquisAnnuel;
+
+				$compteur->acquisAncienneteNM1 = $compteur->acquisAncienneteN;
+				$compteur->acquisHorsPeriodeNM1 = $compteur->acquisHorsPeriodeN;
+			}
+						
 			$compteur->acquisExerciceN = 0;
 			$compteur->acquisHorsPeriodeN = 0;
 			$compteur->congesPrisN = 0;
