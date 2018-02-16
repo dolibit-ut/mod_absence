@@ -433,6 +433,13 @@ class modAbsence extends DolibarrModules
 	    $this->rights[$r][5] = 'IfAllValideurAlertedAlerteMe';
 		$r++;
 		
+		$this->rights[$r][0] = $this->numero.$r;
+		$this->rights[$r][1] = $langs->trans('Absence_CanUpdateDatesClotures');
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'update_date_cloture';
+		$r++;
+		
 
 		
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.

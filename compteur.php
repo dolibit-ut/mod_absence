@@ -322,7 +322,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'congesPris'=>$form->texte('','congesPrisN',round2Virgule($compteur->congesPrisN),10,50)
 				,'total'=>round2Virgule($congeCourantTotal)
 				,'idUser'=>$compteur->fk_user
-				,'date_congesCloture'=>date("d/m/Y",$compteur->date_congesCloture)
+				,'date_congesCloture'=>(!empty($user->rights->absence->myactions->update_date_cloture)) ? $form->calendrier('', 'date_congesCloture', $compteur->date_congesCloture) : date("d/m/Y",$compteur->date_congesCloture)
 				,'nombreCongesAcquisMensuel'=>$form->texte('','nombreCongesAcquisMensuel',round2Virgule($compteur->nombreCongesAcquisMensuel),10,50,'')	
 				,'nombreCongesAcquisAnnuel'=>$form->texte('','nombreCongesAcquisAnnuel',round2Virgule($compteur->nombrecongesAcquisAnnuel),10,50,'')	
 				
@@ -339,7 +339,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'mensuel'=>$form->texte('','rttAcquisMensuel',round2Virgule($compteur->rttAcquisMensuel),10,50,'')
 				,'annuelCumule'=>$form->texte('','rttAcquisAnnuelCumule',round2Virgule($compteur->rttAcquisAnnuelCumule),10,50,'')
 				,'annuelNonCumule'=>$form->texte('','rttAcquisAnnuelNonCumule',round2Virgule($compteur->rttAcquisAnnuelNonCumule),10,50,'')
-				,'date_rttCloture'=>date("d/m/Y", $compteur->date_rttCloture)
+				,'date_rttCloture'=>(!empty($user->rights->absence->myactions->update_date_cloture)) ? $form->calendrier('', 'date_rttCloture', $compteur->date_rttCloture) : date("d/m/Y", $compteur->date_rttCloture)
 				,'mensuelInit'=>$form->texte('','rttAcquisMensuelInit',round2Virgule($compteur->rttAcquisMensuelInit),10,50,'')
 				,'mensuelTotal'=>$form->texte('','rttAcquisMensuelTotal',round2Virgule($compteur->rttAcquisMensuelTotal),10,50,'')
 				,'annuelCumuleInit'=>$form->texte('','rttAcquisAnnuelCumuleInit',round2Virgule($compteur->rttAcquisAnnuelCumuleInit),10,50,'')
