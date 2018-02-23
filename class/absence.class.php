@@ -3160,7 +3160,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3172,7 +3172,7 @@ class TRH_TypeAbsence extends TObjetStd {
 					";
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3185,7 +3185,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
