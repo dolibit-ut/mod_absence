@@ -170,7 +170,7 @@
 		<table class="liste formdoc noborder">
 			<tr class="liste_titre">
 				<td><b>Date d'acceptation</b></td>
-				<td><b>Accéptée par</b></td>
+				<td><b>Acceptée par</b></td>
 			</tr>
 			<tr>
 				<td>[TUserAccepted.date_acceptation;strconv=no;protect=no]</td>
