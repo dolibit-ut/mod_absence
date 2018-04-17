@@ -2500,13 +2500,30 @@ END:VCALENDAR
 		//on récupère les différents utilisateurs concernés par la recherche
 
 		if($idUserRecherche>0) {
-			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u WHERE rowid=".$idUserRecherche;
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.rowid=".$idUserRecherche."
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
 		}
 		else if(array_sum($idGroupeRecherche)>0 ) {	//on recherche un groupe précis
-			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."usergroup_user as g
-			WHERE u.rowid=g.fk_user AND g.fk_usergroup IN (".implode(',',$idGroupeRecherche).") AND u.statut=1 ORDER BY u.lastname";
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user g ON (u.rowid=g.fk_user)
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE g.fk_usergroup IN (".implode(',',$idGroupeRecherche).")
+				AND u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+				ORDER BY u.lastname
+			";
 		}else{
-			$sql="SELECT rowid, login, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE statut=1";
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
 		}
 		$PDOdb->Execute($sql);
 		while ($PDOdb->Get_line()) {
