@@ -473,7 +473,7 @@ CanReportPresence=Gérer les Présences
 NbDaysAcquiredByYear=Nombre de jours acquis à l'an
 NbDayOffAcquired=Nombre de RTT acquis à l'an pour tous
 NbDayOffNCAcquired=Nombre de RTT Non cumulé acquis à l'an pour tous
-ListUserAlreadyAccepted=Liste des valideurs ayant déjà accéptés
+ListUserAlreadyAccepted=Liste des valideurs ayant déjà acceptés
 AbsenceSecable = Absence Non Sécable ?
 ApplyEmploiTempToGroup=Appliquer cet emploi du temps sur un groupe
 NewAbsenceRequestCollective=Nouvelle absence collective
@@ -534,3 +534,4 @@ NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suiv
 
 
 absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du compteur
+Absence_CanUpdateDatesClotures=Autoriser la modification des dates de clôtures sur une fiche compteur

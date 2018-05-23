@@ -171,7 +171,7 @@ class TRH_Compteur extends TObjetStd {
 		$this->congesPrisN=0;
 		$this->anneeNM1=$anneePrec;
 		$this->rttTypeAcquisition='Annuel';
-
+		
 		$this->rttAcquisMensuelInit=$conf->global->RH_NB_RTT_ANNUEL;
 		$this->rttAcquisAnnuelNonCumuleInit=$conf->global->RH_NB_RTTNC_ANNUEL;
 
@@ -194,8 +194,24 @@ class TRH_Compteur extends TObjetStd {
 		$this->rttannee=$annee;
 		$this->nombreCongesAcquisMensuel=$conf->global->RH_NB_CONGES_MOIS;
 		$this->nombrecongesAcquisAnnuel=$conf->global->RH_NB_CONGES_ANNUEL;
-		$this->date_rttCloture=strtotime($conf->global->RH_DATE_RTT_CLOTURE);
-		$this->date_congesCloture=strtotime($conf->global->RH_DATE_CONGES_CLOTURE);
+		
+		// Permet de claculer la bonne année de cloture pour la création d'un compteur
+		$today = dol_now();
+		
+		$time_rtt_cloture = strtotime($conf->global->RH_DATE_RTT_CLOTURE);
+		$date_rtt_cloture = date('Y');
+		if (date('md', $today) > date('md', $time_rtt_cloture)) $date_rtt_cloture += 1; //+1 year
+		$date_rtt_cloture .= '-'.date('m-d', $time_rtt_cloture);
+		
+		$time_conges_cloture = strtotime($conf->global->RH_DATE_CONGES_CLOTURE);
+		$date_conges_cloture = date('Y');
+		if (date('md', $today) > date('md', $time_conges_cloture)) $date_conges_cloture += 1; //+1 year
+		$date_conges_cloture .= '-'.date('m-d', $time_conges_cloture);
+		
+		$this->date_rttCloture=strtotime($date_rtt_cloture);
+		$this->date_congesCloture=strtotime($date_conges_cloture);
+		
+		
 		$this->reportRtt=0;
 
 		$this->is_archive=0;
@@ -3160,7 +3176,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3172,7 +3188,7 @@ class TRH_TypeAbsence extends TObjetStd {
 					";
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3185,7 +3201,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
