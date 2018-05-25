@@ -388,7 +388,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 						
 					});
 					
-					$(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					if ($.tipTip) $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					else $(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
 				});
 			}
 	

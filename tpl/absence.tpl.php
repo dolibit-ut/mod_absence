@@ -340,7 +340,8 @@
                     }).done(function(response) {
 					    $('#user-planning').html($(response).find("#plannings"));
                         $('#user-planning tr.footer').remove();
-                        $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+                        if ($.tipTip) $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+						else $(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
     			    });
     			    
 			}
