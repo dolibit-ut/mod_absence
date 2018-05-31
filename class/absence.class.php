@@ -526,30 +526,29 @@ class TRH_Absence extends TObjetStd {
 
 	function valid(&$PDOdb)
 	{
-		global $user,$conf,$langs;
-
-		//Valideur fort
-		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity) || $user->rights->absence->myactions->voirToutesAbsencesListe)
+		global $user,$conf;
+		
+		$canValidate = $user->rights->absence->myactions->valideurConges;
+		
+		if (!empty($conf->valideur->enabled))
 		{
-			$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
+			define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/valideur/config.php');
+			dol_include_once('/valideur/class/valideur.class.php');
 
-			//Validation final
-			$this->setAcceptee($PDOdb, $user->id);
+			if (!TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges')) $canValidate = false;
 		}
-		//Valideur faible
+		
+		
+		if ($canValidate)
+		{
+			$this->setAcceptee($PDOdb, $user->id);
+			return 1;
+		}
 		else
 		{
-			if (!TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS'))
-			{
-				$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
-
-				//check si tous le monde a validé
-				if (TRH_valideur_object::checkAllAccepted($PDOdb, $user, 'ABS', $this->getId(), $this))
-				{
-					//Validation final
-					$this->setAcceptee($PDOdb, $user->id);
-				}
-			}
+			$this->error = 'Permission insuffisante pour valider l\'absence';
+			return 0;
 		}
 
 	}
