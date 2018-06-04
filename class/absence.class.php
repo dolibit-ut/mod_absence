@@ -451,7 +451,8 @@ class TRH_Absence extends TObjetStd {
 		parent::add_champs('etat',array('type'=>'string','length'=>50, 'index'=>true));			//état (à valider, validé...)
 		parent::add_champs('avertissement',array('type'=>'integer'));
 		parent::add_champs('libelleEtat,avertissementInfo');			//état (à valider, validé...)
-		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation
+		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation @deprecated
+		parent::add_champs('level',array('type'=>'integer', 'default' => 1));	//niveau de validation pour la notion de hiérarchie
 		parent::add_champs('idAbsImport',array('type'=>'integer','index'=>true));	//niveau de validation
 		parent::add_champs('fk_user, fk_user_valideur',array('type'=>'integer','index'=>true));	//utilisateur concerné
 		parent::add_champs('entity',array('type'=>'integer','index'=>true));
@@ -490,6 +491,8 @@ class TRH_Absence extends TObjetStd {
 		$this->date_hourStart = strtotime(date('Y-m-d 8:00:00'));
 		$this->date_hourEnd = strtotime(date('Y-m-d 17:00:00'));
 		$this->date_lunchBreak = strtotime(date('Y-m-d 1:30:00'));
+		
+		$this->level = 1;
 	}
 
 	function delete(&$PDOdb)
@@ -536,9 +539,8 @@ class TRH_Absence extends TObjetStd {
 			dol_include_once('/valideur/config.php');
 			dol_include_once('/valideur/class/valideur.class.php');
 
-			if (!TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges')) $canValidate = false;
+			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
 		}
-		
 		
 		if ($canValidate)
 		{

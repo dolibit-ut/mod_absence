@@ -222,7 +222,8 @@ function _valideMultiple(&$PDOdb) {
 				$a=new TRH_Absence;
 				$a->load($PDOdb, $fk_absence);
 
-				$a->setAcceptee($PDOdb, $user->id);
+//				$a->setAcceptee($PDOdb, $user->id);
+				$a->valid($PDOdb);
 
 				setEventMessage($langs->transnoentities('AbsenceCheckedValidated', $a));
 			}
@@ -496,15 +497,14 @@ function _listeValidation(&$PDOdb, &$absence) {
 	print dol_get_fiche_head(absencePrepareHead($absence, '')  , '', $langs->trans('Absence'));
 	//getStandartJS();
 
- 	$sql = _getSQLListValidation($user->id);
-
- 	if($sql===false) {
+	$TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
+ 	if (empty($TGroupValidation)) {
 		?><div class="error">Vous n'&ecirc;tes pas valideur de cong&eacute;  </div><?php
 
 		llxFooter();
 		return false;
 	}
-
+		$sql = _getSQLListValidation($user->id);
 
 		//LISTE DES ABSENCES À VALIDER
 		$r = new TSSRenderControler($absence);

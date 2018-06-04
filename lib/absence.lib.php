@@ -793,7 +793,7 @@ function _getSQLListValidation($userid)
 		dol_include_once('/valideur/class/valideur.class.php');
 	}
 	
-	return TRH_valideur_groupe::getSqlListObject(null, 'Conges');
+	return TRH_valideur_groupe::getSqlListObject('Conges');
 }
 
 function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {
