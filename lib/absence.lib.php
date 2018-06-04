@@ -786,7 +786,12 @@ global $conf,$db,$user;
 
 function _getSQLListValidation($userid)
 {
-	if (!class_exists('TRH_valideur_groupe')) dol_include_once('/valideur/class/valideur.class.php');
+	if (!class_exists('TRH_valideur_groupe')) 
+	{
+		if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', 1);
+		dol_include_once('/valideur/config.php');
+		dol_include_once('/valideur/class/valideur.class.php');
+	}
 	
 	return TRH_valideur_groupe::getSqlListObject(null, 'Conges');
 }
