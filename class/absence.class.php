@@ -2646,6 +2646,30 @@ END:VCALENDAR
 		//print_r($TRetour);
 		return $TRetour;
 	}
+	
+	private function getTValideurFromTUser(&$PDOdb, &$TUser)
+	{
+		$TValideur = array();
+		foreach ($TUser as &$user)
+		{
+			$Tab = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $this, 'Conges', 'object');
+			foreach ($Tab as &$u)
+			{
+				$TValideur[$u->id] = $u;
+			}
+		}
+//		var_dump($TValideur); exit;
+		return $TValideur;
+	}
+	
+	public function getNextTValideur(&$PDOdb)
+	{
+		global $db;
+		$u = new User($db);
+		$u->fetch($this->fk_user);
+		$TUser = array($u);
+		return $this->getTValideurFromTUser($PDOdb, $TUser);
+	}
 }
 
 
