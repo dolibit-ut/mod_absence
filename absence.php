@@ -222,7 +222,8 @@ function _valideMultiple(&$PDOdb) {
 				$a=new TRH_Absence;
 				$a->load($PDOdb, $fk_absence);
 
-				$a->setAcceptee($PDOdb, $user->id);
+//				$a->setAcceptee($PDOdb, $user->id);
+				$a->valid($PDOdb);
 
 				setEventMessage($langs->transnoentities('AbsenceCheckedValidated', $a));
 			}
@@ -496,15 +497,14 @@ function _listeValidation(&$PDOdb, &$absence) {
 	print dol_get_fiche_head(absencePrepareHead($absence, '')  , '', $langs->trans('Absence'));
 	//getStandartJS();
 
- 	$sql = _getSQLListValidation($user->id);
-
- 	if($sql===false) {
+	$TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
+ 	if (empty($TGroupValidation)) {
 		?><div class="error">Vous n'&ecirc;tes pas valideur de cong&eacute;  </div><?php
 
 		llxFooter();
 		return false;
 	}
-
+		$sql = _getSQLListValidation($user->id);
 
 		//LISTE DES ABSENCES À VALIDER
 		$r = new TSSRenderControler($absence);
@@ -673,7 +673,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			$estValideur=1;
 		}else $estValideur=0;
 	}else $estValideur=(int)TRH_valideur_groupe::isValideur($PDOdb, $user->id,0,true,'Conges',$absence->fk_user);
-
+	
 	if($absence->fk_user==0){
 		$regleId=$user->id;
 	}else $regleId=$absence->fk_user;
@@ -818,14 +818,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
 
-    $valideurs = '';
-    if(($absence->etat=='Avalider' || isset($_REQUEST['DEBUG'])) && empty($conf->global->RH_HIDE_VALIDEUR_ON_CARD)) {
-        $TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges', true, true,false);
-        $valideurs = implode(", ", $TValideur);
-        if(!empty($valideurs)) $valideurs = ' (à valider par '.$valideurs.')';
-
-    }
-
+    
 	$userAbsenceVisu = '';
 //	var_dump($droitsCreation);
 	if($droitsCreation==1) {
@@ -837,12 +830,17 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		$userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 	}
 
+	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || $user->rights->absence->myactions->CanValidPersonalAbsencePresence==1))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
+	if (TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')) $valideurConges = false;
+	
+	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
 		,array(
 			//'TRegle' =>$TRegle
 			'TRecap'=>$TRecap
 			,'TUserAccepted'=>_getUserAlreadyAccepted($PDOdb, $db, $absence)
+			,'TNextValideur' => $TNextValideur
 		)
 		,array(
 			'congesPrec'=>array(
@@ -891,7 +889,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'idUser'=>$user->id
 				,'comboType'=>$form->combo('','type',$typeAbsenceCreable,$absence->type)
 				,'etat'=>$absence->etat
-				,'libelleEtat'=>$absence->libelleEtat.$valideurs
+				,'libelleEtat'=>$absence->libelleEtat
 				,'duree'=>$form->texte('','duree',round2Virgule($absence->duree),5,10)
 				,'dureeHeure'=>$form->texte('','dureeHeure',round2Virgule($absence->dureeHeure),5,10)
 				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',round2Virgule($absence->dureeHeurePaie),5,10)
@@ -928,7 +926,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'lastname'=>$userCourant->lastname
 				,'firstname'=>$userCourant->firstname
 				,'link'=>$userCourant->getNomUrl(1)
-				,'valideurConges'=>($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || $user->rights->absence->myactions->CanValidPersonalAbsencePresence==1))?1:$user->rights->absence->myactions->valideurConges&&$estValideur
+				,'valideurConges'=>$valideurConges
 				//,'valideurConges'=>$user->rights->absence->myactions->valideurConges
 				,'droitCreationAbsenceCollaborateur'=>$droitsCreation==1?'1':'0'
 				//,'enregistrerPaieAbsences'=>$user->rights->absence->myactions->enregistrerPaieAbsences&&$estValideur
@@ -980,7 +978,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'autoValidatedAbsence' => (int)($form->type_aff == 'edit' &&  $user->rights->absence->myactions->CanDeclareAbsenceAutoValidated)
 				,'autoValidatedAbsenceChecked'=> ( !empty($user->rights->absence->myactions->voirToutesAbsencesListe) ? ' checked="checked" ':'')
 			)
-
+			,'langs' => $langs
 		)
 	);
 

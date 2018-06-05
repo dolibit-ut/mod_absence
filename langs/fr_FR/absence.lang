@@ -535,3 +535,5 @@ NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suiv
 
 absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du compteur
 Absence_CanUpdateDatesClotures=Autoriser la modification des dates de clôtures sur une fiche compteur
+
+NextValideur=Prochain(s) valideur(s)

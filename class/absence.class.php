@@ -451,7 +451,8 @@ class TRH_Absence extends TObjetStd {
 		parent::add_champs('etat',array('type'=>'string','length'=>50, 'index'=>true));			//état (à valider, validé...)
 		parent::add_champs('avertissement',array('type'=>'integer'));
 		parent::add_champs('libelleEtat,avertissementInfo');			//état (à valider, validé...)
-		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation
+		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation @deprecated
+		parent::add_champs('level',array('type'=>'integer', 'default' => 1));	//niveau de validation pour la notion de hiérarchie
 		parent::add_champs('idAbsImport',array('type'=>'integer','index'=>true));	//niveau de validation
 		parent::add_champs('fk_user, fk_user_valideur',array('type'=>'integer','index'=>true));	//utilisateur concerné
 		parent::add_champs('entity',array('type'=>'integer','index'=>true));
@@ -490,6 +491,8 @@ class TRH_Absence extends TObjetStd {
 		$this->date_hourStart = strtotime(date('Y-m-d 8:00:00'));
 		$this->date_hourEnd = strtotime(date('Y-m-d 17:00:00'));
 		$this->date_lunchBreak = strtotime(date('Y-m-d 1:30:00'));
+		
+		$this->level = 1;
 	}
 
 	function delete(&$PDOdb)
@@ -526,30 +529,28 @@ class TRH_Absence extends TObjetStd {
 
 	function valid(&$PDOdb)
 	{
-		global $user,$conf,$langs;
-
-		//Valideur fort
-		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity) || $user->rights->absence->myactions->voirToutesAbsencesListe)
+		global $user,$conf;
+		
+		$canValidate = $user->rights->absence->myactions->valideurConges;
+		
+		if (!empty($conf->valideur->enabled))
 		{
-			$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
+			define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/valideur/config.php');
+			dol_include_once('/valideur/class/valideur.class.php');
 
-			//Validation final
-			$this->setAcceptee($PDOdb, $user->id);
+			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
 		}
-		//Valideur faible
+		
+		if ($canValidate)
+		{
+			$this->setAcceptee($PDOdb, $user->id);
+			return 1;
+		}
 		else
 		{
-			if (!TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS'))
-			{
-				$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
-
-				//check si tous le monde a validé
-				if (TRH_valideur_object::checkAllAccepted($PDOdb, $user, 'ABS', $this->getId(), $this))
-				{
-					//Validation final
-					$this->setAcceptee($PDOdb, $user->id);
-				}
-			}
+			$this->error = 'Permission insuffisante pour valider l\'absence';
+			return 0;
 		}
 
 	}
@@ -2644,6 +2645,30 @@ END:VCALENDAR
 		}
 		//print_r($TRetour);
 		return $TRetour;
+	}
+	
+	private function getTValideurFromTUser(&$PDOdb, &$TUser)
+	{
+		$TValideur = array();
+		foreach ($TUser as &$user)
+		{
+			$Tab = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $this, 'Conges', 'object');
+			foreach ($Tab as &$u)
+			{
+				$TValideur[$u->id] = $u;
+			}
+		}
+//		var_dump($TValideur); exit;
+		return $TValideur;
+	}
+	
+	public function getNextTValideur(&$PDOdb)
+	{
+		global $db;
+		$u = new User($db);
+		$u->fetch($this->fk_user);
+		$TUser = array($u);
+		return $this->getTValideurFromTUser($PDOdb, $TUser);
 	}
 }
 
