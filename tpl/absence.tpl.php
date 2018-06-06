@@ -71,10 +71,12 @@
 						<td>[absenceCourante.commentaire;strconv=no;protect=no]</td>
 					</tr>
 					[onshow;block=begin;when [TNextValideur.#]+-0]
+					[onshow;block=begin;when [absenceCourante.time_validation]==0 ]
 					<tr class="next_valideurs">
 						<td width="25%">[langs.transnoentities(NextValideur)]</td>
 						<td><p>[TNextValideur;block=p][TNextValideur.getNomUrl(1);strconv=no]</p></td>
 					</tr>
+					[onshow;block=end]
 					[onshow;block=end]
 					<tr>
 						<td>[translate.CreatedThe;strconv=no;protect=no]</td>
