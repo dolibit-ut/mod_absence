@@ -412,12 +412,13 @@ class modAbsence extends DolibarrModules
         $this->rights[$r][5] = 'CanAvoidSendMail';
 		$r++;	
 		
-		$this->rights[$r][0] = 7135;
-		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'myactions';
-	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
-		$r++;
+		// Droit mis en commentaire car plus utilisé par le module, maintenant c'est l'attribut validate_himself sur la définition d'un groupe de validation
+//		$this->rights[$r][0] = 7135;
+//		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
+//		$this->rights[$r][3] = 0;
+//		$this->rights[$r][4] = 'myactions';
+//	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
+		$r++; //!\ Conserver l'incrémentation car les droits suivants utilise la variable pour numéroter les droits (ça évitera de changer de valeur sur désactivation/activation pour les ldap)
         
 		$this->rights[$r][0] = $this->numero.$r;
 		$this->rights[$r][1] = $langs->trans('CanDeclareAbsenceAutoValidated');
