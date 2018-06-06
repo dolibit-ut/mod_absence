@@ -714,7 +714,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		$droitsCreation=1;
 		$typeAbsenceCreable=TRH_TypeAbsence::getTypeAbsence($PDOdb, 'user', 0);
 	}
-	else if(TRH_valideur_groupe::validHimSelf($user, $absence) > 0){
+	else if(TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges') > 0){
                 $sql="SELECT rowid, lastname,  firstname,login
                 FROM `".MAIN_DB_PREFIX."user`
                 WHERE rowid=".$user->id;
@@ -830,10 +830,10 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		$userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 	}
 
-	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || TRH_valideur_groupe::validHimSelf($user, $absence)>0))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
+	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')>0))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
 	if (TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')) $valideurConges = false;
 	
-	if (!TRH_valideur_groupe::validHimSelf($user, $absence)) $valideurConges = false;
+	if (!TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')) $valideurConges = false;
 
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
