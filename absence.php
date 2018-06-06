@@ -833,6 +833,8 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || $user->rights->absence->myactions->CanValidPersonalAbsencePresence==1))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
 	if (TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')) $valideurConges = false;
 	
+	if($absence->fk_user == $user->id && empty($user->rights->absence->myactions->CanValidPersonalAbsencePresence)) $valideurConges = false;
+
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
