@@ -833,7 +833,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')>0))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
 	if (TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')) $valideurConges = false;
 	
-	if (!TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')) $valideurConges = false;
+	if ($absence->fk_user == $user->id &&!TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')) $valideurConges = false;
 
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
