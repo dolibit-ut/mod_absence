@@ -827,7 +827,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$groupslist = $usergroup->listGroupsForUser($absence->fk_user);
 	
 	if (
-		TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist, true, 'Conges')
+		TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist), true, 'Conges')
 		&& (
 			$absence->fk_user == $user->id && TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')
 			|| ($absence->fk_user!=$user->id && $user->rights->absence->myactions->valideurConges)
