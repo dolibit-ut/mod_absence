@@ -144,11 +144,14 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	}
 	
 
-	$sql.=" ORDER BY u.lastname, u.firstname";
-	//print $sql;
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')]=$ATMdb->Get_field('lastname')." ".$ATMdb->Get_field('firstname');
+	if (!empty($sql))
+	{
+		$sql.=" ORDER BY u.lastname, u.firstname";
+		//print $sql;
+		$ATMdb->Execute($sql);
+		while($ATMdb->Get_line()) {
+			$TUser[$ATMdb->Get_field('rowid')]=$ATMdb->Get_field('lastname')." ".$ATMdb->Get_field('firstname');
+		}
 	}
 	
 	llxHeader('', $langs->trans('Summary'));
