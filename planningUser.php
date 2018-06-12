@@ -122,6 +122,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			$sql.=" WHERE ug.fk_usergroup=".$idGroupeRecherche;
 		}
 		
+		$sql.=" ORDER BY u.lastname, u.firstname";
 	}
 	elseif($user->rights->absence->myactions->voirGroupesAbsences)  {
 		
@@ -146,7 +147,6 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 
 	if (!empty($sql))
 	{
-		$sql.=" ORDER BY u.lastname, u.firstname";
 		//print $sql;
 		$ATMdb->Execute($sql);
 		while($ATMdb->Get_line()) {

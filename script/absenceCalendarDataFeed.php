@@ -4,6 +4,7 @@ require('../config.php');
 dol_include_once("/absence/class/absence.class.php");
 dol_include_once("/valideur/class/valideur.class.php");
 dol_include_once("/rhlibrary/wdCalendar/php/functions.php");
+require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 
 $PDOdb=new TPDOdb;
 
@@ -45,7 +46,9 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 		
 		$userAbs=new User($db);
 		$userAbs->fetch($row->fk_user);
-				
+		
+		$usergroup=new UserGroup($db);
+		$groupslist = $usergroup->listGroupsForUser($userAbs->fk_user);
 		
 		if($row->isPresence==1) {
 	
@@ -64,7 +67,7 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 				$url = "presence.php?id=".$row->rowid."&action=view";//$row->location,
 		        $attends = 'presence';//$attends
 
-				if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)) {
+				if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist))) {
 					$label = $row->lastname.' '.$row->firstname;
                                 }
                                 else {
@@ -144,7 +147,7 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 			$url = "absence.php?id=".$row->rowid."&action=view";//$row->location,
 		        $attends = 'absence';//$attends
 				
-			if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)) {
+			if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist))) {
                      $label = $row->lastname.' '.$row->firstname;
 				     $url = '#';
             }
