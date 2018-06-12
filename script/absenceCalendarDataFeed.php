@@ -48,7 +48,7 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 		$userAbs->fetch($row->fk_user);
 		
 		$usergroup=new UserGroup($db);
-		$groupslist = $usergroup->listGroupsForUser($userAbs->fk_user);
+		$groupslist = $usergroup->listGroupsForUser($userAbs->id);
 		
 		if($row->isPresence==1) {
 	
