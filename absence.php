@@ -3,7 +3,8 @@
 	dol_include_once('/absence/class/absence.class.php');
 	dol_include_once('/absence/lib/absence.lib.php');
 	dol_include_once('/valideur/class/valideur.class.php');
-
+	require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+	
 	$langs->load('absence@absence');
 
 	$PDOdb=new TPDOdb;
@@ -664,15 +665,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	else{
 		$userCourant->fetch($user->id);
 	}
-
-
-
-	//$estValideur=$absence->estValideur($PDOdb,$user->id);
-	if(isset($_REQUEST['validation'])){
-		if($_REQUEST['validation']=='ok'){
-			$estValideur=1;
-		}else $estValideur=0;
-	}else $estValideur=(int)TRH_valideur_groupe::isValideur($PDOdb, $user->id,0,true,'Conges',$absence->fk_user);
+	
 	
 	if($absence->fk_user==0){
 		$regleId=$user->id;
@@ -829,12 +822,23 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	else {
 		$userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 	}
-
-	$valideurConges = ($user->rights->absence->myactions->creerAbsenceCollaborateur==1 && ($absence->fk_user!=$user->id || TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')>0))?1:$user->rights->absence->myactions->valideurConges&&$estValideur;
-	if (TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')) $valideurConges = false;
 	
-	if ($absence->fk_user == $user->id &&!TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')) $valideurConges = false;
-
+	$usergroup=new UserGroup($db);
+	$groupslist = $usergroup->listGroupsForUser($absence->fk_user);
+	
+	if (
+		TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist, true, 'Conges')
+		&& (
+			$absence->fk_user == $user->id && TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')
+			|| ($absence->fk_user!=$user->id && $user->rights->absence->myactions->valideurConges)
+		)
+		&& !TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')
+	) {
+		$valideurConges = true;
+	} else {
+		$valideurConges = false;
+	}
+	
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
