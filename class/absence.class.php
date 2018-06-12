@@ -2665,6 +2665,9 @@ END:VCALENDAR
 	public function getNextTValideur(&$PDOdb)
 	{
 		global $db;
+		
+		if ($this->getId() <= 0) return array();
+		
 		$u = new User($db);
 		$u->fetch($this->fk_user);
 		$TUser = array($u);
