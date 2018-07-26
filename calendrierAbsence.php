@@ -134,13 +134,29 @@ a.fc-day-grid-event,a.fc-time-grid-event  {
 </style>
 <script type="text/javascript">
 
+$.fn.serializeObject = function()
+{
+	var o = {};
+	var a = this.serializeArray();
+	$.each(a, function() {
+		if (o[this.name] !== undefined) {
+			if (!o[this.name].push) {
+				o[this.name] = [o[this.name]];
+			}
+			o[this.name].push(this.value || '');
+		} else {
+			o[this.name] = this.value || '';
+		}
+	});
+	return o;
+};
+
 $(document).ready(function() {
 
 var year = '<?php echo date('Y') ?>';
 var month = '<?php echo date('m') ?>';
 var defaultDate = year+'-'+month+'-<?php echo $defaultDay ?>';
 var defaultView='month';
-var currentsource = '<?php echo dol_buildpath('/absence/script/absenceCalendarDataFeed.php',1) ?>'+'?'+$('form[name=formAgenda]').serialize();
 
 $('#fullcalendar').fullCalendar({
 	        header:{
@@ -152,7 +168,26 @@ $('#fullcalendar').fullCalendar({
 	        ,lang: 'fr'
 	        ,weekNumbers:true
 			,defaultView:'month'
-			,eventSources : [currentsource]
+			,viewRender: function( view, element ) {
+				console.log('viewRender called');
+				
+				var formData = $('form[name=formAgenda]').serializeObject();
+				formData.start=view.start.format('YYYY-MM-DD HH:mm:ss');
+				formData.end=view.end.format('YYYY-MM-DD HH:mm:ss');
+				
+				$.ajax({
+					url: '<?php echo dol_buildpath('/absence/script/absenceCalendarDataFeed.php',1); ?>'
+					,dataType: 'json'
+					,data: formData
+				}).fail(function(jqXHR, textStatus, errorThrown) {
+					console.log('Error: jqXHR, textStatus, errorThrown => ', jqXHR, textStatus, errorThrown);
+				}).done(function(TEvent, textStatus, jqXHR) {
+					console.log('viewRender Done => TEvent = ', TEvent);
+
+					view.calendar.removeEvents();
+					view.calendar.addEventSource(TEvent);
+				});
+			}
 			,eventLimit : <?php echo !empty($conf->global->AGENDA_MAX_EVENTS_DAY_VIEW) ? $conf->global->AGENDA_MAX_EVENTS_DAY_VIEW : 3; ?>
 			<?php
 				if(!empty($conf->global->FULLCALENDAR_HIDE_DAYS)) {
