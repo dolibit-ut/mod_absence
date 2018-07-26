@@ -19,7 +19,11 @@ switch ($method) {
 
 function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = 'Tous'){
   global $conf,$user, $langs,$db;
-    
+  
+	$TUserTmp = array();
+	$TGoupListByUserId = array();
+//	$TValidationLevelByGroupId = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
+	
  	$TEvent=array();
   
   	$TJourFerie=getJourFerie($PDOdb, $date_start, $date_end);
@@ -44,11 +48,19 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 			continue;
 		}
 		
-		$userAbs=new User($db);
-		$userAbs->fetch($row->fk_user);
+		if (!empty($TUserTmp[$row->fk_user])) $userAbs = $TUserTmp[$row->fk_user];
+		else {
+			$userAbs=new User($db);
+			$userAbs->fetch($row->fk_user);
+			$TUserTmp[$row->fk_user] = $userAbs;
+		}
 		
-		$usergroup=new UserGroup($db);
-		$groupslist = $usergroup->listGroupsForUser($userAbs->id);
+		if (!empty($TGoupListByUserId[$userAbs->id])) $grouplist = $TGoupListByUserId[$userAbs->id];
+		else {
+			$usergroup=new UserGroup($db);
+			$groupslist = $usergroup->listGroupsForUser($userAbs->id);
+			$TGoupListByUserId[$userAbs->id] = $groupslist;
+		}
 		
 		if($row->isPresence==1) {
 	
@@ -67,15 +79,17 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 				$url = "presence.php?id=".$row->rowid."&action=view";//$row->location,
 		        $attends = 'presence';//$attends
 
-				if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist))) {
+				// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
+				if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist)))
+				{
 					$label = $row->lastname.' '.$row->firstname;
-                                }
-                                else {
+				}
+				else
+				{
 
 					$label = $row->lastname.' '.$row->firstname.' : '.$row->libelle;
-	
-                                }
-	
+				}
+
 
 				if($moreOneDay) {
 					$label.=' du '.dol_print_date($timeDebut).' au '.dol_print_date($timeFin);
@@ -142,20 +156,22 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGrou
 	
 
 					
-			$allDayEvent=(int)($row->ddMoment=='matin' && $row->dfMoment=='apresmidi' || $row->date_debut<$row->date_fin);		
-			$moreOneDay=(int)($row->date_debut<$row->date_fin);
-			$url = "absence.php?id=".$row->rowid."&action=view";//$row->location,
-		        $attends = 'absence';//$attends
-				
-			if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist))) {
-                     $label = $row->lastname.' '.$row->firstname;
-				     $url = '#';
-            }
-            else {
-                     $label = $row->lastname.' '.$row->firstname.' : '.html_entity_decode( $row->libelle);
-
-            }
+			$allDayEvent = (int) ($row->ddMoment == 'matin' && $row->dfMoment == 'apresmidi' || $row->date_debut < $row->date_fin);
+			$moreOneDay = (int) ($row->date_debut < $row->date_fin);
+			$url = "absence.php?id=".$row->rowid."&action=view"; //$row->location,
+			$attends = 'absence'; //$attends
 			
+			// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
+			if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist)))
+			{
+				$label = $row->lastname.' '.$row->firstname;
+				$url = '#';
+			}
+			else
+			{
+				$label = $row->lastname.' '.$row->firstname.' : '.html_entity_decode($row->libelle);
+			}
+
 			if(mb_detect_encoding($label,'UTF-8', true) === false  ) $label = utf8_encode($label);
 			
 //	var_dump($label, $user->id,$row->fk_user,TRH_valideur_groupe::isValideur($PDOdb, $row->fk_user), '<br>');        
@@ -393,7 +409,7 @@ global $user, $conf;
 				,'fk_project'=>0
 				,'societe'=>''
 				,'contact'=>''
-				,'user'=>$userAbs->getFullName($langs)
+				,'user'=>$userAbs->getFullName($langs) // TODO à corriger, ici la variable n'est même instancié et il faudrait ce baser sur le fk_user de l'event
 				,'project'=>''
 				,'more'=>''
 			);
