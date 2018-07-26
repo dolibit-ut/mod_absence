@@ -354,7 +354,7 @@ global $user, $conf;
 	$socid = GETPOST("socid","int",1);
 	if ($user->societe_id) $socid=$user->societe_id;
 	
-	$result = restrictedArea($user, 'agenda', 0, '', 'myactions');
+	if (empty($user->rights->agenda->myactions->lire) && empty($user->rights->agenda->myactions->read)) return array();
 
 	$canedit=1;
 	if (! $user->rights->agenda->myactions->read) return array();
