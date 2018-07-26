@@ -456,7 +456,7 @@ global $user, $conf;
 				,'fk_project'=>0
 				,'societe'=>''
 				,'contact'=>''
-				,'user'=>$userAbs->getFullName($langs) // TODO à corriger, ici la variable n'est même instancié et il faudrait ce baser sur le fk_user de l'event
+				,'user'=> '' // $userAbs->getFullName($langs) // TODO à corriger, ici la variable n'est même instancié et il faudrait ce baser sur le fk_user de l'event
 				,'project'=>''
 				,'more'=>''
 			);
