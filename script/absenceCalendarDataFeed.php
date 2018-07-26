@@ -72,8 +72,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 		if (!empty($TGoupListByUserId[$userAbs->id])) $groupslist = $TGoupListByUserId[$userAbs->id];
 		else
 		{
-			$usergroup = new UserGroup($db);
-			$groupslist = $usergroup->listGroupsForUser($userAbs->id);
+			$groupslist = customListGroupsForUser($userAbs->id);
 			$TGoupListByUserId[$userAbs->id] = $groupslist;
 		}
 
@@ -93,7 +92,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 				$url = "presence.php?id=".$row->rowid."&action=view"; //$row->location,
 				$attends = 'presence'; //$attends
 				// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
-				if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist)))
+				if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist))
 				{
 					$label = $row->lastname.' '.$row->firstname;
 				}
@@ -181,7 +180,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 			$url = "absence.php?id=".$row->rowid."&action=view"; //$row->location,
 			$attends = 'absence'; //$attends
 			// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
-			if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist)))
+			if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist))
 			{
 				$label = $row->lastname.' '.$row->firstname;
 				$url = '#';
@@ -227,6 +226,44 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 	}
 
 	return $TEvent;
+}
+
+function customListGroupsForUser($fk_user)
+{
+	global $conf,$user,$db;
+	
+	$sql = "SELECT g.rowid, ug.entity as usergroup_entity";
+	$sql.= " FROM ".MAIN_DB_PREFIX."usergroup as g,";
+	$sql.= " ".MAIN_DB_PREFIX."usergroup_user as ug";
+	$sql.= " WHERE ug.fk_usergroup = g.rowid";
+	$sql.= " AND ug.fk_user = ".$fk_user;
+	if(! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
+	{
+		$sql.= " AND g.entity IS NOT NULL";
+	}
+	else
+	{
+		$sql.= " AND g.entity IN (0,".$conf->entity.")";
+	}
+	
+	$result = $db->query($sql);
+	if ($result)
+	{
+		while ($obj = $db->fetch_object($result))
+		{
+			$ret[$obj->rowid] = $obj->rowid;
+		}
+
+		$db->free($result);
+
+		return $ret;
+	}
+	else
+	{
+		$error=$db->lasterror();
+		var_dump($error);
+		exit;
+	}
 }
 
 function _justDate($date,$frm = 'm/d/Y H:i') {
