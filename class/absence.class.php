@@ -2585,53 +2585,98 @@ END:VCALENDAR
 			if(!empty($TabAbsence[$id])){
 				foreach($TabAbsence as $tabAbs){
 					//print_r($tabAbs[$k]);exit;
-					foreach($tabAbs as $key=>$value){
-						$jourDebut=strtotime(str_replace("/","-",$date_debut));
-						//print_r($value);exit;
-						if($value['idUser']==$id){
-							while($jourFin>=$jourDebut){
-								if($TRetour[date('d/m/Y',$jourDebut)][$id]=='non'){
-
-									$moment=new TRH_absenceDay;
-									if(strtotime(str_replace("/","-",$value['date_debut']))<=$jourDebut&&strtotime(str_replace("/","-",$value['date_fin']))>=$jourDebut){
-										if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))&&$jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
-											if($value['ddMoment']==$value['dfMoment']){
-												if($value['ddMoment']=='matin'){
-													$moment->AM = true;
-												}else $moment->PM = true;
-											}
-										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))){
-											if($value['ddMoment']=='matin'){
-												$moment->DAM=$moment->AM=true;
-											}else $moment->DPM=$moment->PM=true;
-										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
-											if($value['dfMoment']=='matin'){
-												$moment->FAM=$moment->AM=true;
-											}else $moment->FPM=$moment->PM=true;
-										}
-
-										if($value['isPresence']>0) $moment->isPresence = 1;
-										$moment->label = $value['type'];
-										$moment->description = $value['commentaire'];
-										$moment->colorId = $value['colorId'];
-										$moment->date = date('Y-m-d', $jourDebut);
-
-										$moment->idAbsence =  $value['idAbsence'];
-
-										$TRetour[date('d/m/Y',$jourDebut)][$id]=$moment;
-
-									}else{
-
-										$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
-									}
-								}
-								//$typeTemp=$value['type'];
-								$jourDebut=strtotime('+1day',$jourDebut);
-							}
-						}
-
-					}
-
+				    if (isset($tabAbs[0])){
+    					foreach($tabAbs as $key=>$value){
+    						$jourDebut=strtotime(str_replace("/","-",$date_debut));
+    						//print_r($value);exit;
+    						if($value['idUser']==$id){
+    							while($jourFin>=$jourDebut){
+    								if($TRetour[date('d/m/Y',$jourDebut)][$id]=='non'){
+    
+    									$moment=new TRH_absenceDay;
+    									if(strtotime(str_replace("/","-",$value['date_debut']))<=$jourDebut&&strtotime(str_replace("/","-",$value['date_fin']))>=$jourDebut){
+    										if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))&&$jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
+    											if($value['ddMoment']==$value['dfMoment']){
+    												if($value['ddMoment']=='matin'){
+    													$moment->AM = true;
+    												}else $moment->PM = true;
+    											}
+    										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))){
+    											if($value['ddMoment']=='matin'){
+    												$moment->DAM=$moment->AM=true;
+    											}else $moment->DPM=$moment->PM=true;
+    										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
+    											if($value['dfMoment']=='matin'){
+    												$moment->FAM=$moment->AM=true;
+    											}else $moment->FPM=$moment->PM=true;
+    										}
+    
+    										if($value['isPresence']>0) $moment->isPresence = 1;
+    										$moment->label = $value['type'];
+    										$moment->description = $value['commentaire'];
+    										$moment->colorId = $value['colorId'];
+    										$moment->date = date('Y-m-d', $jourDebut);
+    
+    										$moment->idAbsence =  $value['idAbsence'];
+    
+    										$TRetour[date('d/m/Y',$jourDebut)][$id]=$moment;
+    
+    									}else{
+    
+    										$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
+    									}
+    								}
+    								//$typeTemp=$value['type'];
+    								$jourDebut=strtotime('+1day',$jourDebut);
+    							}
+    						}
+    
+    					}
+				    }
+				    else 
+				    {
+				        if($tabAbs['idUser']==$id){
+				            while($jourFin>=$jourDebut){
+				                if($TRetour[date('d/m/Y',$jourDebut)][$id]=='non'){
+				                    
+				                    $moment=new TRH_absenceDay;
+				                    if(strtotime(str_replace("/","-",$tabAbs['date_debut']))<=$jourDebut&&strtotime(str_replace("/","-",$tabAbs['date_fin']))>=$jourDebut){
+				                        if($jourDebut==strtotime(str_replace("/","-",$tabAbs['date_debut']))&&$jourDebut==strtotime(str_replace("/","-",$tabAbs['date_fin']))){
+				                            if($tabAbs['ddMoment']==$tabAbs['dfMoment']){
+				                                if($tabAbs['ddMoment']=='matin'){
+				                                    $moment->AM = true;
+				                                }else $moment->PM = true;
+				                            }
+				                        }else if($jourDebut==strtotime(str_replace("/","-",$tabAbs['date_debut']))){
+				                            if($tabAbs['ddMoment']=='matin'){
+				                                $moment->DAM=$moment->AM=true;
+				                            }else $moment->DPM=$moment->PM=true;
+				                        }else if($jourDebut==strtotime(str_replace("/","-",$tabAbs['date_fin']))){
+				                            if($tabAbs['dfMoment']=='matin'){
+				                                $moment->FAM=$moment->AM=true;
+				                            }else $moment->FPM=$moment->PM=true;
+				                        }
+				                        
+				                        if($tabAbs['isPresence']>0) $moment->isPresence = 1;
+				                        $moment->label = $tabAbs['type'];
+				                        $moment->description = $tabAbs['commentaire'];
+				                        $moment->colorId = $tabAbs['colorId'];
+				                        $moment->date = date('Y-m-d', $jourDebut);
+				                        
+				                        $moment->idAbsence =  $tabAbs['idAbsence'];
+				                        
+				                        $TRetour[date('d/m/Y',$jourDebut)][$id]=$moment;
+				                        
+				                    }else{
+				                        
+				                        $TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
+				                    }
+				                }
+				                //$typeTemp=$tabAbs['type'];
+				                $jourDebut=strtotime('+1day',$jourDebut);
+				            }
+				        }
+				    }
 
 				}
 			}else{
