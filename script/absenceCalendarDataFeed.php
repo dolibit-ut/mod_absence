@@ -37,6 +37,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 {
 	global $conf, $user, $langs, $db;
 	
+	$TEvent = array();
 	$TUserTmp = array();
 	$TGoupListByUserId = array();
 //	$TValidationLevelByGroupId = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
