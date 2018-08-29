@@ -254,13 +254,24 @@ $('#fullcalendar').fullCalendar({
 
 				element.prepend('<div style="float:right;">'+event.statut+'</div>');
 
-				element.tipTip({
-					maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50
-					,content : '<strong>'+event.title+'</strong><br />'+ note
-				});
+				if ($.tipTip) {
+					element.tipTip({
+						maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50
+						,content : '<strong>'+event.title+'</strong><br />'+ note
+					});
 
-				element.find(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
-				element.find(".classforcustomtooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 5000});
+					element.find(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					element.find(".classforcustomtooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 5000});
+				} else {
+					element.tooltip({
+						maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50
+						,content : '<strong>'+event.title+'</strong><br />'+ note
+					});
+					
+					element.find(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					element.find(".classforcustomtooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 5000});
+				}
+				
 
 			 }
 	    });   
