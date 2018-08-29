@@ -47,11 +47,11 @@ function _get(&$ATMdb, $case) {
 			$ATMdb=new TPDOdb;
 			$absence=new TRH_Absence;
             
-	        	$absence->date_debut_planning = strtotime('-3month');
-	       	    	$absence->date_fin_planning = strtotime('+1month');
+			$absence->date_debut_planning = strtotime('-3month');
+			$absence->date_fin_planning = strtotime('+1month');
             
-		        if(isset($_REQUEST['date_debut_search'])) $absence->set_date('date_debut_planning', $_REQUEST['date_debut_search']); 
-			if(isset($_REQUEST['date_fin_search'])) $absence->set_date('date_fin_planning', $_REQUEST['date_fin_search']); 
+			if(isset($_REQUEST['date_debut_search'])) $absence->date_debut_planning = $_REQUEST['date_debut_search']; 
+			if(isset($_REQUEST['date_fin_search'])) $absence->date_fin_planning = $_REQUEST['date_fin_search']; 
 			
 			$html = getPlanningAbsence($ATMdb, $absence, array((int)GETPOST('groupe'),(int)GETPOST('groupe2'),(int)GETPOST('groupe3')), GETPOST('fk_user'));
 			

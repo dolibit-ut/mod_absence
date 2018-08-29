@@ -362,7 +362,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	<script type="text/javascript">
 	function refreshPlanning() {
 				
-				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>')
+				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>');
 				
 				$.ajax({
 					url: "script/interface.php"
@@ -371,8 +371,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		    		,crossDomain: true
 					,data: {
 						get:'planning'
-						,date_debut_search: "<?php echo date('d/m/Y', $absence->date_debut_planning) ?>"
-						,date_fin_search: "<?php echo date('d/m/Y', $absence->date_fin_planning) ?>"
+						,date_debut_search: "<?php echo $absence->date_debut_planning; ?>"
+						,date_fin_search: "<?php echo $absence->date_fin_planning; ?>"
 						,groupe : <?php echo (int)$idGroupeRecherche ?>
 						,groupe2 : <?php echo (int)$idGroupeRecherche2 ?>
 						,groupe3 : <?php echo (int)$idGroupeRecherche3 ?>
