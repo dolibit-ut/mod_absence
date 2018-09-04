@@ -2424,7 +2424,8 @@ END:VCALENDAR
 		
 		$date_debut = strtotime(str_replace("/","-",$date_debut));
 		$date_fin = strtotime(str_replace("/","-",$date_fin));
-		
+
+		dol_include_once('/valideur/class/valideur.class.php');
 		$sql = TRH_valideur_groupe::getSqlListObject('Conges', array(
 			'ajax' => true
 			, 'fk_user' => $idUserRecherche
