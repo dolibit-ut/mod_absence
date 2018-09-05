@@ -2344,6 +2344,7 @@ END:VCALENDAR
 
 				list($dt, $TAbsence) = each($TPlanning);
 
+				if (empty($TAbsence)) $TAbsence = array();
 				foreach($TAbsence as $fk_user => $ouinon) {
 					$date = date('Y-m-d', $t_current);
 
