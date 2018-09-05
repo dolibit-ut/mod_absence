@@ -328,7 +328,7 @@ function _ticket(&$ATMdb) {
 	if($t_debut<0) return false;
 	
 	print "Du ".date('d/m/Y', $t_debut)." au ".date('d/m/Y', $t_fin);
-
+	
 	
 	print '<table class="planning" border="0">';
 	print '<tr class="entete">';
