@@ -42,6 +42,8 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.txt');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 
+		if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
+		
 		foreach($Tab as $fk_user=>$row) {
 
                 if($row['nbTicket'] > 0) {
@@ -58,6 +60,8 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 		header('Content-type: application/octet-stream');
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.csv');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		
+		if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
 		
 		if($type != 'primoclic'){
 			print $langs->trans('ProductCode') . ';' . $langs->trans('ClientCode') . ';' . $langs->trans('DeliveryPoint') . ';';
@@ -346,6 +350,8 @@ function _ticket(&$ATMdb) {
 	$group = new UserGroup($db);
 	$group->fetch($idGroup);
 	
+	$code_fact = '';
+	
 	if(!empty($group->array_options['options_tr_raison_sociale'])) {
 		$rs =  $group->array_options['options_tr_raison_sociale'];
 		$address = $group->array_options['options_tr_address'];
@@ -377,6 +383,7 @@ function _ticket(&$ATMdb) {
 		$ville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
 	
 		$code_client='';
+		$code_fact = $conf->global->DYNAMICRH_TR_CODEFACT;
 	}
 	
 	
@@ -444,7 +451,7 @@ function _ticket(&$ATMdb) {
 			<td align="right"><?php echo !empty($stat['ndf_suspicious']) ? '<strong style="color:red;" class="classfortooltip" title="'.implode(', ', $stat['TRefSuspisious']).'">'.$stat['ndf_suspicious'].'</strong>' : '' ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][nbTicket]', $stat['presence']-$stat['ndf'], 3)  ?> de <?php echo (int)$conf->global->RH_MONTANT_TICKET_RESTO ?> centimes</td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][pointlivraison]',$pointlivraison, 10,255).$form->hidden('TTicket['.$idUser.'][code_client]', $code_client)  ?></td>
-			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau1]', '', 10,255)  ?></td>
+			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau1]', $code_fact, 10,255)  ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau2]', '', 10,255)  ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][matricule]', $u->array_options['options_COMPTE_TIERS'], 10,255)  ?></td>
 			<td align="right"><?php echo $form->combo('', 'TTicket['.$idUser.'][nomcouv]', $TON , false)  ?></td>
