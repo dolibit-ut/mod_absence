@@ -1,4 +1,6 @@
 <?php
+set_time_limit(0);
+
 	require('config.php');
 	dol_include_once('/absence/class/absence.class.php');
 	dol_include_once('/absence/class/ticket.class.php');
@@ -187,9 +189,9 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$sql=" SELECT DISTINCT u.rowid, u.lastname, u.firstname 
 			FROM ".MAIN_DB_PREFIX."user as u LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (u.rowid=ug.fk_user)
 			";
-
+	$sql.= ' WHERE u.statut = 1 AND (u.firstname != "" OR u.lastname != "")';
 	if($idGroupeRecherche>0) {
-		$sql.=" WHERE ug.fk_usergroup=".$idGroupeRecherche;
+		$sql.=" AND ug.fk_usergroup=".$idGroupeRecherche;
 	}
 
 	$sql.=" ORDER BY u.lastname, u.firstname";

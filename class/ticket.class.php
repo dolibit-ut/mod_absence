@@ -92,6 +92,7 @@ class TRH_TicketResto extends TObjetStd {
 		$Tab=array();
 		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin);	
 		
+		if (empty($TAbsence)) $TAbsence = array();
 		foreach($TAbsence as $fk_user=>$TAbs) {
 			
 			$presence = $ndf = $ndf_with_suspicious = 0;
