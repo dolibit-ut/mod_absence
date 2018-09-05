@@ -2361,11 +2361,11 @@ END:VCALENDAR
 					else @$Tab[$fk_user][$date]['nb_jour_presence'] = 0;
 
 					@$Tab[$fk_user][$date]['absence'] = (int)($ouinon!='non' && !$estFerie) ;
-
+					
 					if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille=='OUI')@$Tab[$fk_user][$date]['nb_jour_absence'] = 1;
 					else if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille!='NON')@$Tab[$fk_user][$date]['nb_jour_absence'] = 0.5;
 					else $Tab[$fk_user][$date]['nb_jour_absence'] = 0;
-
+					
 					//$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
 					$t_am = $TTime['am'];
 					$t_pm = $TTime['pm'];
@@ -2531,7 +2531,7 @@ END:VCALENDAR
 
 		$TRetour=array();
 		//on remplit le tableau de non
-		foreach ($TabLogin as $id=>$user) {
+		foreach ($TabLogin as $id=>$username) {
 			$jourDebut = $date_debut;
 			//echo "ici".$id." ";
 			while ($jourFin >= $jourDebut)
@@ -2540,13 +2540,13 @@ END:VCALENDAR
 				$jourDebut=strtotime('+1day',$jourDebut);
 			}
 		}
-
-		foreach ($TabLogin as $id => $user)
+	
+		foreach ($TabLogin as $id => $username)
 		{
 			$jourDebut = $date_debut;
 			if (!empty($TabAbsence[$id]))
 			{
-				foreach ($TabAbsence as $tabAbs)
+				foreach ($TabAbsence[$id] as $tabAbs)
 				{
 					//print_r($tabAbs[$k]);exit;
 					if (isset($tabAbs[0]))
