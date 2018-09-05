@@ -17,9 +17,11 @@ switch ($method) {
 
 }
 
-function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = 'Tous')
+function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = '')
 {
 	global $conf;
+	
+	if (empty($typeAbsence)) $typeAbsence = 'Tous';
 	
 	$TEvent = getJourFerie($PDOdb, $date_start, $date_end); 
 	$TEvent = array_merge($TEvent, getEventsAbs($PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence));
@@ -37,6 +39,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 {
 	global $conf, $user, $langs, $db;
 	
+	$TEvent = array();
 	$TUserTmp = array();
 	$TGoupListByUserId = array();
 //	$TValidationLevelByGroupId = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
