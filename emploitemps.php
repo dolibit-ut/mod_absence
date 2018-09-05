@@ -76,6 +76,9 @@
 				
 				$mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
 				_fiche($PDOdb, $emploiTemps,'view');
+				
+				header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				
 				break;
 			case 'archive':
 				if(GETPOST('id','int')>0) $emploiTemps->load($PDOdb, GETPOST('id','int'));
@@ -94,12 +97,39 @@
 				$emploiTempsArchive->rowid=0;
 				$emploiTempsArchive->is_archive=1;
 				
-				$emploiTempsArchive->save($PDOdb);
+				$newId = $emploiTempsArchive->save($PDOdb);
 				setEventMessage($langs->trans('ArchivedSchedule'));
-				
+		
 				_fiche($PDOdb, $emploiTemps,'view');
 				
 				break;
+				
+			case 'copytoNew':
+			    if(GETPOST('id','int')>0) $emploiTemps->load($PDOdb, GETPOST('id','int'));
+			    else $emploiTemps->loadByuser($PDOdb, GETPOST('fk_user','int'));
+			    
+			    $emploiTempsArchive = clone $emploiTemps;
+			    
+			    $PDOdb->Execute("SELECT MAX(date_fin) as date_fin
+					FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
+			    $row = $PDOdb->Get_line();
+			    if($row) {
+			        $emploiTempsArchive->date_debut = strtotime($row->date_fin);
+			    }
+			    $emploiTempsArchive->date_fin = time();
+			    
+			    $emploiTempsArchive->rowid=0;
+			    $emploiTempsArchive->is_archive=1;
+			    
+			    $newId = $emploiTempsArchive->save($PDOdb);
+			    setEventMessage($langs->trans('ArchivedSchedule'));
+			    
+			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+			    exit;
+			    
+			    //_fiche($PDOdb, $emploiTemps,'view');
+			    
+			    break;
 			case 'deleteArchive':
 				
 				$emploiTempsArchive=new TRH_EmploiTemps;
@@ -284,6 +314,23 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	
 	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($_REQUEST['id'])))	$can_modify_edt = 1;
 	
+	// to return on default planning
+	$defaultEmploiTemps = new TRH_EmploiTemps();
+	$defaultEmploiTemps->load_by_fkuser($PDOdb, $emploiTemps->fk_user);
+	$defaultPlanningUrl = '';
+	if($defaultEmploiTemps->getId() > 0 && $emploiTemps->getId() != $defaultEmploiTemps->getId()){
+	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 2).'?action=view&id='.$defaultEmploiTemps->getId();
+	}
+	
+	$cardTitle = $langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname);
+	
+	if($emploiTemps->is_archive){
+	    $cardTitle .= ' ';
+	}
+	else{
+	    $cardTitle .= '('.$langs->trans('DefaultSchedule').')';
+	}
+	
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/emploitemps.tpl.php'
 		,array(	
@@ -302,8 +349,9 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 				'mode'=>$mode
 				,'head'=>dol_get_fiche_head(edtPrepareHead($emploiTemps, 'emploitemps')  , 'emploitemps', $langs->trans('Absence'))
 				,'compteur_id'=>$emploiTemps->getId()
-				,'titreEdt'=>load_fiche_titre($langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname),'', 'title.png', 0, '')
-				
+			    ,'titreEdt'=>load_fiche_titre($cardTitle,'', 'title.png', 0, '')
+			    ,'defaultPlanningUrl' => $defaultPlanningUrl
+			    ,'defaultPlanning' => !empty($defaultPlanningUrl)?'no':'yes' 
 				// Avant y'avait ça : (ça posait un souci sur l'affichage des caractères accentués)
 				//,'titreEdt'=>load_fiche_titre($langs->trans('ScheduleOf', htmlentities($userCourant->firstname, ENT_COMPAT , 'ISO8859-1'), htmlentities($userCourant->lastname, ENT_COMPAT , 'ISO8859-1')),'', 'title.png', 0, '')
 				
@@ -332,8 +380,14 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 				'Register' 				=> $langs->trans('Register'),
 				'Cancel' 				=> $langs->trans('Cancel'),
 				'Modify' 				=> $langs->trans('Modify'),
-				'Archive' 				=> $langs->trans('Archive'),
-				'is_tempspartiel'		=> $langs->trans('is_tempspartiel')
+			    'Archive' 				=> $langs->trans('Archive'),
+			    'is_tempspartiel'		=> $langs->trans('is_tempspartiel'),
+			    'GoToDefaultPlanning'   => $langs->trans('GoToDefaultPlanning'),
+			    'AbsenceCopy'           => $langs->trans('AbsenceCopy'),
+			    'archiveHelpToolTip'    => $langs->trans('archiveHelpToolTip'),
+			    'copytoNewHelpToolTip'  => $langs->trans('copytoNewHelpToolTip'),
+			    
+			    
 			)
 			
 		)	

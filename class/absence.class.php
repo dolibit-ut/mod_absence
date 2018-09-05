@@ -2728,7 +2728,7 @@ class TRH_EmploiTemps extends TObjetStd {
 	function save(&$db) {
 		global $conf;
 
-		parent::save($db);
+		return parent::save($db);
 	}
 
 	function initCompteurHoraire (&$PDOdb, $idUser){
