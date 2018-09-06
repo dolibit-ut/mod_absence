@@ -42,7 +42,8 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.txt');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 
-		if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
+		// Pour l'export SAGE il faut pas le rajouter ce caractère
+		//if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
 		
 		foreach($Tab as $fk_user=>$row) {
 

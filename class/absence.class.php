@@ -2434,6 +2434,10 @@ END:VCALENDAR
 			, 'date_start' => date('Y-m-d H:i:s', $date_debut)
 			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
 			, 'typeAbsence' => 'Tous'
+			, 'statut' => 1
+			, 'extrafields' => array(
+				'ue.ticketresto_ok' => 1
+			)
 		));
 		
 		$TRow = $PDOdb->ExecuteAsArray($sql);
