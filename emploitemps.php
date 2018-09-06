@@ -72,12 +72,15 @@
 				
 				$emploiTemps->tempsHebdo=$emploiTemps->calculTempsHebdo($PDOdb, $emploiTemps);
 				
-				$emploiTemps->save($PDOdb);
+				$newId = $emploiTemps->save($PDOdb);
 				
-				$mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
-				_fiche($PDOdb, $emploiTemps,'view');
-				
-				header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				if($newId>0){
+				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				}
+				else{
+				    $mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
+				    _fiche($PDOdb, $emploiTemps,'view');
+				}
 				
 				break;
 			case 'archive':
@@ -105,29 +108,52 @@
 				break;
 				
 			case 'copytoNew':
+			    
+			    
 			    if(GETPOST('id','int')>0) $emploiTemps->load($PDOdb, GETPOST('id','int'));
 			    else $emploiTemps->loadByuser($PDOdb, GETPOST('fk_user','int'));
 			    
 			    $emploiTempsArchive = clone $emploiTemps;
 			    
-			    $PDOdb->Execute("SELECT MAX(date_fin) as date_fin
+			    
+			    $date_debut = GETPOST('date_debut');
+			    $date_fin = GETPOST('date_fin');
+			    
+			    if(empty($date_debut) || empty($date_fin))
+			    {
+			        $PDOdb->Execute("SELECT MAX(date_fin) as date_fin
 					FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
-			    $row = $PDOdb->Get_line();
-			    if($row) {
-			        $emploiTempsArchive->date_debut = strtotime($row->date_fin);
+			        
+			        $emploiTempsArchive->date_debut = time();
+			        $emploiTempsArchive->date_fin = time() + 604800;
+			        if($row) {
+			            $emploiTempsArchive->date_debut = strtotime($row->date_fin);
+			            $emploiTempsArchive->date_fin = $date_debut + 604800;
+			            if($emploiTempsArchive->date_fin < time ())
+			            {
+			                $emploiTempsArchive->date_fin = time();
+			            }
+			        }
+			        
+			        setEventMessage($langs->trans('copytoNewDateWarning'), 'warnings');
 			    }
-			    $emploiTempsArchive->date_fin = time();
+			    else{
+			        $emploiTempsArchive->date_debut = strtotime($date_debut);
+			        $emploiTempsArchive->date_fin = strtotime($date_fin);
+			    }
+			    
+			    
+			    
+			    
 			    
 			    $emploiTempsArchive->rowid=0;
 			    $emploiTempsArchive->is_archive=1;
 			    
 			    $newId = $emploiTempsArchive->save($PDOdb);
-			    setEventMessage($langs->trans('ArchivedSchedule'));
 			    
 			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
 			    exit;
 			    
-			    //_fiche($PDOdb, $emploiTemps,'view');
 			    
 			    break;
 			case 'deleteArchive':
@@ -296,6 +322,7 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 		)		
 		,'link'=>array(
 			'Actions'=>'
+			<a href="?id=@ID@&action=view">' . $langs->trans('View') . '</a>
 			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a>
 			<a href="?id='.$emploiTemps->getId().'&idArchive=@ID@&action=deleteArchive">' . $langs->trans('Delete') . '</a>'
 		)
@@ -304,6 +331,9 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			,'date_fin'=> $langs->trans('EndDate')
 			,'tempsHebdo'=> $langs->trans('WeeklyWorkingTimeInHour')
 		)
+	     ,'liste' => array(
+	         'titre' => $langs->trans('PlanningListByPeriod'),
+	     )
 		
 	 ));
 	
@@ -414,10 +444,156 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
         
 	}
 	
+	
+	printModalJsForm_copynew($PDOdb,$emploiTemps);
+	
+	
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
 }
+
+function printModalJsForm_copynew($PDOdb,$emploiTemps){
+    global $langs;
+    
+    
+    $PDOdb->Execute("SELECT MAX(date_fin) as date_fin FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
+    $row = $PDOdb->Get_line();
+    $date_debut = time();
+    $date_fin = time() + 604800;
+    if($row) {
+        $date_debut = strtotime($row->date_fin);
+        $date_fin = $date_debut + 604800;
+        if($date_fin < time ())
+        {
+            $date_fin = time();
+        }
+    }
+
+    
+    
+	print '<div id="dialog-form-copynew" title="'.$langs->trans('copytoNewModalTitle').'">';
+	print '<p class="validateTips">'.$langs->trans('AllFormAreRequired').'</p>';
+
+ 
+    $form=new TFormCore($_SERVER['PHP_SELF'],'form-copynew','POST'); 
+	 
+	echo $form->hidden('action', 'copytoNew');
+	echo $form->hidden('fk_user', $emploiTemps->fk_user);
+	 
+	print '<div id="errors-dialog-copynew" ></div>';
+
+	print '<table >';
+    print '<tr>';
+    print '<td>'.$langs->trans('StartDate').'</td>';
+    print '<td>'.$langs->trans('EndDate').'</td>';
+    print '</tr>';
+    print '<tr>';
+    print '<td>';
+    print '<input required type="date" name="date_debut" id="copynew_date_debut" value="'.date('Y-m-d',$date_debut).'" >';
+    print '</td>';
+    print '<td>';
+    print '<input required type="date" name="date_fin" id="copynew_date_fin" value="'.date('Y-m-d',$date_fin).'" >';
+    print '</td>';
+    print '</tr>';
+    print '</table>';
+	print '<!-- Allow form submission with keyboard without duplicating the dialog button --><input type="submit" tabindex="-1" style="position:absolute; top:-1000px">';
+    
+	$form->end();
+	print '</div>';
+   
+?>
+<script>
+    $( function() {
+        var dialog, form;
+
+        	function copytoNewHelpToolTip (){
+            	//check traitement
+            	var date_debut = $("#copynew_date_debut").val();
+            	var date_fin   = $("#copynew_date_fin").val();
+            	var formIsValid = true;
+            	
+            	$.getJSON( "<?php print dol_buildpath("absence/script/interface.php",2) ?>?get=checkPlanningOverride&date_debut_search=" + date_debut + "&date_fin_search=" + date_fin + "&fk_user=<?php print $emploiTemps->fk_user; ?>"  
+                    , function( data ) {
+                        //console.log(data);
+    
+                        var errors = [];
+    
+                        if(data.errors != undefined && data.errors.length > 0){
+                            $.each( data.errors, function( key, val ) {
+                            	errors.push( val);
+                            });
+                            formIsValid = false;
+                        }
+    
+                        if(data.count > 0){
+                        	errors.push( "<?php print $langs->trans("PlanningRangeAllreadyUsed"); ?>" );
+                            formIsValid = false;
+                        }
+                        
+                        if(errors.length > 0){
+                            var htmlerrors = $( "<div/>", {
+                              "class": "error",
+                              html: errors.join( "<br/>" )
+                            });
+    
+                            $( "#errors-dialog-copynew" ).html(htmlerrors);
+                        }
+                    
+                   
+                  }).done(function() {
+                	    console.log( "second success" );
+                  })
+                  .fail(function() {
+                    console.log( "error" );
+                  })
+                  .always(function() {
+                	  if(formIsValid == true){
+                          dialog.find( "form" ).submit();
+                      	return true;
+                  	}
+                  	else{
+                      	return false;
+                  	}
+                	  
+                  });
+
+            	console.log(formIsValid);
+            	
+        	}
+        
+            dialog = $( "#dialog-form-copynew" ).dialog({
+                autoOpen: false,
+                /*height: 400,
+                width: 350,*/
+                modal: true,
+                buttons: {
+                    "<?php echo $langs->transnoentitiesnoconv('Validate'); ?>": copytoNewHelpToolTip,
+                    "<?php echo $langs->transnoentitiesnoconv('Cancel'); ?>": function() {
+                        dialog.dialog( "close" );
+                    }
+                },
+                close: function() {
+                   
+                }
+            });
+                
+            /*form = dialog.find( "form" ).on( "submit", function( event ) {
+                event.preventDefault();
+                dialog.find( "form" ).submit();
+            });*/
+                
+            $( "#copytoNewHelpToolTipBtn" ).button().on( "click", function( event ) {
+                event.preventDefault();
+                dialog.dialog( "open" );
+            });
+
+            
+    } );
+</script>
+    <?php 
+}
+
 
 /**
  * Détermine si l'emploi du temps sur lequel on se trouve appartient à un utilisateur dont le user courant est supérieur hiérarchique

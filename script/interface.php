@@ -20,6 +20,7 @@ $get = isset($_REQUEST['get'])?$_REQUEST['get']:'';
 _get($ATMdb, $get);
 
 function _get(&$ATMdb, $case) {
+    global $langs;
 	switch ($case) {
 		case 'jour_anciennete':
 			__out(_jourAnciennete($ATMdb, $_REQUEST['fk_user']));	
@@ -43,21 +44,61 @@ function _get(&$ATMdb, $case) {
 			break;
 			
 		case 'planning':
-			
-			$ATMdb=new TPDOdb;
-			$absence=new TRH_Absence;
-            
-	        	$absence->date_debut_planning = strtotime('-3month');
-	       	    	$absence->date_fin_planning = strtotime('+1month');
-            
-		        if(isset($_REQUEST['date_debut_search'])) $absence->set_date('date_debut_planning', $_REQUEST['date_debut_search']); 
-			if(isset($_REQUEST['date_fin_search'])) $absence->set_date('date_fin_planning', $_REQUEST['date_fin_search']); 
-			
-			$html = getPlanningAbsence($ATMdb, $absence, array((int)GETPOST('groupe'),(int)GETPOST('groupe2'),(int)GETPOST('groupe3')), GETPOST('fk_user'));
-			
-			__out($html);
-			
-			break;
+		    
+		    $ATMdb=new TPDOdb;
+		    $absence=new TRH_Absence;
+		    
+		    $absence->date_debut_planning = strtotime('-3month');
+		    $absence->date_fin_planning = strtotime('+1month');
+		    
+		    if(isset($_REQUEST['date_debut_search'])) $absence->set_date('date_debut_planning', $_REQUEST['date_debut_search']);
+		    if(isset($_REQUEST['date_fin_search'])) $absence->set_date('date_fin_planning', $_REQUEST['date_fin_search']);
+		    
+		    $html = getPlanningAbsence($ATMdb, $absence, array((int)GETPOST('groupe'),(int)GETPOST('groupe2'),(int)GETPOST('groupe3')), GETPOST('fk_user'));
+		    
+		    __out($html);
+		    
+		    break;
+		    
+		case 'checkPlanningOverride':  // Check if a planning allready exist in date range 
+		    
+		    $langs->load('absence@absence');
+		    $date_debut = 0;
+		    $date_fin = time();
+		    $result = array(
+		        'count' => 0
+		    );
+		    
+		    $fk_user = GETPOST('fk_user', 'int');
+		    if(empty($fk_user)){
+		        $result['errors'][] = $langs->trans('fk_user_empty');
+		    }
+		    else{
+		        
+    		    if(isset($_REQUEST['date_debut_search'])) $date_debut = strtotime($_REQUEST['date_debut_search']);
+    		    if(isset($_REQUEST['date_fin_search']))   $date_fin   = strtotime($_REQUEST['date_fin_search']);
+    		    
+    		    
+    		    if($date_fin < $date_debut){
+    		        $result['errors'][] = $langs->trans('invalidDatesRange');
+    		    }
+    		    
+    		    if(empty($result['errors']))
+    		    {
+        		    $sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps  WHERE fk_user=".(int)$fk_user."  AND is_archive=1 AND date_debut < '".date('Y-m-d 00:00:00',$date_fin)."' AND date_fin > '".date('Y-m-d 00:00:00',$date_debut)."'";
+        		    $ATMdb->Execute($sql);
+        		    // $result['sql'] = $sql;
+        		    
+        		    
+        		    $row = $ATMdb->Get_line();
+        		    if($row) {
+        		        $result['count'] = $row->count;
+        		    }
+    		    }
+		    }
+		    
+            print json_encode($result); exit();
+		    break;
 	}
 }
 

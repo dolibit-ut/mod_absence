@@ -518,10 +518,17 @@ ABSENCE_ALERT_OTHER_VALIDEUR=Alerter tout les valideurs qui en auront le droit d
 IfAllValideurAlertedAlerteMe=Si l'alerte pour tous les valideurs d'acception de congés est active, me l'envoyer
 
 AbsenceCopy=Nouveau planning
-DefaultSchedule=Planning utilisé par defaut
+DefaultSchedule=Planning utilisé par defaut si pas de période correspondante 
 GoToDefaultPlanning=Retour au planning par defaut
-archiveHelpToolTip=Copy l'emploi du temps par default en calculant les dates de début et de fin
-copytoNewHelpToolTip=
+archiveHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut avec comme date de fin ce jour et une date de début calculé en fonction des plannings précédents  
+copytoNewHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut 
+PlanningListByPeriod=Liste des emplois du temps par périodes
+View=Consulter
+AllFormAreRequired=Tous les champs sont requis.
+copytoNewModalTitle=Créer un nouveau planning
+copytoNewDateWarning=Dates incorrectes
+PlanningRangeAllreadyUsed=Cette periode est déjà utilisée.
+invalidDatesRange=Plage de dates invalide.
 
 absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
 recupRulesDeclare=Sur déclaration du temps de travail

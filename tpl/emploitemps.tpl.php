@@ -127,7 +127,7 @@
 			<div class="tabsAction" >
 				<a class="butAction"  href="?id=[view.compteur_id]&action=edit">[translate.Modify;strconv=no;protect=no]</a>
 				<a class="butAction classfortooltip" title="[translate.archiveHelpToolTip]"  href="?id=[view.compteur_id]&action=archive">[onshow;block=a;when [emploiTemps.is_archive]==0][translate.Archive;strconv=no;protect=no]</a>
-				<a class="butAction classfortooltip" title="[translate.copytoNewHelpToolTip]" href="?id=[view.compteur_id]&action=copytoNew">[onshow;block=a;when [emploiTemps.is_archive]==0][translate.AbsenceCopy;strconv=no;protect=no]</a>
+				<a id="copytoNewHelpToolTipBtn" class="butAction classfortooltip" title="[translate.copytoNewHelpToolTip]" href="?id=[view.compteur_id]&action=copytoNew">[onshow;block=a;when [emploiTemps.is_archive]==0][translate.AbsenceCopy;strconv=no;protect=no]</a>
 			
 			
 			
