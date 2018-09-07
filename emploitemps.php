@@ -100,10 +100,26 @@
 				$emploiTempsArchive->rowid=0;
 				$emploiTempsArchive->is_archive=1;
 				
-				$newId = $emploiTempsArchive->save($PDOdb);
-				setEventMessage($langs->trans('ArchivedSchedule'));
-		
+				// check planning override
+				$sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps  
+                        WHERE fk_user=".$emploiTempsArchive->fk_user."  AND is_archive=1 
+                                AND date_debut < '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_fin)."' 
+                                AND date_fin > '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_debut)."'";
+				$PDOdb->Execute($sql);
+				$row = $PDOdb->Get_line();
+				//var_dump($sql);
+				if($row && $row->count > 0 ) {
+				    setEventMessage($langs->trans('ArchiveErrorPlanningRangeAllreadyUsed'),'warnings');
+				}
+				else {
+				    
+				    $newId = $emploiTempsArchive->save($PDOdb);
+				    setEventMessage($langs->trans('ArchivedSchedule'));
+				}
+				
+				
 				_fiche($PDOdb, $emploiTemps,'view');
+				
 				
 				break;
 				
@@ -320,10 +336,11 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			'date_debut'=>array('30/11/-0001'=>'-')
 			,'date_fin'=>array('30/11/-0001'=>'-')
 		)		
-		,'link'=>array(
+	     ,'link'=>array(
+	         'ID'=>'<a href="?id=@ID@&action=view">@val@</a>',
 			'Actions'=>'
-			<a href="?id=@ID@&action=view">' . $langs->trans('View') . '</a>
-			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a>
+			<a href="?id=@ID@&action=view">' . $langs->trans('View') . '</a> &nbsp;  &nbsp; 
+			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a> &nbsp;  &nbsp; 
 			<a href="?id='.$emploiTemps->getId().'&idArchive=@ID@&action=deleteArchive">' . $langs->trans('Delete') . '</a>'
 		)
 		,'title'=>array(

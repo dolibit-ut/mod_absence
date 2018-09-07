@@ -529,6 +529,7 @@ copytoNewModalTitle=Créer un nouveau planning
 copytoNewDateWarning=Dates incorrectes
 PlanningRangeAllreadyUsed=Cette periode est déjà utilisée.
 invalidDatesRange=Plage de dates invalide.
+ArchiveErrorPlanningRangeAllreadyUsed=Un planning existe dejà pour cette plage de date
 
 absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
 recupRulesDeclare=Sur déclaration du temps de travail
