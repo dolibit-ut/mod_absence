@@ -4,6 +4,7 @@ require('../config.php');
 dol_include_once("/absence/class/absence.class.php");
 dol_include_once("/valideur/class/valideur.class.php");
 dol_include_once("/rhlibrary/wdCalendar/php/functions.php");
+require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 
 $PDOdb=new TPDOdb;
 
@@ -16,257 +17,254 @@ switch ($method) {
 
 }
 
-function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = 'Tous'){
-  global $conf,$user, $langs,$db;
-    
- 	$TEvent=array();
-  
-  	$TJourFerie=getJourFerie($PDOdb, $date_start, $date_end);
-	$TEvent = array_merge($TJourFerie, $TEvent); 
-
-  	if($user->rights->absence->myactions->voirToutesAbsences){		//si on a le droit de voir toutes les absences
-	  	
-	  	if($idUser>0){		//on recherche un groupe et un utilisateur
-	  		$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle', r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat, r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd ,t.colorId
-	  		FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-	  			LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-	  		WHERE u.rowid=".$idUser." AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";
-	  	}
-	  	else if($idGroupe>0){		//on recherche un groupe
-	  		$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle',  r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat, r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd ,t.colorId
-	  			FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-	  				LEFT JOIN `".MAIN_DB_PREFIX."usergroup_user` as g ON (u.rowid=g.fk_user)
-	  				LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-	  		WHERE g.fk_usergroup=".$idGroupe." AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";;
-	  	}
-		else {
-			$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle',  r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat , r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd,t.colorId
-			  		FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-	  						LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-			  		WHERE r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";
-		}
-
-		if($typeAbsence!= 'Tous'){
-  			$sql1.=" AND r.type LIKE '".$typeAbsence."' ";
-  		}
-	  	
-		$sql1.= " AND u.entity IN (0,".$conf->entity.") ";
-	}
-	else if($user->rights->absence->myactions->voirGroupesAbsences) {
-			
-		$Tab = $PDOdb->ExecuteAsArray("SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user WHERE fk_user=".$user->id);
-		$TGroup=array(0);
-		foreach($Tab as $row)$TGroup[] = $row->fk_usergroup;		
-				
-				
-		if($idUser>0){		//on recherche un groupe et un utilisateur
-	  		$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle', r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat, r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd ,t.colorId
-	  		FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-				LEFT JOIN `".MAIN_DB_PREFIX."usergroup_user` as g ON (u.rowid=g.fk_user)
-	  			LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-	  		WHERE u.rowid=".$idUser." AND g.fk_usergroup IN (".implode(',',$TGroup).") AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";
-	  	}
-	  	else if($idGroupe>0){		//on recherche un groupe
-	  		$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle',  r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat, r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd ,t.colorId
-	  			FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-	  				LEFT JOIN `".MAIN_DB_PREFIX."usergroup_user` as g ON (u.rowid=g.fk_user)
-	  				LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-	  		WHERE g.fk_usergroup=".$idGroupe." AND g.fk_usergroup IN (".implode(',',$TGroup).") AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";;
-	  	}
-		else {
-			$sql1 = "SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle',  r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat , r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd,t.colorId
-			  		FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-			  			LEFT JOIN `".MAIN_DB_PREFIX."usergroup_user` as g ON (u.rowid=g.fk_user)
-	  						LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-			  		WHERE  g.fk_usergroup IN (".implode(',',$TGroup).") AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";
-		}
-
-		if($typeAbsence!= 'Tous'){
-  			$sql1.=" AND r.type LIKE '".$typeAbsence."' ";
-  		}
-	  	
-		$sql1.= " AND u.entity IN (0,".$conf->entity.") ";	
-		
-	}
-	else{ //on ne peut voir que ses propres absences
-		$sql1="SELECT DISTINCT r.rowid as rowid, t.libelleAbsence as 'libelle',  r.type, u.lastname, u.firstname, r.fk_user, r.date_debut, r.date_fin, r.etat , r.ddMoment, r.dfMoment,t.isPresence, r.date_hourStart, r.date_hourEnd,t.colorId
-	  		FROM `".MAIN_DB_PREFIX."rh_absence` as r LEFT JOIN `".MAIN_DB_PREFIX."user` as u ON (r.fk_user=u.rowid)
-	  						LEFT JOIN `".MAIN_DB_PREFIX."rh_type_absence` t ON (r.type=t.typeAbsence) 
-	  		WHERE u.rowid=".$user->id." AND r.date_debut<='".$date_end."' AND r.date_fin>='".$date_start."'";
-			if($typeAbsence != 'Tous'){
-	  			$sql1.=" AND r.type LIKE '".$typeAbsence."' ";
-	  		}
-			//" AND (date_debut <= '".php2MySqlTime($ed)."' AND date_fin >='". php2MySqlTime($sd)."' )";
-	      
-	}
-  	
-  	$TRow = $PDOdb->ExecuteAsArray($sql1);
-    
+function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = 'Tous')
+{
+	global $conf;
 	
+	$TEvent = getJourFerie($PDOdb, $date_start, $date_end); 
+	$TEvent = array_merge($TEvent, getEventsAbs($PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence));
+	
+	if ($conf->agenda->enabled && $_REQUEST['withAgenda'] == 1)
+	{
+		$TEvent = array_merge($TEvent, getAgendaEvent($PDOdb, $date_start, $date_end));
+		//$ret['events'] = $TAgenda;
+	}
+	
+  	return $TEvent;
+}
 
-    foreach($TRow as $row) {
-    				
-		$idAbs[]=$row->rowid;
-    
-		if($row->etat=='Refusee' && !$user->rights->absence->myactions->voirAbsenceRefusee){
+function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence)
+{
+	global $conf, $user, $langs, $db;
+	
+	$TEvent = array();
+	$TUserTmp = array();
+	$TGoupListByUserId = array();
+//	$TValidationLevelByGroupId = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
+	
+	$sql = TRH_valideur_groupe::getSqlListObject('Conges', array(
+			'ajax' => true
+			, 'fk_user' => $idUser
+			, 'fk_ursergroup' => $idGroupe
+			, 'date_start' => $date_start
+			, 'date_end' => $date_end
+			, 'typeAbsence' => $typeAbsence
+	));
+
+	$TRow = $PDOdb->ExecuteAsArray($sql);
+
+	foreach ($TRow as $row)
+	{
+//		$idAbs[] = $row->rowid;
+
+		if ($row->etat == 'Refusee' && !$user->rights->absence->myactions->voirAbsenceRefusee)
+		{
 			continue;
 		}
-		
-		$userAbs=new User($db);
-		$userAbs->fetch($row->fk_user);
-				
-		
-		if($row->isPresence==1) {
-	
+
+		if (!empty($TUserTmp[$row->fk_user])) $userAbs = $TUserTmp[$row->fk_user];
+		else
+		{
+			$userAbs = new User($db);
+			$userAbs->fetch($row->fk_user);
+			$TUserTmp[$row->fk_user] = $userAbs;
+		}
+
+		if (!empty($TGoupListByUserId[$userAbs->id])) $groupslist = $TGoupListByUserId[$userAbs->id];
+		else
+		{
+			$groupslist = customListGroupsForUser($userAbs->id);
+			$TGoupListByUserId[$userAbs->id] = $groupslist;
+		}
+
+		if ($row->isPresence == 1)
+		{
 			$time_debut_jour = strtotime($row->date_debut);
 			$time_fin_jour = strtotime($row->date_fin);
-			
-	        $moreOneDay=(int)($row->date_debut<$row->date_fin);
-	        
-	        $t_current = $time_debut_jour;
-			while($t_current<=$time_fin_jour) {
-				
-				
-				$timeDebut = strtotime( date('Y-m-d',$t_current).' '.substr($row->date_hourStart,11) ); 
-				$timeFin = strtotime(date('Y-m-d',$t_current).' '.substr($row->date_hourEnd,11) ) ; 
-				
-				$url = "presence.php?id=".$row->rowid."&action=view";//$row->location,
-		        $attends = 'presence';//$attends
 
-				if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)) {
+			$moreOneDay = (int) ($row->date_debut < $row->date_fin);
+
+			$t_current = $time_debut_jour;
+			while ($t_current <= $time_fin_jour)
+			{
+				$timeDebut = strtotime(date('Y-m-d', $t_current).' '.substr($row->date_hourStart, 11));
+				$timeFin = strtotime(date('Y-m-d', $t_current).' '.substr($row->date_hourEnd, 11));
+
+				$url = "presence.php?id=".$row->rowid."&action=view"; //$row->location,
+				$attends = 'presence'; //$attends
+				// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
+				if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist))
+				{
 					$label = $row->lastname.' '.$row->firstname;
-                                }
-                                else {
-
-					$label = $row->lastname.' '.$row->firstname.' : '.$row->libelle;
-	
-                                }
-	
-
-				if($moreOneDay) {
-					$label.=' du '.dol_print_date($timeDebut).' au '.dol_print_date($timeFin);
 				}
-				
-				if(mb_detect_encoding($label,'UTF-8', true) === false  ) $label = utf8_encode($label);
-				
-				if(empty($row->colorId)) $color = '#66ff66';
+				else
+				{
+					$label = $row->lastname.' '.$row->firstname.' : '.$row->libelle;
+				}
+
+
+				if ($moreOneDay)
+				{
+					$label .= ' du '.dol_print_date($timeDebut).' au '.dol_print_date($timeFin);
+				}
+
+				if (mb_detect_encoding($label, 'UTF-8', true) === false)
+					$label = utf8_encode($label);
+
+				if (empty($row->colorId)) $color = '#66ff66';
 				else $color = TRH_TypeAbsence::getColor($row->colorId);
-				
-				$TEvent[]=array(
-					'id'=>$row->rowid
-					,'title'=>$label
-					,'allDay'=>0
-					,'start'=>(empty($timeDebut) ? '' : date('Y-m-d H:i:s',(int)$timeDebut))
-					,'end'=>(empty($timeFin) ? '' : date('Y-m-d H:i:s',(int)$timeFin))
-					,'url'=>$url
-					,'editable'=>0
-					,'color'=>'#66ff66'
-					,'isDarkColor'=>0
-					,'colors'=>''
-					,'note'=>''
-					,'statut'=>''
-					,'fk_soc'=>0
-					,'fk_contact'=>0
-					,'fk_user'=>$row->fk_user
-					,'fk_project'=>0
-					,'societe'=>''
-					,'contact'=>''
-					,'user'=>$userAbs->getFullName($langs)
-					,'project'=>''
-					,'more'=>''
+
+				$TEvent[] = array(
+					'id' => $row->rowid
+					, 'title' => $label
+					, 'allDay' => 0
+					, 'start' => (empty($timeDebut) ? '' : date('Y-m-d H:i:s', (int) $timeDebut))
+					, 'end' => (empty($timeFin) ? '' : date('Y-m-d H:i:s', (int) $timeFin))
+					, 'url' => $url
+					, 'editable' => 0
+					, 'color' => '#66ff66'
+					, 'isDarkColor' => 0
+					, 'colors' => ''
+					, 'note' => ''
+					, 'statut' => ''
+					, 'fk_soc' => 0
+					, 'fk_contact' => 0
+					, 'fk_user' => $row->fk_user
+					, 'fk_project' => 0
+					, 'societe' => ''
+					, 'contact' => ''
+					, 'user' => $userAbs->getFullName($langs)
+					, 'project' => ''
+					, 'more' => ''
 				);
-				
-				$t_current=strtotime('+1day', $t_current);
+
+				$t_current = strtotime('+1day', $t_current);
 			}
-			
-			
 		}
-		else {
-			
-			switch($row->etat){
-				case 'Avalider' : 
+		else
+		{
+			switch ($row->etat) {
+				case 'Avalider' :
 					$color = '#668cd9';
 					break;
 				case 'Refusee':
 					$color = '#ff4444';
 					break;
 				default:
-					
-					if(empty($row->colorId)) $color = '#65ad89';
+
+					if (empty($row->colorId)) $color = '#65ad89';
 					else $color = TRH_TypeAbsence::getColor($row->colorId);
-					
+
 					break;
 			}
-			
+
 			$timeDebut = strtotime($row->date_debut);
-			$timeFin = strtotime($row->date_fin)+86399; // par défaut 23:59:59
-			
+			$timeFin = strtotime($row->date_fin) + 86399; // par défaut 23:59:59
+
 			$allDay = 1;
-			
-			if($row->ddMoment=='apresmidi'){$timeDebut += (3600 * 12) ; $allDay = 0; }//+12h
-			if($row->dfMoment=='matin'){$timeFin -= (3600 * 12) ;  $allDay = 0; }//-12h
-	
 
-					
-			$allDayEvent=(int)($row->ddMoment=='matin' && $row->dfMoment=='apresmidi' || $row->date_debut<$row->date_fin);		
-			$moreOneDay=(int)($row->date_debut<$row->date_fin);
-			$url = "absence.php?id=".$row->rowid."&action=view";//$row->location,
-		        $attends = 'absence';//$attends
-				
-			if($user->id!=$row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)) {
-                     $label = $row->lastname.' '.$row->firstname;
-				     $url = '#';
-            }
-            else {
-                     $label = $row->lastname.' '.$row->firstname.' : '.html_entity_decode( $row->libelle);
+			if ($row->ddMoment == 'apresmidi')
+			{
+				$timeDebut += (3600 * 12);
+				$allDay = 0;
+			}//+12h
+			if ($row->dfMoment == 'matin')
+			{
+				$timeFin -= (3600 * 12);
+				$allDay = 0;
+			}//-12h
 
-            }
-			
-			if(mb_detect_encoding($label,'UTF-8', true) === false  ) $label = utf8_encode($label);
-			
-//	var_dump($label, $user->id,$row->fk_user,TRH_valideur_groupe::isValideur($PDOdb, $row->fk_user), '<br>');        
-	//	        $label = utf8_encode($row->lastname.' '.$row->firstname).' : '.$row->libelle;
-			if($moreOneDay) {
-				$label.=' du '._justDate($timeDebut,'d/m').' au '._justDate($timeFin,'d/m/Y');
+
+
+//			$allDayEvent = (int) ($row->ddMoment == 'matin' && $row->dfMoment == 'apresmidi' || $row->date_debut < $row->date_fin);
+			$moreOneDay = (int) ($row->date_debut < $row->date_fin);
+			$url = "absence.php?id=".$row->rowid."&action=view"; //$row->location,
+			$attends = 'absence'; //$attends
+			// TODO remplacer l'appel à isValideur par un test plus opti avec la variable $TValidationLevelByGroupId
+			if ($user->id != $row->fk_user && !TRH_valideur_groupe::isValideur($PDOdb, $user->id, $groupslist))
+			{
+				$label = $row->lastname.' '.$row->firstname;
+				$url = '#';
 			}
-			
-			$TEvent[]=array(
-				'id'=>$row->rowid
-				,'title'=>$label
-				,'allDay'=>$allDay
-				,'start'=>(empty($timeDebut) ? '' : date('Y-m-d H:i:s',(int)$timeDebut))
-				,'end'=>(empty($timeFin) ? '' : date('Y-m-d H:i:s',(int)$timeFin))
-				,'url'=>$url
-				,'editable'=>0
-				,'color'=>$color
-				,'isDarkColor'=>0
-				,'colors'=>''
-				,'note'=>''
-				,'statut'=>''
-				,'fk_soc'=>0
-				,'fk_contact'=>0
-				,'fk_user'=>$row->fk_user
-				,'fk_project'=>0
-				,'societe'=>''
-				,'contact'=>''
-				,'user'=>$userAbs->getFullName($langs)
-				,'project'=>''
-				,'more'=>''
-			);
-	        
-		}	
-		
-	  }  
-	 
-	if($conf->agenda->enabled && $_REQUEST['withAgenda']==1) {
-	    $TAgenda=getAgendaEvent($PDOdb, $date_start, $date_end);
-		$TEvent = array_merge($TEvent, $TAgenda); 
-		//$ret['events'] = $TAgenda;
-		
-	}  
-	
+			else
+			{
+				$label = $row->lastname.' '.$row->firstname.' : '.html_entity_decode($row->libelle);
+			}
 
-  return $TEvent;
+			if (mb_detect_encoding($label, 'UTF-8', true) === false) $label = utf8_encode($label);
+
+//	var_dump($label, $user->id,$row->fk_user,TRH_valideur_groupe::isValideur($PDOdb, $row->fk_user), '<br>');        
+//	        $label = utf8_encode($row->lastname.' '.$row->firstname).' : '.$row->libelle;
+			if ($moreOneDay)
+			{
+				$label .= ' du '._justDate($timeDebut, 'd/m').' au '._justDate($timeFin, 'd/m/Y');
+			}
+
+			$TEvent[] = array(
+				'id' => $row->rowid
+				, 'title' => $label
+				, 'allDay' => $allDay
+				, 'start' => (empty($timeDebut) ? '' : date('Y-m-d H:i:s', (int) $timeDebut))
+				, 'end' => (empty($timeFin) ? '' : date('Y-m-d H:i:s', (int) $timeFin))
+				, 'url' => $url
+				, 'editable' => 0
+				, 'color' => $color
+				, 'isDarkColor' => 0
+				, 'colors' => ''
+				, 'note' => ''
+				, 'statut' => ''
+				, 'fk_soc' => 0
+				, 'fk_contact' => 0
+				, 'fk_user' => $row->fk_user
+				, 'fk_project' => 0
+				, 'societe' => ''
+				, 'contact' => ''
+				, 'user' => $userAbs->getFullName($langs)
+				, 'project' => ''
+				, 'more' => ''
+			);
+		}
+	}
+
+	return $TEvent;
+}
+
+function customListGroupsForUser($fk_user)
+{
+	global $conf,$user,$db;
+	
+	$sql = "SELECT g.rowid, ug.entity as usergroup_entity";
+	$sql.= " FROM ".MAIN_DB_PREFIX."usergroup as g,";
+	$sql.= " ".MAIN_DB_PREFIX."usergroup_user as ug";
+	$sql.= " WHERE ug.fk_usergroup = g.rowid";
+	$sql.= " AND ug.fk_user = ".$fk_user;
+	if(! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
+	{
+		$sql.= " AND g.entity IS NOT NULL";
+	}
+	else
+	{
+		$sql.= " AND g.entity IN (0,".$conf->entity.")";
+	}
+	
+	$result = $db->query($sql);
+	if ($result)
+	{
+		while ($obj = $db->fetch_object($result))
+		{
+			$ret[$obj->rowid] = $obj->rowid;
+		}
+
+		$db->free($result);
+
+		return $ret;
+	}
+	else
+	{
+		$error=$db->lasterror();
+		var_dump($error);
+		exit;
+	}
 }
 
 function _justDate($date,$frm = 'm/d/Y H:i') {
@@ -357,7 +355,7 @@ global $user, $conf;
 	$socid = GETPOST("socid","int",1);
 	if ($user->societe_id) $socid=$user->societe_id;
 	
-	$result = restrictedArea($user, 'agenda', 0, '', 'myactions');
+	if (empty($user->rights->agenda->myactions->lire) && empty($user->rights->agenda->myactions->read)) return array();
 
 	$canedit=1;
 	if (! $user->rights->agenda->myactions->read) return array();
@@ -459,7 +457,7 @@ global $user, $conf;
 				,'fk_project'=>0
 				,'societe'=>''
 				,'contact'=>''
-				,'user'=>$userAbs->getFullName($langs)
+				,'user'=> '' // $userAbs->getFullName($langs) // TODO à corriger, ici la variable n'est même instancié et il faudrait ce baser sur le fk_user de l'event
 				,'project'=>''
 				,'more'=>''
 			);

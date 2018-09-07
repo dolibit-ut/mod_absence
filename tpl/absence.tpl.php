@@ -70,6 +70,14 @@
 						<td>[translate.Comment;strconv=no;protect=no]</td>
 						<td>[absenceCourante.commentaire;strconv=no;protect=no]</td>
 					</tr>
+					[onshow;block=begin;when [TNextValideur.#]+-0]
+					[onshow;block=begin;when [absenceCourante.time_validation]==0 ]
+					<tr class="next_valideurs">
+						<td width="25%">[langs.transnoentities(NextValideur)]</td>
+						<td><p>[TNextValideur;block=p][TNextValideur.getNomUrl(1);strconv=no]</p></td>
+					</tr>
+					[onshow;block=end]
+					[onshow;block=end]
 					<tr>
 						<td>[translate.CreatedThe;strconv=no;protect=no]</td>
 						<td>[absenceCourante.dt_cre;strconv=no;protect=no]</td>
@@ -170,7 +178,7 @@
 		<table class="liste formdoc noborder">
 			<tr class="liste_titre">
 				<td><b>Date d'acceptation</b></td>
-				<td><b>Accéptée par</b></td>
+				<td><b>Acceptée par</b></td>
 			</tr>
 			<tr>
 				<td>[TUserAccepted.date_acceptation;strconv=no;protect=no]</td>
@@ -340,7 +348,8 @@
                     }).done(function(response) {
 					    $('#user-planning').html($(response).find("#plannings"));
                         $('#user-planning tr.footer').remove();
-                        $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+                        if ($.tipTip) $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+						else $(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
     			    });
     			    
 			}

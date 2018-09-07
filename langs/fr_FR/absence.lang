@@ -28,7 +28,7 @@ AbsencesPresencesAdministration=Administration des absences et présences
 AbsencesPresencesCalendar=Calendrier des absences/présences
 AbsencesPresencesDiary=Agenda des absences/présences
 AbsencesPresencesRequestRulesList=Liste des règles sur les demandes d'abs./présence
-AbsencesPresencesRequestRulesMaxTimeOut= la durée dépasse la durée préconisée ou ne nombre de personnes présentes est insuffisante
+AbsencesPresencesRequestRulesMaxTimeOut=La durée dépasse la durée préconisée ou le nombre de personnes présentes est insuffisant
 AbsencesPresencesRequestRulesMaxTimeOutRestrictif=Demande refusée : La durée de l'absence dépasse une règle restrictive en vigueur
 AbsencesRules=Règles des absences
 AbsencesStatsDetailled=Statistiques absences découpées
@@ -473,7 +473,7 @@ CanReportPresence=Gérer les Présences
 NbDaysAcquiredByYear=Nombre de jours acquis à l'an
 NbDayOffAcquired=Nombre de RTT acquis à l'an pour tous
 NbDayOffNCAcquired=Nombre de RTT Non cumulé acquis à l'an pour tous
-ListUserAlreadyAccepted=Liste des valideurs ayant déjà accéptés
+ListUserAlreadyAccepted=Liste des valideurs ayant déjà acceptés
 AbsenceSecable = Absence Non Sécable ?
 ApplyEmploiTempToGroup=Appliquer cet emploi du temps sur un groupe
 NewAbsenceRequestCollective=Nouvelle absence collective
@@ -546,3 +546,6 @@ NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suiv
 
 
 absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du compteur
+Absence_CanUpdateDatesClotures=Autoriser la modification des dates de clôtures sur une fiche compteur
+
+NextValideur=Prochain(s) valideur(s)
