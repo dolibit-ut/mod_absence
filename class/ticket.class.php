@@ -38,9 +38,50 @@ class TRH_TicketResto extends TObjetStd {
 		
 	}
 	
+	static function getNdfpByDateRefFromDates($fk_user, $date_debut, $date_fin, $suspicious=false)
+	{
+		global $db,$conf;
+		
+		$TRef = array();
+		$db->query("SET SESSION sql_mode = '';");	
+		
+		$sql = "SELECT n.ref, DATE_FORMAT(nd.dated,'%Y-%m-%d') as dated";
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'ndfp_det nd';
+		$sql.= ' INNER JOIN '.MAIN_DB_PREFIX.'ndfp n ON (nd.fk_ndfp=n.rowid)';
+		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'ndfp_det_link_user ndl ON (nd.rowid=ndl.fk_ndfpdet)';
+		$sql.= ' WHERE 1';
+		if($suspicious) {
+			$sql .= " AND nd.datec >= '".$date_debut."' AND nd.datec <= '".$date_fin."'";
+		} else {
+			$sql .= " AND nd.dated <= '".$date_fin."' AND nd.datef >= '".$date_debut."'";
+		}
+		
+		$sql.= ' AND (n.fk_user = '.$fk_user.' OR ndl.fk_user = '.$fk_user.')';
+		
+		$sql.= ' AND nd.fk_exp IN ('.$conf->global->RH_NDF_TICKET_RESTO.')';
+		$sql.= ' GROUP BY nd.dated ';
+//		echo $sql."<br><br><br><br><br>";
+		
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			while ($obj = $db->fetch_object($resql))
+			{
+				$desc = $obj->ref.' ('.$obj->dated.')';
+				$TRef[$obj->dated][$obj->ref] = $desc;
+			}
+		}
+		else
+		{
+			dol_print_error($db);
+		}
+		
+		return $TRef;
+	}
+	
 	static function isNDFforDay(&$ATMdb, $date, $fk_user, $withSuspicisous=false) {
 		global $conf;
-		/* Note repas */
+		/* Note repas */			
 		$sql = "SELECT n.ref, DATE_FORMAT(nd.dated,'%d/%m/%Y') as dated
 		FROM ".MAIN_DB_PREFIX."ndfp_det nd LEFT JOIN ".MAIN_DB_PREFIX."ndfp n ON (nd.fk_ndfp=n.rowid)
 		WHERE n.fk_user=".$fk_user." AND nd.fk_exp IN (".$conf->global->RH_NDF_TICKET_RESTO.") ";
@@ -83,44 +124,85 @@ class TRH_TicketResto extends TObjetStd {
 		while($obj = $ATMdb->Get_line()) {
 			$line = $obj->ref.' ('.$obj->dated.')';
                         if(!in_array($line,$Tab))$Tab[]=$line;
-		}		
+		}
 
 		return $Tab;		
 	}
 	
-	static function getTicketFor(&$ATMdb, $date_debut, $date_fin, $idGroup=0, $fk_user=0) {
+	static function getTUserIdWithTicketOption()
+	{
+		global $db;
+		
+		$TUserId = array();
+		
+		$sql = 'SELECT fk_object FROM '.MAIN_DB_PREFIX.'user_extrafields WHERE ticketresto_ok = 1';
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			while ($row = $db->fetch_array($resql))
+			{
+				$TUserId[$row['fk_object']] = $row['fk_object'];
+			}
+		}
+		else
+		{
+			dol_print_error($db);
+		}
+		
+		return $TUserId;
+	}
+	
+	static function getTicketFor(&$ATMdb, $date_debut, $date_fin, $idGroup=0, $fk_user=0)
+	{
 		$Tab=array();
-		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin);	
+		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin);
+		
+		$TUserToScan = self::getTUserIdWithTicketOption();
 		
 		if (empty($TAbsence)) $TAbsence = array();
 		foreach($TAbsence as $fk_user=>$TAbs) {
 			
 			$presence = $ndf = $ndf_with_suspicious = 0;
-			
 			$TRefSuspisious = array();
-			foreach($TAbs as $date=>$row) {
+			
+			if (isset($TUserToScan[$fk_user]))
+			{
+				$TRefNdfp = self::getNdfpByDateRefFromDates($fk_user, $date_debut, $date_fin);
+				$TRefNdfpSuspicious = self::getNdfpByDateRefFromDates($fk_user, $date_debut, $date_fin, true);
 				
-				$presence+=	$row['presence_jour_entier'];	
-				if(	$row['presence_jour_entier'] ) {
+				foreach($TAbs as $date=>$row)
+				{
+					$presence += $row['presence_jour_entier'];
 					
-					$TRefNDF = TRH_TicketResto::isNDFforDay($ATMdb, $date, $fk_user);
-					$ndf+=(count( $TRefNDF )>0) ? 1 : 0;
-
-					$TRefNDFSus = TRH_TicketResto::isNDFforDay($ATMdb, $date, $fk_user, true);
-					$ndf_with_suspicious+=(count( $TRefNDFSus )>0) ?1:0;
-					
-					$TSuspicious = array_diff($TRefNDFSus,$TRefNDF);
-					if(!empty($TSuspicious)) $TRefSuspisious= array_merge($TRefSuspisious, $TSuspicious);
+					if(	$row['presence_jour_entier'] )
+					{
+						if (!empty($TRefNdfp[$date])) $ndf++;
+					}
 				}
 				
-				
-				
+				if (!empty($TRefNdfpSuspicious))
+				{
+					foreach ($TRefNdfpSuspicious as $d => $T)
+					{
+						$suspicious_found = false;
+						foreach ($T as $ref_ndfp => $str)
+						{
+							if (!isset($TRefNdfp[$d][$ref_ndfp]))
+							{
+								$suspicious_found = true;
+								$TRefSuspisious[] = $str;
+							}
+						}
+						
+						if ($suspicious_found) $ndf_with_suspicious++;
+					}
+				}
 			}
 			
 			$Tab[$fk_user]=array(
 				'presence'=>$presence
 				,'ndf'=>$ndf
-				,'ndf_suspicious'=>$ndf_with_suspicious - $ndf
+				,'ndf_suspicious'=>$ndf_with_suspicious
 				, 'TRefSuspisious'=>$TRefSuspisious
 			);
 		}
