@@ -2707,6 +2707,11 @@ END:VCALENDAR
 		return $TRetour;
 	}
 	
+	/**
+	 * Ré-écriture de requetePlanningAbsence() qui est encore utilisé dans absence.lib.php ainsi que dans le module "report" => "report_atm.php:l741"
+	 * 
+	 * @return array \TRH_absenceDay
+	 */
 	function requetePlanningAbsence2(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $extra_params=array())
 	{
 		global $conf;
