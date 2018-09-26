@@ -4,7 +4,7 @@
 	dol_include_once('/absence/lib/absence.lib.php');
 	dol_include_once('/valideur/class/valideur.class.php');
 	require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
-	
+
 	$langs->load('absence@absence');
 
 	$PDOdb=new TPDOdb;
@@ -347,7 +347,8 @@ function _historyCompteurInForm($duree) {
 
 }
 function _listeAdmin(&$PDOdb, &$absence) {
-	global $langs, $conf, $db, $user;
+	global $langs, $conf, $db, $user, $hookmanager;
+	$hookmanager->initHooks(array('agefoddsessionlist'));
 	llxHeader('', $langs->trans('ListeAllAbsences'));
 	print dol_get_fiche_head(absencePrepareHead($absence, '')  , '', $langs->trans('Absence'));
 	//getStandartJS();
@@ -461,8 +462,6 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	<div style="clear:both"></div><?php
 	$form->end();
 
-
-	llxFooter();
 }
 function _linkUser($fk_user) {
 	global $db,$langs;
@@ -665,8 +664,8 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	else{
 		$userCourant->fetch($user->id);
 	}
-	
-	
+
+
 	if($absence->fk_user==0){
 		$regleId=$user->id;
 	}else $regleId=$absence->fk_user;
@@ -811,7 +810,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
 
-    
+
 	$userAbsenceVisu = '';
 //	var_dump($droitsCreation);
 	if($droitsCreation==1) {
@@ -822,10 +821,10 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	else {
 		$userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 	}
-	
+
 	$usergroup=new UserGroup($db);
 	$groupslist = $usergroup->listGroupsForUser($absence->fk_user);
-	
+
 	if (
 		TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist), true, 'Conges')
 		&& (
@@ -838,7 +837,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	} else {
 		$valideurConges = false;
 	}
-	
+
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
