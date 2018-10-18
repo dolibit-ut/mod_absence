@@ -2575,6 +2575,8 @@ END:VCALENDAR
 			{
 				foreach ($TabAbsence[$id] as $tabAbs)
 				{
+					$jourDebut = $date_debut;
+					
 					//print_r($tabAbs[$k]);exit;
 					if (isset($tabAbs[0]))
 					{
