@@ -71,7 +71,7 @@
                             $res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid), 0, 1, 'userfile', '');
 
 							if(GETPOST('autoValidatedAbsence')>0) {
-								$absence->setAcceptee($PDOdb, $user->id);
+								$absence->setAcceptee($PDOdb, $user->id, false, $TPieceJointe);
 							}
 							else if($absence->fk_user==$user->id){	//on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
 								mailConges($absence, false, $TPieceJointe);

@@ -684,7 +684,7 @@ class TRH_Absence extends TObjetStd {
 		mailConges($this,$isPresence);
 	}
 
-	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
+	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false, $TPieceJointe = array()) {
 		global $db, $langs,$user,$conf;
 
 		if($this->etat=='Validee') return false;
@@ -707,7 +707,7 @@ class TRH_Absence extends TObjetStd {
 		}
 		else {
 			$this->save($PDOdb);
-			mailConges($this, $isPresence);
+			mailConges($this, $isPresence, $TPieceJointe);
 
 			return true;
 		}

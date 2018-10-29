@@ -448,9 +448,9 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 		}
 
         foreach($TPieceJointe as $pj) {
-            $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid));
+            $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid).'/'.$pj);     // C'est moche mais c'est comme ça
         }
-		
+
 		$result = $mail->send(true, 'utf-8');
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
 		else setEventMessage('Erreur lors de l\'envoi du mail à l\'utilisateur');*/
