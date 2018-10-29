@@ -19,6 +19,7 @@ function absencePrepareHead(&$obj, $type='absence') {
 				return array(
 					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
 					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
+					,array(dol_buildpath('/absence/document.php?id='.$obj->getId(),1), $langs->trans('Documents'),'document')
 				);
 				
 			}
@@ -285,7 +286,7 @@ function php2dmy($phpDate){
 
 
 //fonction permettant l'envoi de mail
-function mailConges(&$absence,$presence=false){
+function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 	global $db, $langs,$conf, $user;		
 
 	//$from = USER_MAIL_SENDER;
@@ -445,6 +446,10 @@ function mailConges(&$absence,$presence=false){
 			$fileics = absenceCreateICS($absence);
 			$mail->add_piece_jointe('absence-'.$absence->getId().'-'.date('Ymdhis').'.ics', $fileics, 'application/ics');
 		}
+
+        foreach($TPieceJointe as $pj) {
+            $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid));
+        }
 		
 		$result = $mail->send(true, 'utf-8');
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
@@ -463,7 +468,7 @@ function absenceCreateICS(&$absence){
 	return $tmfile;
 }
 //fonction permettant la récupération
-function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
+function mailCongesValideur(&$PDOdb, &$absence,$presence=false, $TPieceJointe = array()){
 	global $conf,$user;
 
 	dol_include_once('/valideur/class/valideur.class.php');
@@ -483,7 +488,7 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 	
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
-			envoieMailValideur($PDOdb, $absence, $idVal,$presence);
+			envoieMailValideur($PDOdb, $absence, $idVal,$presence, $TPieceJointe);
 		}
 	}
 	
@@ -491,7 +496,7 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 
 
 //fonction permettant l'envoi de mail aux valideurs de la demande d'absence
-function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
+function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TPieceJointe = array()){
 	global $db, $langs, $user, $conf;
 		
 	$from = !empty($user->email) ? $user->email : $conf->global->MAIN_MAIL_EMAIL_FROM;
@@ -568,6 +573,9 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
 	
 	if(!$dont_send_mail){
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
+
+        foreach($TPieceJointe as $pj) $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid));
+
 	    	$result = $mail->send(true, 'utf-8');
 	    	
 		if($result) setEventMessage('Email envoyé avec succès au valideur '.$sendto);

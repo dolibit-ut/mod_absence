@@ -82,6 +82,12 @@
 						<td>[translate.CreatedThe;strconv=no;protect=no]</td>
 						<td>[absenceCourante.dt_cre;strconv=no;protect=no]</td>
 					</tr>
+                    [onshow;block=begin;when [view.mode]=='edit']
+					<tr>
+						<td>[translate.Documents;strconv=no;protect=no]</td>
+						<td>[absenceCourante.documents;strconv=no;protect=no]</td>
+					</tr>
+                    [onshow;block=end]
 					[onshow;block=begin;when [absenceCourante.time_validation]+-0 ]
 					<tr>
 						<td>[translate.ValidatedThe;strconv=no;protect=no]</td>
