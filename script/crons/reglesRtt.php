@@ -4,6 +4,7 @@
  * SCRIPT 3 à exécuter
  * 
  */
+/* 
 	$sapi_type = php_sapi_name();
         $script_file = basename(__FILE__);
         $path=dirname(__FILE__).'/';
@@ -12,7 +13,7 @@
             echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
                 exit(-1);
         }
-
+*/
  	define('INC_FROM_CRON_SCRIPT', true);
 	
 	chdir(__DIR__);
@@ -47,7 +48,7 @@
 		
 		
 		$dateMD=date("dm",$date);
-
+     
 		//on reporte les RTT pour ceux pour qui c'est autorisé
 		if($mars==$dateMD){
 			//on remet à 5 et à 7 des rtt cumules/noncumules les compteurs par exemple, dépend de ce qui est entré sur le compteur

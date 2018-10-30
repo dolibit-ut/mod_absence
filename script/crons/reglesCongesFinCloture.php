@@ -4,6 +4,7 @@
  * SCRIPT 1 à exécuter
  * 
  */
+/*
         $sapi_type = php_sapi_name();
         $script_file = basename(__FILE__);
         $path=dirname(__FILE__).'/';
@@ -12,7 +13,7 @@
             echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
                 exit(-1);
         }
-
+ */
 
  	define('INC_FROM_CRON_SCRIPT', true);
 	
@@ -35,24 +36,25 @@
 	while($PDOdb->Get_line()) {
 				$Tab[$PDOdb->Get_field('fk_user')] = $PDOdb->Get_field('date_congesCloture');
 	}
-
+           
 	foreach($Tab as $idUser => $dateCloture )
 	{
 		$u=new User($db);
 		$u->fetch($idUser);
 		
 		if($u->id<=0)continue;
-
-	   	echo $u->getNomUrl(1)." ".$dateCloture. "...";
-
+    // ATTENTION LA LIGNE CI DESSOUS PROVOQUE UNE ERREUR
+	 	//echo $u->getNomUrl(1)." ".$dateCloture. "...";
+         /* remplacé par */      echo $u->lastname." ".$dateCloture. "...";
 		$date=strtotime('+1day',strtotime($dateCloture)); // Car on passe à 1h du matin le lendemain
 		$dateMD=date('Ymd',$date);
-		////// 1er juin, tous les congés de l'année N sont remis à 0, et sont transférés vers le compteur congés N-1
+		// 1er juin, tous les congés de l'année N sont remis à 0, et sont transférés vers le compteur congés N-1
 		$juin=date('Ymd');
 //var_dump( $juin , $dateMD);
 		echo $juin.'?='.$dateMD.'...';	
-
-		if(!strcmp($juin,$dateMD)/* || isset($_REQUEST['force_for_test'])*/){
+                                             // || isset($_REQUEST['force_for_test'])
+		
+    if(!strcmp($juin,$dateMD)){
 			
 			echo 'Oui...';
 
@@ -76,8 +78,8 @@
 		else {
 			echo 'Non...';
 		}
-
+      
 		echo '<br />';
-	}
+	}  
 	
 $PDOdb->close();

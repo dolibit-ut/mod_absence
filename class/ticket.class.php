@@ -40,7 +40,7 @@ class TRH_TicketResto extends TObjetStd {
 	
 	static function isNDFforDay(&$ATMdb, $date, $fk_user, $withSuspicisous=false) {
 		global $conf;
-		/* Note repas */
+		/* Note repas */             
 		$sql = "SELECT n.ref, DATE_FORMAT(nd.dated,'%d/%m/%Y') as dated
 		FROM ".MAIN_DB_PREFIX."ndfp_det nd LEFT JOIN ".MAIN_DB_PREFIX."ndfp n ON (nd.fk_ndfp=n.rowid)
 		WHERE n.fk_user=".$fk_user." AND nd.fk_exp IN (".$conf->global->RH_NDF_TICKET_RESTO.") ";
@@ -77,7 +77,7 @@ class TRH_TicketResto extends TObjetStd {
 		}
 
 		$sql.=" GROUP BY n.ref,nd.dated ";
-
+           
 		$ATMdb->Execute($sql);
 
 		while($obj = $ATMdb->Get_line()) {
@@ -91,17 +91,16 @@ class TRH_TicketResto extends TObjetStd {
 	static function getTicketFor(&$ATMdb, $date_debut, $date_fin, $idGroup=0, $fk_user=0) {
 		$Tab=array();
 		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin);	
-		
+		    
 		foreach($TAbsence as $fk_user=>$TAbs) {
-			
-			$presence = $ndf = $ndf_with_suspicious = 0;
-			
+			            
+		  $presence = $ndf = $ndf_with_suspicious = 0;
 			$TRefSuspisious = array();
 			foreach($TAbs as $date=>$row) {
-				
+				          
 				$presence+=	$row['presence_jour_entier'];	
 				if(	$row['presence_jour_entier'] ) {
-					
+					        
 					$TRefNDF = TRH_TicketResto::isNDFforDay($ATMdb, $date, $fk_user);
 					$ndf+=(count( $TRefNDF )>0) ? 1 : 0;
 
@@ -123,7 +122,7 @@ class TRH_TicketResto extends TObjetStd {
 				, 'TRefSuspisious'=>$TRefSuspisious
 			);
 		}
-		
+		                  
 		
 		return $Tab;
 		

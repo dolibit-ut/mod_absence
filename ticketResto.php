@@ -53,12 +53,13 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 
 	}
 	else {
-		header('Content-type: application/octet-stream');
+		  header('Content-type: application/octet-stream;charset=iso-8859-1');
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.csv');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		
 		if($type != 'primoclic'){
-			print $langs->trans('ProductCode') . ';' . $langs->trans('ClientCode') . ';' . $langs->trans('DeliveryPoint') . ';';
+			
+      print $langs->trans('ProductCode') . ';' . $langs->trans('ClientCode') . ';' . $langs->trans('DeliveryPoint') . ';';
 			print $langs->trans('Level') . ' 1;' . $langs->trans('Level') . ' 2;' . $langs->trans('Matricule') . ';' . $langs->transnoentities('EmployeeName') . ';';
 			print $langs->trans('EditingNameOnCover') . ';' . $langs->trans('EditingNameOnTitle') . ';' . $langs->trans('FacialValueInCents') . ';';
 			print $langs->trans('EmployersShareInCents') . ';' . $langs->trans('NbTitle') . ';' . $langs->trans('CompanyName') . ';';
@@ -66,9 +67,13 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 			print $langs->trans('PostalCodeAndCityOnBook') . ';' . $langs->trans('DeliveryDate') . ";\n";
 		}
 		else{
-			print html_entity_decode($langs->trans('EmployeeName')).';'.$langs->trans('Matricule').';'.$langs->trans('NbTitle').';'.$langs->trans('FacialValueInCents').';';
+			// JB MODIFICATIONS
+       print 	utf8_decode(html_entity_decode($langs->trans('EmployeeName'))).';'.$langs->trans('NbTitle').";\n";
+      /*
+      print html_entity_decode($langs->trans('EmployeeName')).';'.$langs->trans('Matricule').';'.$langs->trans('NbTitle').';'.$langs->trans('FacialValueInCents').';';
 			print $langs->trans('DeliveryPoint').';'.$langs->trans('Libelle').";\n";
-		}
+		  */
+    }
 		
 		foreach($Tab as $fk_user=>$row) {
 			
@@ -98,12 +103,12 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 				}
 				else{
 				print implode(';',array(
-						$row['name']
-						,''
+						utf8_decode($row['name'])
+					//	,''
 						,$row['nbTicket']
-						,$conf->global->RH_MONTANT_TICKET_RESTO
-						,$row['pointlivraison']
-						,$row['cp']." ".$row['ville']
+						//,$conf->global->RH_MONTANT_TICKET_RESTO
+						//,$row['pointlivraison']
+						//,$row['cp']." ".$row['ville']
 					))."\n";
 				}
 				

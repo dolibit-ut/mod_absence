@@ -4,15 +4,16 @@
  * SCRIPT 2 à exécuter
  * 
  */
+/*
 	$sapi_type = php_sapi_name();
         $script_file = basename(__FILE__);
         $path=dirname(__FILE__).'/';
         // Test if batch mode
         if (substr($sapi_type, 0, 3) != 'cli') {
-            echo "Error: ".$script_file." you must use PHP for CLI mode.\n";
-                exit(-1);
+            echo "Error: ".$script_file." you must use PHP for CLI mode.\n".$sapi_type;
+             //   exit(-1);
         }
-
+  */
 
  	define('INC_FROM_CRON_SCRIPT', true);
 
@@ -24,8 +25,8 @@
 	$ATMdb=new TPDOdb;
 	
 	/////chaque mois, les congés année N sont incrémentés de 2,08
-	$jour=date("d");
-	if($jour=='01' || isset($_REQUEST['forceCompteur'])){
+	$jour=date("j");
+	if(strcmp($jour,"1") == 0 || isset($_REQUEST['forceCompteur'])){
 		$k=0;
 		$sqlReqUser="SELECT fk_user, nombreCongesAcquisMensuel FROM ".MAIN_DB_PREFIX."rh_compteur";
 		$ATMdb->Execute($sqlReqUser);
@@ -52,7 +53,7 @@
 		}
 		
 	} else {
-		echo 'ce n est pas un jour 1';
+		echo 'ce n est pas un jour 1, nous sommes le '.$jour;
 	}
 	
 $ATMdb->close();
