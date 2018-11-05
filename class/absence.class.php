@@ -172,12 +172,12 @@ class TRH_Compteur extends TObjetStd {
 		$this->anneeNM1=$anneePrec;
 		$this->rttTypeAcquisition='Annuel';
 		
-		$this->rttAcquisMensuelInit=$conf->global->RH_NB_RTT_ANNUEL;
-		$this->rttAcquisAnnuelNonCumuleInit=$conf->global->RH_NB_RTTNC_ANNUEL;
+		$this->rttAcquisMensuelInit=!empty($conf->global->RH_NB_RTT_MENSUEL) ? $conf->global->RH_NB_RTT_MENSUEL : 0;
+		$this->rttAcquisAnnuelCumuleInit=!empty($conf->global->RH_NB_RTT_ANNUEL) ? $conf->global->RH_NB_RTT_ANNUEL : 0;
+		$this->rttAcquisAnnuelNonCumuleInit=!empty($conf->global->RH_NB_RTTNC_ANNUEL) ? $conf->global->RH_NB_RTTNC_ANNUEL : 0;
 
 
 		$this->rttCumuleAcquis=0;
-		$this->rttAcquisAnnuelCumuleInit=0;
 		$this->rttCumuleReportNM1=0;
 		$this->rttCumulePris=0;
 		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
