@@ -1,11 +1,14 @@
 <?php
 	require('config.php');
+    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+    require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 	dol_include_once('/absence/class/absence.class.php');
 	dol_include_once('/absence/lib/absence.lib.php');
 	dol_include_once('/valideur/class/valideur.class.php');
 	require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 
 	$langs->load('absence@absence');
+	$langs->load('main');
 
 	$PDOdb=new TPDOdb;
 	$absence=new TRH_Absence;
@@ -61,16 +64,20 @@
 
 							$absence->load($PDOdb, $_REQUEST['id']);
 
+                            // Submit file
+                            $TPieceJointe = array();
+                            if(! empty($_FILES['userfile']['name'])) $TPieceJointe = $_FILES['userfile']['name'];
+
+                            $res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid), 0, 1, 'userfile', '');
+
 							if(GETPOST('autoValidatedAbsence')>0) {
-								$absence->setAcceptee($PDOdb, $user->id);
+								$absence->setAcceptee($PDOdb, $user->id, false, $TPieceJointe);
 							}
 							else if($absence->fk_user==$user->id){	//on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
-
-
-
-								mailConges($absence);
-								mailCongesValideur($PDOdb,$absence);
+								mailConges($absence, false, $TPieceJointe);
+								mailCongesValideur($PDOdb,$absence, false, $TPieceJointe);
 							}
+
 
 							$mesg = $langs->trans('RegistedRequest');
 
@@ -115,6 +122,8 @@
 					mailCongesValideur($PDOdb, $absence);
 
 				}
+
+                dol_delete_dir_recursive($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid), 0, 0, 1);
 
 				$absence->delete($PDOdb);
 
@@ -595,7 +604,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
 	$form=new TFormCore;
 
-	$form_start = $form->begin_form($_SERVER['PHP_SELF'],'form1','POST');
+	$form_start = $form->begin_form($_SERVER['PHP_SELF'],'form1','POST', true);
 
 	$form->Set_typeaff($mode);
 	$form_start.=$form->hidden('id', $absence->getId());
@@ -839,6 +848,10 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	}
 
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
+
+    $input_doc = '<input class="flat minwidth400" type="file"'.((! empty($conf->global->MAIN_DISABLE_MULTIPLE_FILEUPLOAD) || $conf->browser->layout != 'classic')?' name="userfile"':' name="userfile[]" multiple').
+                 (empty($conf->global->MAIN_UPLOAD_DOC) || empty($user->rights->absence->myactions->creerAbsenceCollaborateur)?' disabled':'').' />';
+
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'
 		,array(
@@ -851,7 +864,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			'congesPrec'=>array(
 				//texte($pLib,$pName,$pVal,$pTaille,$pTailleMax=0,$plus='',$class="text", $default='')
 				'acquisEx'=>$form->texte('','acquisExerciceNM1',$congePrec['acquisEx'],10,50,'')
-				,'acquisAnc'=>$form->texte('','acquisAncienneteNM1',$congePre['acquisAnc'],10,50)
+				,'acquisAnc'=>$form->texte('','acquisAncienneteNM1',$congePrec['acquisAnc'],10,50)
 				,'acquisHorsPer'=>$form->texte('','acquisHorsPeriodeNM1',$congePrec['acquisHorsPer'],10,50)
 				,'reportConges'=>$form->texte('','reportcongesNM1',$congePrec['reportConges'],10,50)
 				,'congesPris'=>$form->texte('','congesprisNM1',$congePrec['congesPris'],10,50)
@@ -901,6 +914,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
+				,'documents'=>$input_doc
 
 				,'fk_user_absence'=>$form->hidden('fk_user_absence', $absence->fk_user)
 				,'niveauValidation'=>$absence->niveauValidation
@@ -975,6 +989,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'AbsenceBy' => $langs->trans('AbsenceBy')
 				,'acquisRecuperation'=>$langs->trans('acquisRecuperation')
 				,'dontSendMail'=>$langs->trans('dontSendMail')
+				,'Documents'=>$langs->trans('Documents')
 				,'langs'=>$langs
 			)
 			,'other' => array(
