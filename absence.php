@@ -499,7 +499,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 	//getStandartJS();
 
 	$TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
- 	if (empty($TGroupValidation)) {
+ 	if (empty($TGroupValidation) && empty($user->rights->absence->myactions->voirToutesAbsencesListe)) {
 		?><div class="error">Vous n'&ecirc;tes pas valideur de cong&eacute;  </div><?php
 
 		llxFooter();
@@ -827,12 +827,15 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$groupslist = $usergroup->listGroupsForUser($absence->fk_user);
 	
 	if (
-		TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist), true, 'Conges')
-		&& (
-			$absence->fk_user == $user->id && TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')
-			|| ($absence->fk_user!=$user->id && $user->rights->absence->myactions->valideurConges)
+		TRH_valideur_groupe::isAdminRH($user, 'Conges') ||
+		(
+			TRH_valideur_groupe::isValideur($PDOdb, $user->id, array_keys($groupslist), true, 'Conges')
+			&& (
+				$absence->fk_user == $user->id && TRH_valideur_groupe::validHimSelf($user, $absence, 'Conges')
+				|| ($absence->fk_user!=$user->id && $user->rights->absence->myactions->valideurConges)
+			)
+			&& !TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')
 		)
-		&& !TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $absence->entity, $user->id, $absence->getId(), 'Conges')
 	) {
 		$valideurConges = true;
 	} else {

@@ -547,7 +547,7 @@ class TRH_Absence extends TObjetStd {
 			$this->setAcceptee($PDOdb, $user->id);
 			return 1;
 		}
-		else
+		else // si le mode hiérarchique est actif, il est possible de tomber dans ce cas s'il reste des valideurs en attente de réponse (l'erreur n'est pas affichée)
 		{
 			$this->error = 'Permission insuffisante pour valider l\'absence';
 			return 0;
