@@ -117,20 +117,20 @@ function _log(&$PDOdb, &$compteur) {
 	
 function _liste(&$PDOdb, &$compteur) {
 	global $langs, $conf, $db, $user, $listeGlobale;	
+	
 	$listeGlobale='normale';
 	llxHeader('', $langs->trans('HolidaysCollabCounterList'));
 	getStandartJS();
 	print dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur',$user->id)  , 'compteur', $langs->trans('HolidaysAdministration'));
 	$r = new TSSRenderControler($compteur);
 	$sql="SELECT  r.rowid as 'ID', c.login, c.firstname, c.lastname, anneeN as 'annee', 
-		r.date_cre as 'DateCre', CAST(r.acquisExerciceN as DECIMAL(16,1)) as 'Congés acquis N', 
-		CAST(r.acquisAncienneteN as DECIMAL(16,1)) as 'Congés Ancienneté', 
-		CAST(r.acquisExerciceNM1 as DECIMAL(16,1)) as 'Conges Acquis N-1', 
-		CAST(r.congesPrisNM1 as DECIMAL(16,1)) as 'Conges Pris N-1',
+		r.date_cre as 'DateCre', CAST(r.acquisExerciceN as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAcquisN')."', 
+		CAST(r.acquisAncienneteN as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAnciennete')."', 
+		CAST(r.acquisExerciceNM1 as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAcquisNM1')."', 
+		CAST(r.congesPrisNM1 as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesPrisNM1')."',
 		CAST(r.rttPris as DECIMAL(16,1))  as 'RttPris'
 		FROM ".MAIN_DB_PREFIX."rh_compteur as r INNER JOIN ".MAIN_DB_PREFIX."user as c ON ( r.fk_user=c.rowid ) 
 		WHERE r.entity IN (0,".$conf->entity.")";
-		
 	
 	$TOrder = array('DateCre'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
@@ -193,10 +193,10 @@ function _listeAdmin(&$PDOdb, &$compteur) {
 	$sql="SELECT  DISTINCT r.rowid as 'ID', login, firstname, lastname ";
 	if($conf->multicompany->enabled) $sql.= " ,IF(c.entity=0,'Toutes',e.label) as 'Entité' ";
 	$sql .=	", '' as 'Compteur',
-		r.date_cre as 'DateCre', CAST(r.acquisExerciceN as DECIMAL(16,1)) as 'Congés acquis N', 
-		CAST(r.acquisAncienneteN as DECIMAL(16,1)) as 'Congés Ancienneté', 
-		CAST(r.acquisExerciceNM1 as DECIMAL(16,1)) as 'Conges Acquis N-1', 
-		CAST(r.congesPrisNM1 as DECIMAL(16,1)) as 'Conges Pris N-1'
+		r.date_cre as 'DateCre', CAST(r.acquisExerciceN as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAcquisN')."', 
+		CAST(r.acquisAncienneteN as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAnciennete')."', 
+		CAST(r.acquisExerciceNM1 as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesAcquisNM1')."', 
+		CAST(r.congesPrisNM1 as DECIMAL(16,1)) as '".$langs->transnoentities('AbsenceCongesPrisNM1')."'
 		FROM ".MAIN_DB_PREFIX."rh_compteur as r 
 				INNER JOIN ".MAIN_DB_PREFIX."user as c ON (r.fk_user=c.rowid)
 				LEFT JOIN  ".MAIN_DB_PREFIX."usergroup_user as gu ON (r.fk_user=gu.fk_user) ";
@@ -425,6 +425,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'Total'							=> $langs->transnoentities('Total'),
 				'NonCumulatedDaysOffToTake'		=> $langs->transnoentities('NonCumulatedDaysOffToTake'),
 				'acquisRecuperation'=>$langs->transnoentities('acquisRecuperation'),
+				'AbsenceNM1'=>$langs->transnoentities('AbsenceNM1'),
+				'AbsenceN'=>$langs->transnoentities('AbsenceN'),
 				'langs'=>$langs
 			)
 		)	

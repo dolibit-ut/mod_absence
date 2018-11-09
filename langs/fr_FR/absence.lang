@@ -537,3 +537,10 @@ absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du comp
 Absence_CanUpdateDatesClotures=Autoriser la modification des dates de clôtures sur une fiche compteur
 
 NextValideur=Prochain(s) valideur(s)
+
+AbsenceCongesAcquisN=Congés acquis N
+AbsenceCongesAnciennete=Congés Ancienneté
+AbsenceCongesAcquisNM1=Conges Acquis N-1
+AbsenceCongesPrisNM1=Conges Pris N-1
+AbsenceNM1=N-1
+AbsenceN=N
