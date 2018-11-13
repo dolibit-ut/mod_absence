@@ -202,8 +202,8 @@ function _liste(&$ATMdb, &$pointeuse) {
 		,'eval'=>array(
 			'Temps de présence'=>"_get_temps_presence(@val@)"
 			,'login'=>'_linkUser(@fk_user@)'
-		),
-		//'total' => array('sum'=>'Temps de présence')
+		)
+		// ,'math' => array('Temps de présence'=>'sumtime')
 		,'orderBy'=>$TOrder
 
 	));
