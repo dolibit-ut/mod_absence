@@ -194,7 +194,7 @@ function _liste(&$ATMdb, &$pointeuse) {
 			,'lastname'=> $langs->trans('Name')
 		)
 		,'search'=>array(
-			'date_jour'=>array('recherche'=>'calendar'),
+			'date_jour'=>array('recherche'=>'calendars'),
 			"login"=>true
 			,"firstname"=>true
 			,"lastname"=>true
