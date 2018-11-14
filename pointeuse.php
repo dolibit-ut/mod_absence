@@ -203,7 +203,8 @@ function _liste(&$ATMdb, &$pointeuse) {
 			'Temps de présence'=>"_get_temps_presence(@val@)"
 			,'login'=>'_linkUser(@fk_user@)'
 		)
-		// ,'math' => array('Temps de présence'=>'sumtime')
+		,'math' => array('Temps de présence'=>'sum')
+		,'mathformat' => array('Temps de présence'=>'time')
 		,'orderBy'=>$TOrder
 
 	));
