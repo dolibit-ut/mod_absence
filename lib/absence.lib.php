@@ -118,10 +118,15 @@ function edtPrepareHead(&$obj, $type='absence') {
 	switch ($type) {
 		
 		case 'emploitemps':
-				
+		    
+		    // to return on default planning
+		    $PDOdb = new TPDOdb();
+		    $defaultEmploiTemps = new TRH_EmploiTemps();
+		    $defaultEmploiTemps->load_by_fkuser($PDOdb, $obj->fk_user);
+		    
 			$Tab=array(
-				array(dol_buildpath(
-					($obj->getId() > 0 ? '/absence/emploitemps.php?action=view&id='.$obj->getId() : '/absence/emploitemps.php') ,1)
+			    array(dol_buildpath(
+			        ($obj->getId() > 0 ? '/absence/emploitemps.php?action=view&id='.$defaultEmploiTemps->getId() : '/absence/emploitemps.php') ,1)
 					, $langs->trans('Schedule')
 					,'emploitemps')
 			);
