@@ -517,7 +517,19 @@ absenceTicketRestoOnUserCreate=Par défaut, un nouvel utilisateur souscrit aux t
 ABSENCE_ALERT_OTHER_VALIDEUR=Alerter tout les valideurs qui en auront le droit d'une acception de congé par un valideur du même groupe
 IfAllValideurAlertedAlerteMe=Si l'alerte pour tous les valideurs d'acception de congés est active, me l'envoyer
 
-AbsenceCopy=Copie
+AbsenceCopy=Nouveau planning
+DefaultSchedule=Planning utilisé par defaut si pas de période correspondante 
+GoToDefaultPlanning=Retour au planning par defaut
+archiveHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut avec comme date de fin ce jour et une date de début calculé en fonction des plannings précédents  
+copytoNewHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut 
+PlanningListByPeriod=Liste des emplois du temps par périodes
+View=Consulter
+AllFormAreRequired=Tous les champs sont requis.
+copytoNewModalTitle=Créer un nouveau planning
+copytoNewDateWarning=Dates incorrectes
+PlanningRangeAllreadyUsed=Cette periode est déjà utilisée.
+invalidDatesRange=Plage de dates invalide.
+ArchiveErrorPlanningRangeAllreadyUsed=Un planning existe dejà pour cette plage de date
 
 absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
 recupRulesDeclare=Sur déclaration du temps de travail
