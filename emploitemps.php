@@ -76,6 +76,7 @@
 				
 				if($newId>0){
 				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				    exit();
 				}
 				else{
 				    $mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
@@ -141,10 +142,10 @@
 					FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
 			        
 			        $emploiTempsArchive->date_debut = time();
-			        $emploiTempsArchive->date_fin = time() + 604800;
+			        $emploiTempsArchive->date_fin = time() + 3600 * 24 * 7;
 			        if($row) {
 			            $emploiTempsArchive->date_debut = strtotime($row->date_fin);
-			            $emploiTempsArchive->date_fin = $date_debut + 604800;
+			            $emploiTempsArchive->date_fin = $date_debut + 3600 * 24 * 7;
 			            if($emploiTempsArchive->date_fin < time ())
 			            {
 			                $emploiTempsArchive->date_fin = time();
@@ -170,8 +171,6 @@
 			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
 			    exit;
 			    
-			    
-			    break;
 			case 'deleteArchive':
 				
 				$emploiTempsArchive=new TRH_EmploiTemps;
