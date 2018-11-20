@@ -72,7 +72,15 @@
 				
 				$emploiTemps->tempsHebdo=$emploiTemps->calculTempsHebdo($PDOdb, $emploiTemps);
 				
-				$emploiTemps->save($PDOdb);
+				$newId = $emploiTemps->save($PDOdb);
+				
+				if($newId>0){
+				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				}
+				else{
+				    $mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
+				    _fiche($PDOdb, $emploiTemps,'view');
+				}
 				
 				$mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
 				_fiche($PDOdb, $emploiTemps,'view');
@@ -94,12 +102,76 @@
 				$emploiTempsArchive->rowid=0;
 				$emploiTempsArchive->is_archive=1;
 				
-				$emploiTempsArchive->save($PDOdb);
-				setEventMessage($langs->trans('ArchivedSchedule'));
+				// check planning override
+				$sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps
+                        WHERE fk_user=".$emploiTempsArchive->fk_user."  AND is_archive=1
+                                AND date_debut < '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_fin)."'
+                                AND date_fin > '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_debut)."'";
+				$PDOdb->Execute($sql);
+				$row = $PDOdb->Get_line();
+				//var_dump($sql);
+				if($row && $row->count > 0 ) {
+				    setEventMessage($langs->trans('ArchiveErrorPlanningRangeAllreadyUsed'),'warnings');
+				}
+				else {
+				    
+				    $newId = $emploiTempsArchive->save($PDOdb);
+				    setEventMessage($langs->trans('ArchivedSchedule'));
+				}
 				
 				_fiche($PDOdb, $emploiTemps,'view');
 				
 				break;
+				
+			case 'copytoNew':
+			    
+			    
+			    if(GETPOST('id','int')>0) $emploiTemps->load($PDOdb, GETPOST('id','int'));
+			    else $emploiTemps->loadByuser($PDOdb, GETPOST('fk_user','int'));
+			    
+			    $emploiTempsArchive = clone $emploiTemps;
+			    
+			    
+			    $date_debut = GETPOST('date_debut');
+			    $date_fin = GETPOST('date_fin');
+			    
+			    if(empty($date_debut) || empty($date_fin))
+			    {
+			        $PDOdb->Execute("SELECT MAX(date_fin) as date_fin
+					FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
+			        
+			        $emploiTempsArchive->date_debut = time();
+			        $emploiTempsArchive->date_fin = time() + 604800;
+			        if($row) {
+			            $emploiTempsArchive->date_debut = strtotime($row->date_fin);
+			            $emploiTempsArchive->date_fin = $date_debut + 604800;
+			            if($emploiTempsArchive->date_fin < time ())
+			            {
+			                $emploiTempsArchive->date_fin = time();
+			            }
+			        }
+			        
+			        setEventMessage($langs->trans('copytoNewDateWarning'), 'warnings');
+			    }
+			    else{
+			        $emploiTempsArchive->date_debut = strtotime($date_debut);
+			        $emploiTempsArchive->date_fin = strtotime($date_fin);
+			    }
+			    
+			    
+			    
+			    
+			    
+			    $emploiTempsArchive->rowid=0;
+			    $emploiTempsArchive->is_archive=1;
+			    
+			    $newId = $emploiTempsArchive->save($PDOdb);
+			    
+			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+			    exit;
+			    
+			    
+			    break;
 			case 'deleteArchive':
 				
 				$emploiTempsArchive=new TRH_EmploiTemps;
@@ -265,8 +337,10 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			,'date_fin'=>array('30/11/-0001'=>'-')
 		)		
 		,'link'=>array(
+		    'ID'=>'<a href="?id=@ID@&action=view">@val@</a>',
 			'Actions'=>'
-			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a>
+			<a href="?id=@ID@&action=view">' . $langs->trans('View') . '</a> &nbsp;  &nbsp; 
+			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a> &nbsp;  &nbsp; 
 			<a href="?id='.$emploiTemps->getId().'&idArchive=@ID@&action=deleteArchive">' . $langs->trans('Delete') . '</a>'
 		)
 		,'title'=>array(
@@ -274,7 +348,9 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			,'date_fin'=> $langs->trans('EndDate')
 			,'tempsHebdo'=> $langs->trans('WeeklyWorkingTimeInHour')
 		)
-		
+	    ,'liste' => array(
+	         'titre' => $langs->trans('PlanningListByPeriod'),
+	     )
 	 ));
 	
 	$TEmploiTemps = $emploiTemps->get_values();
@@ -283,6 +359,24 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$TEmploiTemps['date_fin'] = $form->calendrier('', 'date_fin',  $emploiTemps->get_date('date_fin'));
 	
 	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($_REQUEST['id'])))	$can_modify_edt = 1;
+	
+	
+	// to return on default planning
+	$defaultEmploiTemps = new TRH_EmploiTemps();
+	$defaultEmploiTemps->load_by_fkuser($PDOdb, $emploiTemps->fk_user);
+	$defaultPlanningUrl = '';
+	if($defaultEmploiTemps->getId() > 0 && $emploiTemps->getId() != $defaultEmploiTemps->getId()){
+	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 2).'?action=view&id='.$defaultEmploiTemps->getId();
+	}
+	
+	$cardTitle = $langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname);
+	
+	if($emploiTemps->is_archive){
+	    $cardTitle .= ' ';
+	}
+	else{
+	    $cardTitle .= '('.$langs->trans('DefaultSchedule').')';
+	}
 	
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/emploitemps.tpl.php'
@@ -302,8 +396,9 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 				'mode'=>$mode
 				,'head'=>dol_get_fiche_head(edtPrepareHead($emploiTemps, 'emploitemps')  , 'emploitemps', $langs->trans('Absence'))
 				,'compteur_id'=>$emploiTemps->getId()
-				,'titreEdt'=>load_fiche_titre($langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname),'', 'title.png', 0, '')
-				
+			    ,'titreEdt'=>load_fiche_titre($cardTitle,'', 'title.png', 0, '')
+			    ,'defaultPlanningUrl' => $defaultPlanningUrl
+			    ,'defaultPlanning' => !empty($defaultPlanningUrl)?'no':'yes' 
 				// Avant y'avait ça : (ça posait un souci sur l'affichage des caractères accentués)
 				//,'titreEdt'=>load_fiche_titre($langs->trans('ScheduleOf', htmlentities($userCourant->firstname, ENT_COMPAT , 'ISO8859-1'), htmlentities($userCourant->lastname, ENT_COMPAT , 'ISO8859-1')),'', 'title.png', 0, '')
 				
@@ -333,7 +428,11 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 				'Cancel' 				=> $langs->trans('Cancel'),
 				'Modify' 				=> $langs->trans('Modify'),
 				'Archive' 				=> $langs->trans('Archive'),
-				'is_tempspartiel'		=> $langs->trans('is_tempspartiel')
+			    'is_tempspartiel'		=> $langs->trans('is_tempspartiel'),
+			    'GoToDefaultPlanning'   => $langs->trans('GoToDefaultPlanning'),
+			    'AbsenceCopy'           => $langs->trans('AbsenceCopy'),
+			    'archiveHelpToolTip'    => $langs->trans('archiveHelpToolTip'),
+			    'copytoNewHelpToolTip'  => $langs->trans('copytoNewHelpToolTip'),
 			)
 			
 		)	
@@ -360,9 +459,154 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
         
 	}
 	
+	
+	printModalJsForm_copynew($PDOdb,$emploiTemps);
+	
+	
+	
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
+}
+
+
+function printModalJsForm_copynew($PDOdb,$emploiTemps){
+    global $langs;
+    
+    
+    $PDOdb->Execute("SELECT MAX(date_fin) as date_fin FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps WHERE fk_user=".$emploiTemps->fk_user." AND is_archive=1");
+    $row = $PDOdb->Get_line();
+    $date_debut = time();
+    $date_fin = time() + 604800;
+    if($row) {
+        $date_debut = strtotime($row->date_fin);
+        $date_fin = $date_debut + 604800;
+        if($date_fin < time ())
+        {
+            $date_fin = time();
+        }
+    }
+    
+    
+    
+    print '<div id="dialog-form-copynew" title="'.$langs->trans('copytoNewModalTitle').'">';
+    print '<p class="validateTips">'.$langs->trans('AllFormAreRequired').'</p>';
+    
+    $form=new TFormCore($_SERVER['PHP_SELF'],'form-copynew','POST');
+    
+    echo $form->hidden('action', 'copytoNew');
+    echo $form->hidden('fk_user', $emploiTemps->fk_user);
+    
+    print '<div id="errors-dialog-copynew" ></div>';
+    print '<table >';
+    print '<tr>';
+    print '<td>'.$langs->trans('StartDate').'</td>';
+    print '<td>'.$langs->trans('EndDate').'</td>';
+    print '</tr>';
+    print '<tr>';
+    print '<td>';
+    print '<input required type="date" name="date_debut" id="copynew_date_debut" value="'.date('Y-m-d',$date_debut).'" >';
+    print '</td>';
+    print '<td>';
+    print '<input required type="date" name="date_fin" id="copynew_date_fin" value="'.date('Y-m-d',$date_fin).'" >';
+    print '</td>';
+    print '</tr>';
+    print '</table>';
+    print '<!-- Allow form submission with keyboard without duplicating the dialog button --><input type="submit" tabindex="-1" style="position:absolute; top:-1000px">';
+    
+    $form->end();
+    print '</div>';
+    
+    ?>
+<script>
+    $( function() {
+        var dialog, form;
+         	function copytoNewHelpToolTip (){
+            	//check traitement
+            	var date_debut = $("#copynew_date_debut").val();
+            	var date_fin   = $("#copynew_date_fin").val();
+            	var formIsValid = true;
+            	
+            	$.getJSON( "<?php print dol_buildpath("absence/script/interface.php",2) ?>?get=checkPlanningOverride&date_debut_search=" + date_debut + "&date_fin_search=" + date_fin + "&fk_user=<?php print $emploiTemps->fk_user; ?>"  
+                    , function( data ) {
+                        //console.log(data);
+    
+                        var errors = [];
+    
+                        if(data.errors != undefined && data.errors.length > 0){
+                            $.each( data.errors, function( key, val ) {
+                            	errors.push( val);
+                            });
+                            formIsValid = false;
+                        }
+    
+                        if(data.count > 0){
+                        	errors.push( "<?php print $langs->trans("PlanningRangeAllreadyUsed"); ?>" );
+                            formIsValid = false;
+                        }
+                        
+                        if(errors.length > 0){
+                            var htmlerrors = $( "<div/>", {
+                              "class": "error",
+                              html: errors.join( "<br/>" )
+                            });
+    
+                            $( "#errors-dialog-copynew" ).html(htmlerrors);
+                        }
+
+                        
+                   
+                  }).done(function() {
+                	    console.log( "second success" );
+                  })
+                  .fail(function() {
+                    console.log( "error" );
+                  })
+                  .always(function() {
+                	  if(formIsValid == true){
+                          dialog.find( "form" ).submit();
+                      	return true;
+                  	}
+                  	else{
+                      	return false;
+                  	}
+                	  
+                  });
+             	console.log(formIsValid);
+            	
+        	}
+        
+            dialog = $( "#dialog-form-copynew" ).dialog({
+                autoOpen: false,
+                /*height: 400,
+                width: 350,*/
+                modal: true,
+                buttons: {
+                    "<?php echo $langs->transnoentitiesnoconv('Validate'); ?>": copytoNewHelpToolTip,
+                    "<?php echo $langs->transnoentitiesnoconv('Cancel'); ?>": function() {
+                        dialog.dialog( "close" );
+                    }
+                },
+                close: function() {
+                   
+                }
+            });
+                
+            /*form = dialog.find( "form" ).on( "submit", function( event ) {
+                event.preventDefault();
+                dialog.find( "form" ).submit();
+            });*/
+                
+            $( "#copytoNewHelpToolTipBtn" ).button().on( "click", function( event ) {
+                event.preventDefault();
+                dialog.dialog( "open" );
+            });
+
+
+            
+    } );
+</script>
+    <?php 
 }
 
 /**
