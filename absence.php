@@ -67,7 +67,7 @@
                             // Submit file
                             $TPieceJointe = array();
                             if(! empty($_FILES['userfile']['name'])) $TPieceJointe = $_FILES['userfile']['name'];
-
+			    if( count($_FILES['userfile']['name']) == 1 && empty($_FILES['userfile']['name'][0])) unset($_FILES['userfile']['name']); //Quand l'input est vide $_FILES n'est pas vide ce qui crée une erreur
                             $res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid), 0, 1, 'userfile', '');
 
 							if(GETPOST('autoValidatedAbsence')>0) {
