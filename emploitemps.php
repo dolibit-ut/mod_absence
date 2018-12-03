@@ -358,7 +358,7 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$TEmploiTemps['date_debut'] = $form->calendrier('', 'date_debut', $emploiTemps->get_date('date_debut')  );
 	$TEmploiTemps['date_fin'] = $form->calendrier('', 'date_fin',  $emploiTemps->get_date('date_fin'));
 	
-	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($_REQUEST['id'])))	$can_modify_edt = 1;
+
 	
 	// to return on default planning
 	$defaultEmploiTemps = new TRH_EmploiTemps();
@@ -367,6 +367,8 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	if($defaultEmploiTemps->getId() > 0 && $emploiTemps->getId() != $defaultEmploiTemps->getId()){
 	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 2).'?action=view&id='.$defaultEmploiTemps->getId();
 	}
+
+if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($defaultEmploiTemps->id))) $can_modify_edt = 1;
 	
 	$cardTitle = $langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname);
 	
