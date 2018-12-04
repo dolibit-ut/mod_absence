@@ -47,10 +47,11 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 	$sql = TRH_valideur_groupe::getSqlListObject('Conges', array(
 			'ajax' => true
 			, 'fk_user' => $idUser
-			, 'fk_ursergroup' => $idGroupe
+			, 'fk_usergroup' => $idGroupe
 			, 'date_start' => $date_start
 			, 'date_end' => $date_end
 			, 'typeAbsence' => $typeAbsence
+			, 'statut' => 1
 	));
 
 	$TRow = $PDOdb->ExecuteAsArray($sql);
