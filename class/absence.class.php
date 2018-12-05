@@ -2433,7 +2433,7 @@ END:VCALENDAR
 		$params = array(
 			'ajax' => true
 			, 'fk_user' => $idUserRecherche
-			, 'fk_ursergroup' => $idGroupeRecherche
+			, 'fk_usergroup' => $idGroupeRecherche
 			, 'date_start' => date('Y-m-d H:i:s', $date_debut)
 			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
 			, 'typeAbsence' => 'Tous'
@@ -2621,6 +2621,7 @@ END:VCALENDAR
 					{
 						if ($tabAbs['idUser'] == $id)
 						{
+							$jourDebut = $date_debut;
 							while ($jourFin >= $jourDebut)
 							{
 								if ($TRetour[date('d/m/Y', $jourDebut)][$id] == 'non')
@@ -2704,7 +2705,7 @@ END:VCALENDAR
 		$params = array(
 			'ajax' => true
 			, 'fk_user' => $idUserRecherche
-			, 'fk_ursergroup' => $idGroupeRecherche
+			, 'fk_usergroup' => $idGroupeRecherche
 			, 'date_start' => date('Y-m-d H:i:s', $date_debut)
 			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
 			, 'typeAbsence' => 'Tous'
