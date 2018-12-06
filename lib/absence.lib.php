@@ -683,17 +683,8 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 	$html = '<table class="planning" border="0">';
 	$html .= "<tr class=\"entete\">";
-	
-	
 
-	foreach($TStatPlanning as $idUser=>$TStat) {
-		$u=new User($db);
-		$u->fetch($idUser);
-		
-		
-		if($first) {
-			
-			$html .= '<tr>
+	$html .= '<tr>
 				<td>' . $langs->trans('Name') . '</td>
 				<td>' . $langs->trans('PresenceDay') . '</td>
 				<td>' . $langs->trans('PresenceHour') . '</td>
@@ -705,17 +696,18 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 				
 				
 			</tr>';
-			
-			$first = false;
-		}
+
+	foreach($TStatPlanning as $idUser=>$TStat) {
+		$u=new User($db);
+		$u->fetch($idUser);
 		
 		$stat=array();
 		
 		foreach($TStat as $date=>$row) {
-		
+
 			@$stat['presence']+=$row['nb_jour_presence'];
 			@$stat['presence_heure']+=$row['nb_heure_presence'];
-			@$stat['absence']+=(empty($row['typeAbsence']->isPresence) ? $row['nb_jour_absence'] : 0);
+			@$stat['absence']+=$row['nb_jour_absence'];
 			@$stat['absence_heure']+=$row['nb_heure_absence'];
 			@$stat['presence+ferie']+=$row['nb_jour_presence'] + $row['nb_jour_ferie'];
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
@@ -775,7 +767,7 @@ global $conf,$db,$user;
 			
 			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
 			
-			$html.= _planning($PDOdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
+			$html.= _planning($PDOdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin );
 		
 			$annee_old = $annee;
 		
@@ -801,7 +793,16 @@ function _getSQLListValidation($userid)
 	return TRH_valideur_groupe::getSqlListObject('Conges');
 }
 
-function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {
+/**
+ * @param $PDOdb
+ * @param TRH_Absence $absence
+ * @param $idGroupeRecherche
+ * @param $idUserRecherche
+ * @param $date_debut
+ * @param $date_fin
+ * @return string
+ */
+function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
 	global $langs,$user,$db;
 	
 	dol_include_once('/valideur/class/valideur.class.php');
@@ -812,8 +813,8 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	if(array_sum($idGroupeRecherche)>0) $idUserRecherche = 0; // si un groupe est sélectionner on ne prend pas en compte l'utilisateur
 
 
-	$TPlanningUser=$absence->requetePlanningAbsence($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
-
+	$TPlanningUser=$absence->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
+//var_dump($TPlanningUser);exit;
 	
 	$TJourTrans=array(
 		1=>substr($langs->trans('Monday'),0,1)
@@ -830,12 +831,13 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	$html .= "<tr class=\"entete\">";
 	$html .= "<td ></td>";
 	foreach($TPlanningUser as $planning=>$val){
+		$planning=date('d/m/Y', $planning);
 		$std = new TObjetStd;
 		$std->set_date('date_jour', $planning);
 		
 		$html .=  '<td colspan="2">'.$TJourTrans[date('N', $std->date_jour)].' '.substr($planning,0,5).'</td>';
-		foreach($val as $id=>$present){
-			$tabUserMisEnForme[$id][$planning]=$present;	
+		foreach($val as $id=>$TPresent){
+			$tabUserMisEnForme[$id][$planning]=$TPresent;
 		}
 	}
 	$html .=  "</tr>";
@@ -859,158 +861,154 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 		$html .=  '<tr >';		
 		$html .=  '<td style="text-align:right; font-weight:bold;height:20px;" nowrap="nowrap">'.$user_courant->getFullName($langs).'</td>';
 //$planning=array();
-		foreach($planning as $dateJour => $ouinon){
-			
-			
-			if(empty($TTotal[$dateJour])) $TTotal[$dateJour] = 0;
-			
+
+		/** @var TRH_absenceDay $TAbsencePresence */
+		foreach ($planning as $dateJour => $TAbsencePresence)
+		{
+			if (empty($TTotal[$dateJour])) $TTotal[$dateJour] = 0;
 			$class='';
-			
+
 			$std = new TObjetStd;
 			$std->set_date('date_jour', $dateJour);
-			if(TRH_JoursFeries::estFerie($PDOdb, $std->get_date('date_jour','Y-m-d') )) { $isFerie = 1; $class .= ' jourFerie';  } else { $isFerie = 0; }	
-			
+			if (TRH_JoursFeries::estFerie($PDOdb, $std->get_date('date_jour','Y-m-d') )) { $isFerie = 1; $class .= ' jourFerie';  } else { $isFerie = 0; }
+
 			$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $idUser, $std->get_date('date_jour','Y-m-d')); // OUI/NON/AM/PM
 			$classTravail= ' jourTravaille'.$estUnJourTravaille;
-			
-			
-			if(!isset($TStatPlanning[$idUser]))$TStatPlanning[$idUser]=array(
-				'presence'=>0
-				,'absence'=>0
-				,'absence+ferie'=>0
-				,'presence+ferie'=>0
-				,'ferie'=>0
-			);
-			
-			if($isFerie && $estUnJourTravaille!='NON') { $TStatPlanning[$idUser]['ferie']++; }
-			
+
 			$labelJour = '+';//$labelJour = $TJourTrans[date('N', strtotime($dateJour))];
-			if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) ) {
-				$linkPop='&nbsp;';
-			}
-			else{
-				
-				if($ouinon->idAbsence>0 && !$ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/absence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">a</a>'; }
-				else if($ouinon->idAbsence>0 && $ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/presence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">p</a>'; }
-				else $linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
-				
-			}
-			
-			
-			if($ouinon=='non') {
-				
+
+			if (empty($TAbsencePresence))
+			{
+				if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) ) {
+					$linkPop='&nbsp;';
+				} else {
+					$linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
+				}
+
+				// case libre
 				$html .=  '<td class="'.$class.$classTravail.'" rel="am">'.$linkPop.'</td>
 					<td class="'.$class.$classTravail.'" rel="pm">'.$linkPop.'</td>';
-					
+
 				if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM')){
-					$TStatPlanning[$idUser]['presence']+=0.5;
 					$TTotal[$dateJour]+=0.5;
 				}
 				else if(!$isFerie && $estUnJourTravaille=='OUI'){
-					$TStatPlanning[$idUser]['presence']+=1;
 					$TTotal[$dateJour]+=1;
-				}
-						
-			}else{
-				//TODO factoriser
-				
-				$boucleOk=0;
-				//var_dump($ouinon);
-				$labelAbs = $ouinon->label;
-				if(!empty($ouinon->description)) $labelAbs.=' : '.$ouinon->description;
-			
-				if(mb_detect_encoding($labelAbs,'UTF-8', true) === false  ) $labelAbs = utf8_encode($labelAbs);
-
-				if(strpos($ouinon, 'RTT')!==false) {
-					$class .= ' rougeRTT';
-				}
-				else if($ouinon->isPresence) {
-					$class .= ' vert';
-					$TTotal[$dateJour]+=1;
-				}
-				else {
-					$class .= ' rouge';	
-				}
-				
-				if(!empty($class))$class.= ' classfortooltip';
-				
-				if($ouinon->colorId>0) {
-					$class.= ' persocolor'.$ouinon->colorId;
-				}
-				
-				if(strpos($ouinon,'DAM')!==false){
-						$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
-						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
-
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
-						else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
-
-				}	
-				else if(strpos($ouinon,'DPM')!==false){
-						$html .=  '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
-						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
-
-						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['presence']+=0.5;
-
-
-				}	
-				else if(strpos($ouinon,'FAM')!==false){
-						$html .=  '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
-						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
-
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI'))$TStatPlanning[$idUser]['absence']+=0.5;
-						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')){
-							$TStatPlanning[$idUser]['presence']+=0.5;
-							$TTotal[$dateJour]+=0.5;
-						}
-
-
-				}
-				else if(strpos($ouinon,'FPM')!==false){
-						$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
-						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
-
-
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
-						else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;
-
-				}
-				else if(strpos($ouinon,'AM')!==false){
-						$html .=  '<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
-						<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
-						
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
-						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')){
-							$TStatPlanning[$idUser]['presence']+=0.5;
-							$TTotal[$dateJour]+=0.5;
-						}
-				}
-				else if(strpos($ouinon,'PM')!==false){
-						$html .=  '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
-						<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
-
-						if(!$isFerie && ($estUnJourTravaille=='PM' || $estUnJourTravaille=='OUI')) $TStatPlanning[$idUser]['absence']+=0.5;
-						if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='OUI')){
-							$TStatPlanning[$idUser]['presence']+=0.5;
-							$TTotal[$dateJour]+=0.5;
-						}
-				}
-				else {
-					$html .=  '<td class="'.$class.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
-					<td class="'.$class.$classTravail.'"  title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
-						
-					if(!$isFerie && ($estUnJourTravaille=='AM' || $estUnJourTravaille=='PM'))$TStatPlanning[$idUser]['absence']+=0.5;
-					else if(!$isFerie && $estUnJourTravaille=='OUI')$TStatPlanning[$idUser]['absence']+=1;	
 				}
 			}
+			else
+			{
+				$countPresence = count($TAbsencePresence);
+				/** @var TRH_absenceDay $ouinon */
+				foreach ($TAbsencePresence as $ouinon)
+				{
+					$toString = $ouinon->__toString();
+					$type = $ouinon->getTypeMoment();
 
-			$TStatPlanning[$idUser]['absence+ferie'] = $TStatPlanning[$idUser]['absence'] + $TStatPlanning[$idUser]['ferie'];  
-			$TStatPlanning[$idUser]['presence+ferie'] = $TStatPlanning[$idUser]['presence'] + $TStatPlanning[$idUser]['ferie'];
+					$subclass = '';
+					if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) )
+					{
+						$linkPop='&nbsp;';
+					}
+					else
+					{
+						if($ouinon->idAbsence>0 && !$ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/absence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">a</a>'; }
+						else if($ouinon->idAbsence>0 && $ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/presence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">p</a>'; }
+						else $linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
+					}
+
+					$labelAbs = $ouinon->label;
+					if(!empty($ouinon->description)) $labelAbs.=' : '.$ouinon->description;
+
+					if(mb_detect_encoding($labelAbs,'UTF-8', true) === false  ) $labelAbs = utf8_encode($labelAbs);
+
+					if(strpos($toString, 'RTT')!==false) $subclass .= ' rougeRTT';
+					else if($ouinon->isPresence)
+					{
+						$subclass .= ' vert';
+						$TTotal[$dateJour]+=1;
+					}
+					else $subclass .= ' rouge';
+
+					if(!empty($class) || !empty($subclass)) $subclass.= ' classfortooltip';
+
+					if($ouinon->colorId > 0) $subclass.= ' persocolor'.$ouinon->colorId;
+
+					$subclass=$class.' '.$subclass;
+
+					// DAM = début congés matin, suite à plusieurs jours consécutifs, donc l'aprem est forcément pris par le meme congés
+					if($type == 'DAM')
+					{
+						$html.= '<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+									<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+					}
+					// DPM = début congés apres midi, si je pose 3 jours à partir d'un lundi après midi, il est possible de pose la matinée avec un autre type absence
+					else if($type == 'DPM')
+					{
+						if ($countPresence == 2)
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+						}
+						else
+						{
+							$html.= '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
+									<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+						}
+					}
+					// FAM = fin congés matin, si plusieurs jours consécutifs, il est possible de pose l'apres midi avec un autre type absence
+					else if($type == 'FAM')
+					{
+						if ($countPresence == 2)
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>';
+						}
+						else
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+									<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
+						}
+					}
+					// FPM = fin congés apres midi, suite à plusieurs jours consécutifs, donc le matin est forcément pris par le meme congés
+					else if($type == 'FPM')
+					{
+						$html.= '<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+									<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+					}
+					else if($type == 'AM')
+					{
+						// 2 = 2 types de congés le meme jour
+						if ($countPresence == 2)
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>';
+						}
+						else
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'"  title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+									<td class="vert'.$classTravail.'"  rel="pm">&nbsp;</td>';
+						}
+					}
+					else if($type == 'PM')
+					{
+						// 2 = 2 types de congés le meme jour
+						if ($countPresence == 2)
+						{
+							$html.= '<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+						}
+						else
+						{
+							$html.= '<td class="vert'.$classTravail.'" rel="am">&nbsp;</td>
+									<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+						}
+					}
+					else
+					{
+						$html.= '<td class="'.$subclass.$classTravail.'" title="'.$labelAbs.'" rel="am">'.$linkPop.'</td>
+									<td class="'.$subclass.$classTravail.'"  title="'.$labelAbs.'" rel="pm">'.$linkPop.'</td>';
+					}
+				}
+			}
 		}
-		
-		
-		
+
 		$html .=  "</tr>";
 	}
 	
