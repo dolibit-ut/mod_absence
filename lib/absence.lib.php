@@ -745,7 +745,7 @@ global $conf,$db,$user;
 		$annee_old = '';
 		
 		$t_max= strtotime(date('Y-m-t',  $absence->date_fin_planning));
-		
+
 		while($t_current<=$t_max) {
 			
 			$annee = date('Y', $t_current);
@@ -766,7 +766,7 @@ global $conf,$db,$user;
 			}
 			
 			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
-			
+
 			$html.= _planning($PDOdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin );
 		
 			$annee_old = $annee;

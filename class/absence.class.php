@@ -2793,10 +2793,14 @@ END:VCALENDAR
 	{
 		global $conf;
 
-		if(!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
-		
+		if (strlen($date_fin) == 10) $date_fin.= ' 23:59:59';
+
 		$date_debut = strtotime(str_replace("/","-",$date_debut));
 		$date_fin = strtotime(str_replace("/","-",$date_fin));
+
+		// clean params
+		if (empty($idGroupeRecherche)) $idGroupeRecherche = array();
+		elseif (!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
 
 		dol_include_once('/valideur/class/valideur.class.php');
 		$params = array(
@@ -2807,6 +2811,7 @@ END:VCALENDAR
 			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
 			, 'typeAbsence' => 'Tous'
 			, 'statut' => 1
+			, 'etat' => array('Validee')
 		);
 		
 		if (!empty($extra_params)) $params += $extra_params;
@@ -2904,8 +2909,10 @@ END:VCALENDAR
 
 //		$jourFin=strtotime(str_replace("/","-",$date_fin));
 //		$jourDebut=strtotime(str_replace("/","-",$date_debut));
-		$jourFin = $date_fin;
+
 		$jourDebut = $date_debut;
+		$jourFin = $date_fin;
+
 
 		$TRetour=array();
 		//on remplit le tableau de non
@@ -2927,8 +2934,12 @@ END:VCALENDAR
 				foreach ($TabAbsence[$id] as $tabAbs)
 				{
 					$time_debut = strtotime($tabAbs['date_debut']);
-					$time_debut_inc = $time_debut;
+					if ($time_debut < $jourDebut) $time_debut = $jourDebut;
+
 					$time_fin = strtotime($tabAbs['date_fin']);
+					if ($time_fin > $jourFin) $time_fin = $jourFin;
+
+					$time_debut_inc = $time_debut;
 
 					while ($time_debut_inc <= $time_fin)
 					{

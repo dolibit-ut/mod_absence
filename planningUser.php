@@ -42,7 +42,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 
 			if(!empty($_COOKIE['TRHPlanning']['date_fin_search'])) {
 				$date_fin=$_COOKIE['TRHPlanning']['date_fin_search'];
-                                $date_fin_time = str_replace('/', '-', $date_fin);
+                $date_fin_time = str_replace('/', '-', $date_fin);
 				$date_fin_time=strtotime($date_fin_time);
 				if(isset($date_debut_time_1_month) && $date_debut_time_1_month < $date_fin_time)
 				{
