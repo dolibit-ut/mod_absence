@@ -4,17 +4,22 @@ dol_include_once('/jouroff/class/jouroff.class.php');
 
 class TRH_absenceDay {
 
-	var $date = '';
-	var $isPresence = 0;
-	var $label = '';
-	var $AM=false;
-	var $PM=false;
-	var $DAM=false;
-	var $DPM=false;
-	var $FPM=false;
-	var $FAM=false;
-	var $colorId = 0;
-	var $description='';
+	public $date = '';
+	public $isPresence = 0;
+	public $label = '';
+	public $AM=false;
+	public $PM=false;
+	public $DAM=false;
+	public $DPM=false;
+	public $FPM=false;
+	public $FAM=false;
+	public $colorId = 0;
+	public $description='';
+
+	/** @var string $ddMoment matin|apresmidi */
+	public $ddMoment;
+	/** @var string $dfMoment matin|apresmidi */
+	public $dfMoment;
 
 	function __construct() {
 
@@ -53,12 +58,32 @@ class TRH_absenceDay {
 			return 'non';
 		}
 
-
-
-
-
 	}
 
+	public function isPresence()
+	{
+		return $this->isPresence;
+	}
+
+	public function getTypeMoment()
+	{
+		$type = 'non';
+
+		if($this->DAM) $type = 'DAM';
+		else if($this->FAM) $type = 'FAM';
+		else if($this->DPM) $type = 'DPM';
+		else if($this->FPM) $type = 'FPM';
+		else if($this->AM) $type = 'AM'; // Attention, il est possible que l'objet soit typé FAM & AM
+		else if($this->PM) $type = 'PM'; // Attention, il est possible que l'objet soit typé FPM & PM
+
+		return $type;
+	}
+
+	public function isFullDay()
+	{
+		// si ces 2 attributs sont différents c'est que nous sommes dans le cas suivant : ddMoement = matin et dfMoment = apresmidi
+		return ($this->ddMoment != $this->dfMoment);
+	}
 }
 
 //TRH_CONGE
@@ -2344,80 +2369,129 @@ END:VCALENDAR
 				)
 				, 'ue.ldap_entity_login' => $conf->entity
 			);
-			
+
 			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
 			$Tab = array(); // Tableau de retour de fonction
 			
 			foreach ($TPlanning as $t_current => $TAbsence)
 			{
-				foreach($TAbsence as $fk_user => $ouinon) {
-					$date = date('Y-m-d', $t_current);
-					
-					$presence = strpos($ouinon, '[Présence]') !== false; //TODO refondre un peu ça pour éviter cette grosse merde de strpos
+				$date = date('Y-m-d', $t_current);
+				$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
 
+				foreach($TAbsence as $fk_user => $TRH_absenceDay)
+				{
+					// OUI = jour entier; AM = que le matin; PM = que l'aprem; NON = jour non présent (non travaillé)
 					$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $fk_user, $date);
-					$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
 
-					$Tab[$fk_user][$date]['presence_jour_entier'] = (int)($estUnJourTravaille=='OUI' && $ouinon=='non' && !$estFerie) ;
-					$Tab[$fk_user][$date]['presence'] = (int)(($estUnJourTravaille!='NON' && $ouinon=='non' && !$estFerie) || $presence) ;
+					$Tab[$fk_user][$date]['ferie'] = (int) $estFerie ;
+					$Tab[$fk_user][$date]['estUnJourTravaille'] = $estUnJourTravaille;
 
-					if($Tab[$fk_user][$date]['presence_jour_entier']==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 1;
-					else if($Tab[$fk_user][$date]['presence_jour_entier']==0 && $Tab[$fk_user][$date]['presence']==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
-					else $Tab[$fk_user][$date]['nb_jour_presence'] = 0;
+					$Tab[$fk_user][$date]['presence'] = 0; // *
+					$Tab[$fk_user][$date]['absence'] = 0; // *
+					$Tab[$fk_user][$date]['presence_jour_entier'] = null; // *
 
-					$Tab[$fk_user][$date]['absence'] = (int)($ouinon!='non' && !$estFerie) ;
-					
-					if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille=='OUI') $Tab[$fk_user][$date]['nb_jour_absence'] = 1;
-					else if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille!='NON') $Tab[$fk_user][$date]['nb_jour_absence'] = 0.5;
-					else $Tab[$fk_user][$date]['nb_jour_absence'] = 0;
-					
-					//$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
+					$Tab[$fk_user][$date]['nb_jour_ferie'] = ($estFerie && $estUnJourTravaille!='NON') ? 1 : 0;
+					$Tab[$fk_user][$date]['nb_jour_presence'] = 0; // *
+					$Tab[$fk_user][$date]['nb_jour_absence'] = 0; // *
+
+					if (empty($TRH_absenceDay))
+					{
+						$presence_jour_entier = (int) ($estUnJourTravaille=='OUI' && !$estFerie);
+						$presence_demi_journee = (int) (in_array($estUnJourTravaille, array('AM', 'PM')) && !$estFerie);
+
+						$Tab[$fk_user][$date]['presence_jour_entier'] = $presence_jour_entier;
+						$Tab[$fk_user][$date]['presence'] = (int) ($presence_jour_entier || $presence_demi_journee);
+
+						if ($presence_jour_entier==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 1;
+						else if ($presence_demi_journee==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
+						else $Tab[$fk_user][$date]['nb_jour_presence'] = 0;
+
+						$Tab[$fk_user][$date]['typeAbsence'] = null;
+
+					}
+					else
+					{
+						$countAbsenceDay = count($TRH_absenceDay);
+						/** @var TRH_absenceDay[] $TRH_absenceDay */
+						/** @var TRH_absenceDay $ouinon */
+						foreach ($TRH_absenceDay as $k => $ouinon)
+						{
+							$Tab[$fk_user][$date]['typeAbsence'][] = $ouinon;
+							$Tab[$fk_user][$date]['presence'] |= $ouinon->isPresence();
+
+							if ($ouinon->isPresence())
+							{
+								$Tab[$fk_user][$date]['presence_jour_entier'] = (int) ($ouinon->isFullDay());
+
+								if ($Tab[$fk_user][$date]['presence_jour_entier'] == 1) $Tab[$fk_user][$date]['nb_jour_presence'] = 1;
+								else $Tab[$fk_user][$date]['nb_jour_presence']+= 0.5;
+							}
+							else
+							{
+								$Tab[$fk_user][$date]['absence'] = (int) (!$estFerie);
+
+								$absence_jour_entier = (int) $ouinon->isFullDay();
+								$absence_demi_journee = !$absence_jour_entier;
+
+								if (!$estFerie)
+								{
+									if ($absence_jour_entier) $Tab[$fk_user][$date]['nb_jour_absence'] = 1;
+									else $Tab[$fk_user][$date]['nb_jour_absence']+= 0.5;
+								}
+
+								$Tab[$fk_user][$date]['presence'] |= (int) $absence_demi_journee;
+
+								// Inc présence uniquement si j'ai qu'une demi journée de posé, il est possible d'avoir un autre objet mais de type Présence
+								if ($countAbsenceDay < 2 && $absence_demi_journee) $Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
+
+								$Tab[$fk_user][$date]['absence'] = (int) (!$estFerie);
+							}
+						}
+					}
+
+					/* TODO C'est une ... sans nom, je mets en commentaire, car de toute façon ce n'est plus en place depuis 6cbf66b2
+					$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
 					$t_am = $TTime['am'];
 					$t_pm = $TTime['pm'];
-
 					$Tab[$fk_user][$date]['t_am'] = $t_am;
 					$Tab[$fk_user][$date]['t_pm'] = $t_pm;
 
-					if ($Tab[$fk_user][$date]['nb_jour_presence'] == 1 || ($Tab[$fk_user][$date]['nb_jour_absence'] == 1 && $presence)) {
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_am + $t_pm;
-					}
-					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='AM')
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_am;
-					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='PM')
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_pm;
-					else
-						$Tab[$fk_user][$date]['nb_heure_presence'] = 0;
+					if ($Tab[$fk_user][$date]['nb_jour_absence'] == 1 && $Tab[$fk_user][$date]['presence']) $Tab[$fk_user][$date]['nb_heure_presence'] = $t_am + $t_pm;
+					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='AM') $Tab[$fk_user][$date]['nb_heure_presence'] = $t_am;
+					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='PM') $Tab[$fk_user][$date]['nb_heure_presence'] = $t_pm;
+					else $Tab[$fk_user][$date]['nb_heure_presence'] = 0;
 
-					if($Tab[$fk_user][$date]['nb_jour_absence']==1)$Tab[$fk_user][$date]['nb_heure_absence'] = $t_am + $t_pm;
-					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='AM')$Tab[$fk_user][$date]['nb_heure_absence'] = $t_am;
-					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='PM')$Tab[$fk_user][$date]['nb_heure_absence'] = $t_pm;
+
+					if ($Tab[$fk_user][$date]['nb_jour_absence']==1) $Tab[$fk_user][$date]['nb_heure_absence'] = $t_am + $t_pm;
+					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='AM') $Tab[$fk_user][$date]['nb_heure_absence'] = $t_am;
+					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='PM') $Tab[$fk_user][$date]['nb_heure_absence'] = $t_pm;
 					else $Tab[$fk_user][$date]['nb_heure_absence'] = 0;
 
-					$Tab[$fk_user][$date]['ferie'] = (int)$estFerie ;
-
-					$Tab[$fk_user][$date]['nb_jour_ferie'] = ($Tab[$fk_user][$date]['ferie'] && $estUnJourTravaille!='NON') ? 1:0;
-
-					$Tab[$fk_user][$date]['estUnJourTravaille'] = $estUnJourTravaille;
-					$Tab[$fk_user][$date]['typeAbsence'] = $ouinon;
 
 					$timePresencePresume = $Tab[$fk_user][$date]['nb_heure_presence'] * 3600;
 
 					$Tab[$fk_user][$date]['nb_heure_presence_reelle'] = TRH_Pointeuse::tempsTravailReelDuJour(
-							$PDOdb
-							, $fk_user
-							, $date
-							, $timePresencePresume
-						); // en heure*/
+						$PDOdb
+						, $fk_user
+						, $date
+						, $timePresencePresume
+					); // en heure
 
 					$Tab[$fk_user][$date]['nb_heure_suplementaire'] = $Tab[$fk_user][$date]['nb_heure_presence_reelle'] - $Tab[$fk_user][$date]['nb_heure_presence'];
-
+					*/
 				}
 			}
-			
+
 			return $Tab;
 	}
 
 	//fonction qui va renvoyer la requête sql de recherche pour le planning
+
+	/**
+	 * @return array
+	 * @deprecated semble être utilisé une dernière fois par le module "report" -> report_atm.php:741 (fonction _rs_get_user_stat)
+	 * @see requetePlanningAbsence2
+	 */
 	function requetePlanningAbsence(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $extra_params=array())
 	{
 			// TODO cette fonction est une horreur, à recoder
@@ -2696,10 +2770,14 @@ END:VCALENDAR
 	{
 		global $conf;
 
-		if(!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
-		
+		if (strlen($date_fin) == 10) $date_fin.= ' 23:59:59';
+
 		$date_debut = strtotime(str_replace("/","-",$date_debut));
 		$date_fin = strtotime(str_replace("/","-",$date_fin));
+
+		// clean params
+		if (empty($idGroupeRecherche)) $idGroupeRecherche = array();
+		elseif (!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
 
 		dol_include_once('/valideur/class/valideur.class.php');
 		$params = array(
@@ -2710,6 +2788,7 @@ END:VCALENDAR
 			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
 			, 'typeAbsence' => 'Tous'
 			, 'statut' => 1
+			, 'etat' => array('Validee')
 		);
 		
 		if (!empty($extra_params)) $params += $extra_params;
@@ -2717,7 +2796,8 @@ END:VCALENDAR
 		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
 			
 		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
-		
+		$sql.= ' ORDER BY r.fk_user, r.date_debut ASC, r.ddMoment DESC';
+//		echo $sql;exit;
 		$TRow = $PDOdb->ExecuteAsArray($sql);
 		
 		// on traite la recherche pour le planning
@@ -2740,7 +2820,7 @@ END:VCALENDAR
 		}
 
 		unset($TRow);
-		
+
 		//on récupère les différents utilisateurs concernés par la recherche
 
 		if($idUserRecherche>0) {
@@ -2806,8 +2886,10 @@ END:VCALENDAR
 
 //		$jourFin=strtotime(str_replace("/","-",$date_fin));
 //		$jourDebut=strtotime(str_replace("/","-",$date_debut));
-		$jourFin = $date_fin;
+
 		$jourDebut = $date_debut;
+		$jourFin = $date_fin;
+
 
 		$TRetour=array();
 		//on remplit le tableau de non
@@ -2816,7 +2898,7 @@ END:VCALENDAR
 			//echo "ici".$id." ";
 			while ($jourFin >= $jourDebut)
 			{
-				$TRetour[$jourDebut][$id]=new TRH_absenceDay;
+				$TRetour[$jourDebut][$id]=array();
 				$jourDebut=strtotime('+1day',$jourDebut);
 			}
 		}
@@ -2829,12 +2911,19 @@ END:VCALENDAR
 				foreach ($TabAbsence[$id] as $tabAbs)
 				{
 					$time_debut = strtotime($tabAbs['date_debut']);
-					$time_debut_inc = $time_debut;
+					if ($time_debut < $jourDebut) $time_debut = $jourDebut;
+
 					$time_fin = strtotime($tabAbs['date_fin']);
+					if ($time_fin > $jourFin) $time_fin = $jourFin;
+
+					$time_debut_inc = $time_debut;
 
 					while ($time_debut_inc <= $time_fin)
 					{
 						$moment = new TRH_absenceDay;
+
+						$moment->ddMoment = $tabAbs['ddMoment'];
+						$moment->dfMoment = $tabAbs['dfMoment'];
 
 						if ($time_debut_inc == $time_debut && $time_debut_inc == $time_fin)
 						{
@@ -2863,14 +2952,13 @@ END:VCALENDAR
 
 						$moment->idAbsence = $tabAbs['idAbsence'];
 
-						$TRetour[$time_debut_inc][$id] = $moment;
-
+						$TRetour[$time_debut_inc][$id][] = $moment;
 						$time_debut_inc = strtotime('+1day', $time_debut_inc);
 					}
 				}
 			}
 		}
-		
+
 		return $TRetour;
 	}
 }
