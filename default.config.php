@@ -6,7 +6,7 @@
 	else  if(is_file('../../../../main.inc.php'))$dir = '../../../../';
 	else  if(is_file('../../../../../main.inc.php'))$dir = '../../../../../';
 	else {
-		exit('Absence Impossible to find main.inc '.__DIR__);
+		//exit('Absence Impossible to find main.inc '.__DIR__); // Ce exit ne devrait plus être de la partie, il fait planter la synchro LDAP qui inclut déjà le main.inc.php
 	}
 	if(!defined('INC_FROM_DOLIBARR') && defined('INC_FROM_CRON_SCRIPT')) {
 		include($dir."master.inc.php");
