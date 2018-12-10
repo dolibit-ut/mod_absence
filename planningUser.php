@@ -103,7 +103,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	}
 
 	$TGroupe = $TUser = array();
-	
+
+	// ConsultCollabSchedule = Visualiser l'emploi du temps des collaborateurs
 	if($user->rights->absence->myactions->voirTousEdt) {
 
 		$TGroupe[0]  = $langs->trans('AllThis');
@@ -124,6 +125,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		
 		$sql.=" ORDER BY u.lastname, u.firstname";
 	}
+	// ConsultGroupCollabAbsencesPresencesOnSchedule = Voir les absences ou présences des collaborateurs de mes groupes sur le calendrier
 	elseif($user->rights->absence->myactions->voirGroupesAbsences)  {
 		
 		$TGroupe[99999]  = $langs->trans('None');
@@ -132,6 +134,9 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (g.rowid=ug.fk_usergroup)
 		WHERE g.entity IN (0,".$conf->entity.")
 		AND ug.fk_user=".$user->id;
+
+		// TODO faudrait il pas croiser les données avec les groupes que l'utilisateur "Valide" ? (@see tk8838)
+
 		$ATMdb->Execute($sqlReq);
 		while($ATMdb->Get_line()) {
 			$TGroupe[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
