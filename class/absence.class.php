@@ -1728,7 +1728,7 @@ class TRH_Absence extends TObjetStd {
 
 	}
 	function mailAlertEffectif($idGroup) {
-		global $db;
+		global $db,$langs,$conf;
 		if (!class_exists('UserGroup')) {
 			require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 		}
