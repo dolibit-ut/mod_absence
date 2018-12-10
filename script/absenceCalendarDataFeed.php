@@ -17,9 +17,11 @@ switch ($method) {
 
 }
 
-function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = 'Tous')
+function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = '')
 {
 	global $conf;
+	
+	if (empty($typeAbsence)) $typeAbsence = 'Tous';
 	
 	$TEvent = getJourFerie($PDOdb, $date_start, $date_end); 
 	$TEvent = array_merge($TEvent, getEventsAbs($PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence));

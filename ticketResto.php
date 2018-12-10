@@ -1,4 +1,6 @@
 <?php
+set_time_limit(0);
+
 	require('config.php');
 	dol_include_once('/absence/class/absence.class.php');
 	dol_include_once('/absence/class/ticket.class.php');
@@ -40,6 +42,9 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.txt');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 
+		// Pour l'export SAGE il faut pas le rajouter ce caractère
+		//if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
+		
 		foreach($Tab as $fk_user=>$row) {
 
                 if($row['nbTicket'] > 0) {
@@ -56,6 +61,8 @@ function _generate_ticket_resto(&$ATMdb, $Tab, $type = 'standard') {
 		header('Content-type: application/octet-stream');
 	    header('Content-Disposition: attachment; filename=TicketResto-'.date('Y-m-d-h-i-s').'.csv');
 	    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		
+		if (!empty($conf->global->DYNAMICRH_ADD_BOM)) print "\xEF\xBB\xBF";
 		
 		if($type != 'primoclic'){
 			print $langs->trans('ProductCode') . ';' . $langs->trans('ClientCode') . ';' . $langs->trans('DeliveryPoint') . ';';
@@ -187,9 +194,9 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$sql=" SELECT DISTINCT u.rowid, u.lastname, u.firstname 
 			FROM ".MAIN_DB_PREFIX."user as u LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (u.rowid=ug.fk_user)
 			";
-
+	$sql.= ' WHERE u.statut = 1 AND (u.firstname != "" OR u.lastname != "")';
 	if($idGroupeRecherche>0) {
-		$sql.=" WHERE ug.fk_usergroup=".$idGroupeRecherche;
+		$sql.=" AND ug.fk_usergroup=".$idGroupeRecherche;
 	}
 
 	$sql.=" ORDER BY u.lastname, u.firstname";
@@ -326,7 +333,7 @@ function _ticket(&$ATMdb) {
 	if($t_debut<0) return false;
 	
 	print "Du ".date('d/m/Y', $t_debut)." au ".date('d/m/Y', $t_fin);
-
+	
 	
 	print '<table class="planning" border="0">';
 	print '<tr class="entete">';
@@ -343,6 +350,8 @@ function _ticket(&$ATMdb) {
 
 	$group = new UserGroup($db);
 	$group->fetch($idGroup);
+	
+	$code_fact = '';
 	
 	if(!empty($group->array_options['options_tr_raison_sociale'])) {
 		$rs =  $group->array_options['options_tr_raison_sociale'];
@@ -375,6 +384,7 @@ function _ticket(&$ATMdb) {
 		$ville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
 	
 		$code_client='';
+		$code_fact = $conf->global->DYNAMICRH_TR_CODEFACT;
 	}
 	
 	
@@ -442,7 +452,7 @@ function _ticket(&$ATMdb) {
 			<td align="right"><?php echo !empty($stat['ndf_suspicious']) ? '<strong style="color:red;" class="classfortooltip" title="'.implode(', ', $stat['TRefSuspisious']).'">'.$stat['ndf_suspicious'].'</strong>' : '' ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][nbTicket]', $stat['presence']-$stat['ndf'], 3)  ?> de <?php echo (int)$conf->global->RH_MONTANT_TICKET_RESTO ?> centimes</td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][pointlivraison]',$pointlivraison, 10,255).$form->hidden('TTicket['.$idUser.'][code_client]', $code_client)  ?></td>
-			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau1]', '', 10,255)  ?></td>
+			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau1]', $code_fact, 10,255)  ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][niveau2]', '', 10,255)  ?></td>
 			<td align="right"><?php echo $form->texte('', 'TTicket['.$idUser.'][matricule]', $u->array_options['options_COMPTE_TIERS'], 10,255)  ?></td>
 			<td align="right"><?php echo $form->combo('', 'TTicket['.$idUser.'][nomcouv]', $TON , false)  ?></td>

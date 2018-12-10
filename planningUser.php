@@ -42,7 +42,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 
 			if(!empty($_COOKIE['TRHPlanning']['date_fin_search'])) {
 				$date_fin=$_COOKIE['TRHPlanning']['date_fin_search'];
-                                $date_fin_time = str_replace('/', '-', $date_fin);
+                $date_fin_time = str_replace('/', '-', $date_fin);
 				$date_fin_time=strtotime($date_fin_time);
 				if(isset($date_debut_time_1_month) && $date_debut_time_1_month < $date_fin_time)
 				{
@@ -103,7 +103,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	}
 
 	$TGroupe = $TUser = array();
-	
+
+	// ConsultCollabSchedule = Visualiser l'emploi du temps des collaborateurs
 	if($user->rights->absence->myactions->voirTousEdt) {
 
 		$TGroupe[0]  = $langs->trans('AllThis');
@@ -124,6 +125,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		
 		$sql.=" ORDER BY u.lastname, u.firstname";
 	}
+	// ConsultGroupCollabAbsencesPresencesOnSchedule = Voir les absences ou présences des collaborateurs de mes groupes sur le calendrier
 	elseif($user->rights->absence->myactions->voirGroupesAbsences)  {
 		
 		$TGroupe[99999]  = $langs->trans('None');
@@ -132,6 +134,9 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (g.rowid=ug.fk_usergroup)
 		WHERE g.entity IN (0,".$conf->entity.")
 		AND ug.fk_user=".$user->id;
+
+		// TODO faudrait il pas croiser les données avec les groupes que l'utilisateur "Valide" ? (@see tk8838)
+
 		$ATMdb->Execute($sqlReq);
 		while($ATMdb->Get_line()) {
 			$TGroupe[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
@@ -362,7 +367,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	<script type="text/javascript">
 	function refreshPlanning() {
 				
-				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>')
+				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>');
 				
 				$.ajax({
 					url: "script/interface.php"
@@ -371,8 +376,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		    		,crossDomain: true
 					,data: {
 						get:'planning'
-						,date_debut_search: "<?php echo date('d/m/Y', $absence->date_debut_planning) ?>"
-						,date_fin_search: "<?php echo date('d/m/Y', $absence->date_fin_planning) ?>"
+						,date_debut_search: "<?php echo $absence->date_debut_planning; ?>"
+						,date_fin_search: "<?php echo $absence->date_fin_planning; ?>"
 						,groupe : <?php echo (int)$idGroupeRecherche ?>
 						,groupe2 : <?php echo (int)$idGroupeRecherche2 ?>
 						,groupe3 : <?php echo (int)$idGroupeRecherche3 ?>
