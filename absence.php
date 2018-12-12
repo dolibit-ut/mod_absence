@@ -355,10 +355,10 @@ function _historyCompteurInForm($duree) {
 
 }
 
-function _typeAbsence($isPresence = '',$libelleAbsence = ''){
+function _typeAbsence($isPresence = 0,$libelleAbsence = '', $showUserID = 0){
     global $user, $langs;
     
-    return TRH_TypeAbsence::_getName($user, $isPresence, $libelleAbsence);
+    return TRH_TypeAbsence::_getName($user, $isPresence, $libelleAbsence, $showUserID);
 
 }
 
@@ -372,11 +372,11 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 
 	$r = new TSSRenderControler($absence);
-
+	$TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
 	//droits d'admin : accès à toutes les absences sur la liste
 
-	$sql="SELECT a.rowid as 'ID',ta.isPresence, IF(ta.isPresence = 0, 'absence', 'presence') as isPresenceCode, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
-		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
+	$sql="SELECT a.rowid as 'ID',a.fk_user,ta.isPresence, IF(ta.isPresence = 0, 'absence', 'presence') as isPresenceCode, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
+		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user, u.login, u.firstname, u.lastname,
 		  	a.etat ";
 
 	if($conf->multicompany->enabled) $sql.=",e.label as entity";
@@ -470,12 +470,12 @@ function _listeAdmin(&$PDOdb, &$absence) {
             'etat' => '_setColorEtat("@val@")',
             'login' => '_linkUser(@fk_user@)',
             'action' => '_getCheckbox(@ID@,"@etat@")',
-            'libelle' => '_typeAbsence("@isPresence@","@libelle@")'
+            'libelle' => '_typeAbsence("@isPresence@","@libelle@", "@fk_user@")'
         ),
         'orderBy' => $TOrder
     );
     
-    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType)){
+    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation)){
         $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
     }
 	
@@ -598,7 +598,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 		    ,'eval'=>array(
 		        'etat'=>'_setColorEtat("@val@")'
 		        ,'action'=>'_getCheckbox(@ID@,"@etat@")'
-		        ,'libelle' => '_typeAbsence("@isPresence@","@libelle@")'
+		        ,'libelle' => '_typeAbsence("@isPresence@","@libelle@", "@fk_user@")'
 		    )
 		    
 		    ,'orderBy'=>$TOrder
@@ -606,7 +606,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 		);
 		
 		
-		if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType)){
+		if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation)){
 		    $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
 		}
 		
@@ -881,7 +881,27 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     $input_doc = '<input class="flat minwidth400" type="file"'.((! empty($conf->global->MAIN_DISABLE_MULTIPLE_FILEUPLOAD) || $conf->browser->layout != 'classic')?' name="userfile"':' name="userfile[]" multiple').
                  (empty($conf->global->MAIN_UPLOAD_DOC) || empty($user->rights->absence->myactions->creerAbsenceCollaborateur)?' disabled':'').' />';
 
-//    var_dump($droitSupprimer);
+     
+     print dol_get_fiche_head(absencePrepareHead($absence, $mode!='edit'? 'absence' : 'absenceCreation')  , 'fiche', $langs->trans('Absence'));
+     
+
+     $absence->cardLibelle = $absence->getName($user);
+     $paramid = '' ;
+     $morehtml='';
+     $shownav=0;
+     $fieldid='id';
+     $fieldref='cardLibelle';
+     $morehtmlref='';
+     $moreparam='';
+     $nodbprefix=0;
+     $morehtmlleft='';
+     $morehtmlstatus='';
+     $onlybanner=0;
+     $morehtmlright='';
+     print dol_absence_banner_tab($absence, 'nextlink', $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $onlybanner, $morehtmlright);
+     
+
+
     print $TBS->render('./tpl/absence.tpl.php'
 		,array(
 			//'TRegle' =>$TRegle
@@ -934,7 +954,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'date_fin'=> $form->doliCalendar('date_fin', $absence->date_fin)
 				,'dfMoment'=>$form->combo('','dfMoment',$absence->TdfMoment,$absence->dfMoment)
 				,'idUser'=>$user->id
-				,'comboType'=>$form->combo('','type',$typeAbsenceCreable,$absence->type)
+			    ,'comboType'=>$mode=='edit'?$form->combo('','type',$typeAbsenceCreable,$absence->type) : $absence->getName($user)
 				,'etat'=>$absence->etat
 				,'libelleEtat'=>$absence->libelleEtat
 				,'duree'=>$form->texte('','duree',round2Virgule($absence->duree),5,10)
@@ -981,8 +1001,6 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 			)
 			,'view'=>array(
 				'mode'=>$mode
-				,'head'=>dol_get_fiche_head(absencePrepareHead($absence, 'absence')  , 'fiche', $langs->trans('Absence'))
-				,'head2'=>dol_get_fiche_head(absencePrepareHead($absence, 'absenceCreation')  , 'fiche', $langs->trans('Absence'))
 				,'dateFormat'=>$langs->trans("FormatDateShortJavaInput")
 				,'form_start'=>$form_start
 				,'form_end'=>$form->end_form()
