@@ -3237,6 +3237,32 @@ class TRH_TypeAbsence extends TObjetStd {
 		return $Tab;
 
 	}
+	
+	/*
+	 * Return absence name coresponding to user rights
+	 */
+	function getName($user){
+	    global $langs;
+	    
+	    return self::_getName($user, $this->isPresence, $this->libelleAbsence);
+	}
+	
+	static function _getName($user, $isPresence, $libelleAbsence){
+	    global  $langs;
+	    
+	    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType)){
+	        return $libelleAbsence;
+	    }
+	    else
+	    {
+	        if(!empty($isPresence)){
+	            return  $langs->trans('Presence');
+	        }
+	        else{
+	            return  $langs->trans('Absence');
+	        }
+	    }
+	}
 
 }
 

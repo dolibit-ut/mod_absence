@@ -253,7 +253,7 @@ function _liste(&$PDOdb, &$absence) {
 	$r = new TSSRenderControler($absence);
 
 	//LISTE D'ABSENCES DU COLLABORATEUR
-	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.fk_user, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
+	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresenceCode, a.fk_user, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
 			a.libelle,a.duree, a.etat,a.type, 'Compteur', u.login, u.firstname, u.lastname ";
 
 	if($conf->multicompany->enabled) $sql.=",e.label as entity";
@@ -285,7 +285,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'libelle'=>'<a href="@isPresence@.php?id=@ID@&action=view">@val@</a>'
+			'libelle'=>'<a href="@isPresenceCode@.php?id=@ID@&action=view">@val@</a>'
 		)
 		,'translate'=>array('Statut demande'=>array(
 			'Refusée'=>'<b style="color:#A72947">'.$langs->trans('Refused').'</b>',
@@ -294,7 +294,7 @@ function _liste(&$PDOdb, &$absence) {
 			,'avertissement'=>array('1'=>'<img src="./img/warning.png" title="'.$langs->trans('DoNotRespectRules').'" />')
 			,'etat'=>$absence->TEtat
 		)
-		,'hide'=>array('isPresence','DateCre', 'fk_user','type', 'ID')
+		,'hide'=>array('isPresence','isPresenceCode', 'DateCre', 'fk_user','type', 'ID')
 		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date', 'duree'=>'number')
 		,'liste'=>array(
 			'titre'=>$langs->trans('ListOfAbsence')
@@ -323,8 +323,8 @@ function _liste(&$PDOdb, &$absence) {
 			,'entity'		 => $langs->trans('Entity')
 		)
 		,'search'=>array(
-			'date_debut'=>array('recherche'=>'calendar')
-			,'date_fin'=>array('recherche'=>'calendar')
+			'date_debut'=>array('recherche'=>'calendars')
+			,'date_fin'=>array('recherche'=>'calendars')
 			,'typeAbsence'=>$absence->TTypeAbsenceAdmin
 			,"firstname"=>true
 			,"lastname"=>true
@@ -335,8 +335,7 @@ function _liste(&$PDOdb, &$absence) {
 			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
 			,'Compteur'=>'_historyCompteurInForm(getHistoryCompteurForUser(@fk_user@,@ID@,@duree@,"@type@","@etat@"))'
-
-
+			
 		)
 		,'orderBy'=>$TOrder
 
@@ -355,6 +354,15 @@ function _historyCompteurInForm($duree) {
 	else return '';
 
 }
+
+function _typeAbsence($isPresence = '',$libelleAbsence = ''){
+    global $user, $langs;
+    
+    return TRH_TypeAbsence::_getName($user, $isPresence, $libelleAbsence);
+
+}
+
+
 function _listeAdmin(&$PDOdb, &$absence) {
 	global $langs, $conf, $db, $user, $hookmanager;
 	$hookmanager->initHooks(array('agefoddsessionlist'));
@@ -367,7 +375,7 @@ function _listeAdmin(&$PDOdb, &$absence) {
 
 	//droits d'admin : accès à toutes les absences sur la liste
 
-	$sql="SELECT a.rowid as 'ID', IF(ta.isPresence = 0, 'absence', 'presence') as isPresence, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
+	$sql="SELECT a.rowid as 'ID',ta.isPresence, IF(ta.isPresence = 0, 'absence', 'presence') as isPresenceCode, a.date_cre as 'DateCre',a.date_debut , a.date_fin,
 		 	a.libelle, ROUND(a.duree ,1) as 'duree', a.fk_user,  a.fk_user, u.login, u.firstname, u.lastname,
 		  	a.etat ";
 
@@ -392,78 +400,90 @@ function _listeAdmin(&$PDOdb, &$absence) {
 	$form=new TFormCore($_SERVER['PHP_SELF'].'?action=listeAdmin','formtranslateList','post');
 	echo $form->hidden('action', 'listeAdmin');
 
-	$THide = array('isPresence','DateCre', 'fk_user', 'ID','typeAbsence');
+	$THide = array('isPresence','isPresenceCode', 'DateCre', 'fk_user', 'ID','typeAbsence');
 	if(empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
 		$THide[] = 'action';
 	}
-	//echo $sql;exit;
-//$PDOdb->debug=true;
-	$r->liste($PDOdb, $sql, array(
-		'limit'=>array(
-			'page'=>$page
-			,'nbLine'=>'30'
-			,'global'=>1000
-		)
-		,'link'=>array(
-			'libelle'=>'<a href="@isPresence@.php?id=@ID@&action=view">@val@</a>'
-		)
-		,'translate'=>array(
-			'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
-			/*,'etat'=>$absence->TEtat*/
-		)
-		,'hide'=>$THide
-		,'type'=>array('date_debut'=>'date', 'date_fin'=>'date')
-		,'liste'=>array(
-			'titre'=> $langs->trans('ListeAllCollabAbsences')
-			,'image'=>img_picto('','title.png', '', 0)
-			,'picto_precedent'=>img_picto('','previous.png', '', 0)
-			,'picto_suivant'=>img_picto('','next.png', '', 0)
-			,'noheader'=> (int)isset($_REQUEST['socid'])
-			,'messageNothing'=> $langs->trans('MessageNothingAbsence')
-			,'order_down'=>img_picto('','1downarrow.png', '', 0)
-			,'order_up'=>img_picto('','1uparrow.png', '', 0)
-		/*	,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
-			,'etat'=>$absence->TEtat
-
-		)
-		,'title'=>array(
-			'date_debut'=> $langs->trans('StartDate')
-			,'date_fin'=> $langs->trans('EndDate')
-			,'avertissement'=> $langs->trans('Rules')
-			,'libelle'=> $langs->trans('AbsenceType')
-			,'typeAbsence'=>$langs->trans('AbsenceType')
-			,'firstname'=> $langs->trans('FirstName')
-			,'lastname'=> $langs->trans('Name')
-			,'login'=> $langs->trans('Login')
-			,'duree'=> $langs->trans('DurationInDays')
-			,'etat'=> $langs->trans('RequestStatus')
-			,'entity'=> $langs->trans('Entity')
-			,'action'=>img_help('','Cocher pour valider en bloc')
-		)
-		,'search'=>array(
-			'date_debut'=>array('recherche'=>'calendar')
-			,'date_fin'=>array('recherche'=>'calendar')
-			,'typeAbsence'=>$absence->TTypeAbsenceAdmin
-			,"firstname"=>true
-			,"lastname"=>true
-			,"login"=>true
-			,'etat'=>$absence->TEtat
-		)
-		,'eval'=>array(
-			'lastname'=>'ucwords(strtolower("@val@"))'
-			,'etat'=>'_setColorEtat("@val@")'
-			,'login'=>'_linkUser(@fk_user@)'
-			,'action'=>'_getCheckbox(@ID@,"@etat@")'
-		)
-		,'orderBy'=>$TOrder
-
-	));
+        // echo $sql;exit;
+        // $PDOdb->debug=true;
+    $listParam = array(
+        'limit' => array(
+            'page' => $page,
+            'nbLine' => '30',
+            'global' => 1000
+        ),
+        'link' => array(
+            'libelle' => '<a href="@isPresenceCode@.php?id=@ID@&action=view">@val@</a>'
+        ),
+        'translate' => array(
+            'avertissement' => array(
+                '1' => '<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>',
+                '0' => ''
+            )
+            /* ,'etat'=>$absence->TEtat */
+        ),
+        'hide' => $THide,
+        'type' => array(
+            'date_debut' => 'date',
+            'date_fin' => 'date'
+        ),
+        'liste' => array(
+            'titre' => $langs->trans('ListeAllCollabAbsences'),
+            'image' => img_picto('', 'title.png', '', 0),
+            'picto_precedent' => img_picto('', 'previous.png', '', 0),
+            'picto_suivant' => img_picto('', 'next.png', '', 0),
+            'noheader' => (int) isset($_REQUEST['socid']),
+            'messageNothing' => $langs->trans('MessageNothingAbsence'),
+            'order_down' => img_picto('', '1downarrow.png', '', 0),
+            'order_up' => img_picto('', '1uparrow.png', '', 0)
+							    /*	,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
+							    ,'etat' => $absence->TEtat
+        ),
+        'title' => array(
+            'date_debut' => $langs->trans('StartDate'),
+            'date_fin' => $langs->trans('EndDate'),
+            'avertissement' => $langs->trans('Rules'),
+            'libelle' => $langs->trans('AbsenceType'),
+            'typeAbsence' => $langs->trans('AbsenceType'),
+            'firstname' => $langs->trans('FirstName'),
+            'lastname' => $langs->trans('Name'),
+            'login' => $langs->trans('Login'),
+            'duree' => $langs->trans('DurationInDays'),
+            'etat' => $langs->trans('RequestStatus'),
+            'entity' => $langs->trans('Entity'),
+            'action' => img_help('', 'Cocher pour valider en bloc')
+        ),
+        'search' => array(
+            'date_debut' => array(
+                'recherche' => 'calendars'
+            ),
+            'date_fin' => array(
+                'recherche' => 'calendars'
+            ),
+            "firstname" => true,
+            "lastname" => true,
+            "login" => true,
+            'etat' => $absence->TEtat
+        ),
+        'eval' => array(
+            'lastname' => 'ucwords(strtolower("@val@"))',
+            'etat' => '_setColorEtat("@val@")',
+            'login' => '_linkUser(@fk_user@)',
+            'action' => '_getCheckbox(@ID@,"@etat@")',
+            'libelle' => '_typeAbsence("@isPresence@","@libelle@")'
+        ),
+        'orderBy' => $TOrder
+    );
+    
+    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType)){
+        $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
+    }
+	
+    $r->liste($PDOdb, $sql, $listParam);
 	?><div class="tabsAction" >
 		<?php
 		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
-
 			echo '<div style="float:right">&nbsp;&nbsp;&nbsp;'.$form->btsubmit($langs->trans('AbsenceAcceptAll'), 'bt_accept_all').'</div>';
-
 		}
 		?>
 		<a class="butAction" href="?id=<?php echo $absence->getId(); ?>&action=new"><?php echo $langs->trans('NewRequest'); ?></a>
@@ -531,58 +551,67 @@ function _listeValidation(&$PDOdb, &$absence) {
 			$THide[] = 'action';
 		}
 
+		
+		$listParam = array(
+		    'limit'=>array(
+		        'page'=>$page
+		        ,'nbLine'=>'30'
+		    )
+		    ,'link'=>array(
+		        'libelle'=>'<a href="?id=@ID@&action=view&validation=ok">@val@</a>'
+		    )
+		    ,'translate'=>array(
+		        'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
+		    )
+		    ,'hide'=>$THide
+		    ,'type'=>array('date_debut'=>'date','date_fin'=>'date')
+		    ,'liste'=>array(
+		        'titre'=> $langs->trans('ListeAbsencesWaitingValidation')
+		        ,'image'=>img_picto('','title.png', '', 0)
+		        ,'picto_precedent'=>img_picto('','previous.png', '', 0)
+		        ,'picto_suivant'=>img_picto('','next.png', '', 0)
+		        ,'noheader'=> (int)isset($_REQUEST['socid'])
+		        ,'messageNothing'=> $langs->trans('MessageNothingAbsence')
+		        ,'order_down'=>img_picto('','1downarrow.png', '', 0)
+		        ,'order_up'=>img_picto('','1uparrow.png', '', 0)
+		        
+		        /*,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
+		    )
+		    ,'title'=>array(
+		        'date_debut'=> $langs->trans('StartDate')
+		        ,'date_fin'=> $langs->trans('EndDate')
+		        ,'avertissement'=> $langs->trans('Rules')
+		        ,'firstname'=> $langs->trans('FirstName')
+		        ,'lastname'=> $langs->trans('LastName')
+		        ,'libelle'=>'Type absence'
+		        ,'etat'=> $langs->trans('RequestStatus')
+		        ,'typeAbsence'=>$langs->trans('AbsenceType')
+		        ,'entity'=> $langs->trans('Entity')
+		        ,'action'=>img_help('','Cocher pour valider en bloc')
+		    )
+		    ,'search'=>array(
+		        'date_debut'=>array('recherche'=>'calendars')
+		        ,'date_fin'=>array('recherche'=>'calendars')
+		        ,"firstname"=>true
+		        ,"lastname"=>true
+		    )
+		    ,'eval'=>array(
+		        'etat'=>'_setColorEtat("@val@")'
+		        ,'action'=>'_getCheckbox(@ID@,"@etat@")'
+		        ,'libelle' => '_typeAbsence("@isPresence@","@libelle@")'
+		    )
+		    
+		    ,'orderBy'=>$TOrder
+		    
+		);
+		
+		
+		if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType)){
+		    $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
+		}
+		
 		//print $page;
-		$r->liste($PDOdb, $sql, array(
-			'limit'=>array(
-				'page'=>$page
-				,'nbLine'=>'30'
-			)
-			,'link'=>array(
-				'libelle'=>'<a href="?id=@ID@&action=view&validation=ok">@val@</a>'
-			)
-			,'translate'=>array(
-				'avertissement'=>array('1'=>'<img src="./img/warning.png" title="' . $langs->trans('DoNotRespectRules') . '"></img>','0'=>'')
-			)
-			,'hide'=>$THide
-			,'type'=>array('date_debut'=>'date','date_fin'=>'date')
-			,'liste'=>array(
-				'titre'=> $langs->trans('ListeAbsencesWaitingValidation')
-				,'image'=>img_picto('','title.png', '', 0)
-				,'picto_precedent'=>img_picto('','previous.png', '', 0)
-				,'picto_suivant'=>img_picto('','next.png', '', 0)
-				,'noheader'=> (int)isset($_REQUEST['socid'])
-				,'messageNothing'=> $langs->trans('MessageNothingAbsence')
-				,'order_down'=>img_picto('','1downarrow.png', '', 0)
-				,'order_up'=>img_picto('','1uparrow.png', '', 0)
-
-				/*,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
-			)
-			,'title'=>array(
-				'date_debut'=> $langs->trans('StartDate')
-				,'date_fin'=> $langs->trans('EndDate')
-				,'avertissement'=> $langs->trans('Rules')
-				,'firstname'=> $langs->trans('FirstName')
-				,'lastname'=> $langs->trans('LastName')
-				,'libelle'=>'Type absence'
-				,'etat'=> $langs->trans('RequestStatus')
-				,'typeAbsence'=>$langs->trans('AbsenceType')
-				,'entity'=> $langs->trans('Entity')
-				,'action'=>img_help('','Cocher pour valider en bloc')
-			)
-			,'search'=>array(
-				'date_debut'=>array('recherche'=>'calendar')
-				,'typeAbsence'=>$absence->TTypeAbsenceAdmin
-				,"firstname"=>true
-				,"lastname"=>true
-			)
-			,'eval'=>array(
-				'etat'=>'_setColorEtat("@val@")'
-				,'action'=>'_getCheckbox(@ID@,"@etat@")'
-			)
-
-			,'orderBy'=>$TOrder
-
-		));
+		$r->liste($PDOdb, $sql, $listParam);
 	?><div class="tabsAction" >
 		<?php
 		if(!empty($user->rights->absence->myactions->creerAbsenceCollaborateur)) {
