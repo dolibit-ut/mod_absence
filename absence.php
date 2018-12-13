@@ -885,21 +885,23 @@ function _fiche(&$PDOdb, &$absence, $mode) {
      print dol_get_fiche_head(absencePrepareHead($absence, $mode!='edit'? 'absence' : 'absenceCreation')  , 'fiche', $langs->trans('Absence'));
      
 
-     $absence->cardLibelle = $absence->getName($user);
-     $paramid = '' ;
-     $morehtml='';
-     $shownav=0;
-     $fieldid='id';
-     $fieldref='cardLibelle';
-     $morehtmlref='';
-     $moreparam='';
-     $nodbprefix=0;
-     $morehtmlleft='';
-     $morehtmlstatus='';
-     $onlybanner=0;
-     $morehtmlright='';
-     print dol_absence_banner_tab($absence, 'nextlink', $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $onlybanner, $morehtmlright);
-     
+     if($mode!="edit")
+     {
+         $absence->cardLibelle = $absence->getName($user);
+         $paramid = '' ;
+         $morehtml='';
+         $shownav=0;
+         $fieldid='id';
+         $fieldref='cardLibelle';
+         $morehtmlref='';
+         $moreparam='';
+         $nodbprefix=0;
+         $morehtmlleft='';
+         $morehtmlstatus='';
+         $onlybanner=0;
+         $morehtmlright='';
+         print dol_absence_banner_tab($absence, 'nextlink', $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $onlybanner, $morehtmlright);
+    }
 
 
     print $TBS->render('./tpl/absence.tpl.php'
