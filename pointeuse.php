@@ -252,7 +252,7 @@ function _fiche(&$ATMdb, &$pointeuse, $mode) {
 
 	//echo $_REQUEST['validation'];
 
-	$fk_user = $user->id; //TODO admin
+	$fk_user = !empty($pointeuse->fk_user) ? $pointeuse->fk_user : $user->id; //TODO admin
 
 	if($pointeuse->getId() == 0) {
 
