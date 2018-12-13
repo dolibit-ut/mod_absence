@@ -81,7 +81,8 @@
 
 
 			case 'save':
-				$pointeuse->load($ATMdb, $_REQUEST['id']);
+				if(!empty($_REQUEST['id'])) $pointeuse->load($ATMdb, $_REQUEST['id']);
+				else $pointeuse->loadByDate($ATMdb, date('Y-m-d'), $_REQUEST['fk_user']);
 
 				$pointeuse->set_values($_REQUEST);
 
