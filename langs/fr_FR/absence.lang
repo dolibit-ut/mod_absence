@@ -558,3 +558,9 @@ AbsenceCongesPrisNM1=Conges Pris N-1
 AbsenceNM1=N-1
 AbsenceN=N
 Presence=Présence
+
+AbsenceNM1titre=N-1, Congés consomables sur l'année en cours :  %s (congés acquis en %s)
+AbsenceNtitre=N, Congés consomables sur l'année suivante : %s (congés acquis en %s)
+RH_NMOIN1_LABEL=Titre colonne année N-1
+RH_N_LABEL=Titre colonne année N
+ViewCompteurAllData=Voir toutes les données d'un compteur

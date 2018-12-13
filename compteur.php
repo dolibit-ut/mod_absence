@@ -293,6 +293,18 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 	
     $TTypeAbsence = TRH_TypeAbsence::getTypeAbsence($PDOdb, 'admin');
     
+
+
+    $morehtmlref.='<div class="refidno">';
+    $morehtmlref.= $langs->trans('HolidaysTaken').' : <strong>'.round2Virgule($compteur->congesPrisN).'</strong> &nbsp;&nbsp;&nbsp;';
+    $morehtmlref.= $langs->trans('RemainingBefore').' '.dol_print_date($compteur->date_congesCloture ).' : <strong>'.round2Virgule($compteur->congesPrisN).'</strong>';
+    $morehtmlref.='</div>';
+    $morehtmlref.= $userCourant->getNomUrl(1);
+    
+    print dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur',$userCourant->id, $userCourant->lastname, $userCourant->firstname)  , 'compteur', $langs->trans('Absence'));
+    dol_banner_tab($userCourant, 'compteuruser', $morehtml='', 0, $fieldid='rowid', $fieldref='ref', $morehtmlref, $moreparam='', $nodbprefix=0, $morehtmlleft='', $morehtmlstatus='',1, $morehtmlright='');
+    print '</div>'; // close dol_get_fiche_head
+    
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/compteur.tpl.php'
 		,array(
@@ -311,6 +323,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				
 				,'dates'=>date('d/m', strtotime('+1day',$compteur->date_congesCloture) ).' au '.date('d/m', $compteur->date_congesCloture )
 				,'dateFin'=>date('d/m', $compteur->date_congesCloture )
+			    ,'title' => !empty($conf->global->RH_NMOIN1_LABEL) ? $conf->global->RH_NMOIN1_LABEL : $langs->trans('AbsenceNM1titre', date('Y'), date('Y', strtotime('-1year',time()) ) )
 			)
 			
 			,'congesCourant'=>array(
@@ -329,7 +342,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'titreConges'=>load_fiche_titre($langs->trans('HolidaysPaid'),'', 'title.png', 0, '')
 
 				,'acquisRecuperation'=>$form->texte('','acquisRecuperation',round2Virgule($compteur->acquisRecuperation),10,50)
-				
+			    ,'title' =>  !empty($conf->global->RH_N_LABEL) ? $conf->global->RH_N_LABEL : $langs->trans('AbsenceNtitre', date('Y', strtotime('+1year',time()) ) , date('Y'))
 			)
 			
 			,'rttCourant'=>array(
@@ -384,9 +397,10 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 			
 			,'view'=>array(
 				'mode'=>$mode
-				,'head'=>dol_get_fiche_head(compteurPrepareHead($compteur, 'compteur',$userCourant->id, $userCourant->lastname, $userCourant->firstname)  , 'compteur', $langs->trans('Absence'))
 			)
-            
+            ,'userRight'=>array(
+                'ViewCompteurAllData' => !empty($user->rights->absence->myactions->ViewCompteurAllData)?1:0
+            )
 			,'translate' => array(
 				'Year' 							=> $langs->transnoentities('Year'),
 				'CurrentUser' 					=> $langs->transnoentities('CurrentUser'),
