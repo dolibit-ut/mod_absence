@@ -458,9 +458,10 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
         
 	}
 	
-	
-	printModalJsForm_copynew($PDOdb,$emploiTemps);
-	
+	if(!empty($emploiTemps->fk_user))
+	{
+	   printModalJsForm_copynew($PDOdb,$emploiTemps);
+	}
 	
 	
 	global $mesg, $error;
