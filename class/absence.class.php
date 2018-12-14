@@ -171,13 +171,13 @@ class TRH_Compteur extends TObjetStd {
 		$this->congesPrisN=0;
 		$this->anneeNM1=$anneePrec;
 		$this->rttTypeAcquisition='Annuel';
-
-		$this->rttAcquisMensuelInit=$conf->global->RH_NB_RTT_ANNUEL;
-		$this->rttAcquisAnnuelNonCumuleInit=$conf->global->RH_NB_RTTNC_ANNUEL;
+		
+		$this->rttAcquisMensuelInit=!empty($conf->global->RH_NB_RTT_MENSUEL) ? $conf->global->RH_NB_RTT_MENSUEL : 0;
+		$this->rttAcquisAnnuelCumuleInit=!empty($conf->global->RH_NB_RTT_ANNUEL) ? $conf->global->RH_NB_RTT_ANNUEL : 0;
+		$this->rttAcquisAnnuelNonCumuleInit=!empty($conf->global->RH_NB_RTTNC_ANNUEL) ? $conf->global->RH_NB_RTTNC_ANNUEL : 0;
 
 
 		$this->rttCumuleAcquis=0;
-		$this->rttAcquisAnnuelCumuleInit=0;
 		$this->rttCumuleReportNM1=0;
 		$this->rttCumulePris=0;
 		$this->rttCumuleTotal=$this->rttCumuleAcquis+$this->rttCumuleReportNM1-$this->rttCumulePris;
@@ -194,8 +194,24 @@ class TRH_Compteur extends TObjetStd {
 		$this->rttannee=$annee;
 		$this->nombreCongesAcquisMensuel=$conf->global->RH_NB_CONGES_MOIS;
 		$this->nombrecongesAcquisAnnuel=$conf->global->RH_NB_CONGES_ANNUEL;
-		$this->date_rttCloture=strtotime($conf->global->RH_DATE_RTT_CLOTURE);
-		$this->date_congesCloture=strtotime($conf->global->RH_DATE_CONGES_CLOTURE);
+		
+		// Permet de claculer la bonne année de cloture pour la création d'un compteur
+		$today = dol_now();
+		
+		$time_rtt_cloture = strtotime($conf->global->RH_DATE_RTT_CLOTURE);
+		$date_rtt_cloture = date('Y');
+		if (date('md', $today) > date('md', $time_rtt_cloture)) $date_rtt_cloture += 1; //+1 year
+		$date_rtt_cloture .= '-'.date('m-d', $time_rtt_cloture);
+		
+		$time_conges_cloture = strtotime($conf->global->RH_DATE_CONGES_CLOTURE);
+		$date_conges_cloture = date('Y');
+		if (date('md', $today) > date('md', $time_conges_cloture)) $date_conges_cloture += 1; //+1 year
+		$date_conges_cloture .= '-'.date('m-d', $time_conges_cloture);
+		
+		$this->date_rttCloture=strtotime($date_rtt_cloture);
+		$this->date_congesCloture=strtotime($date_conges_cloture);
+		
+		
 		$this->reportRtt=0;
 
 		$this->is_archive=0;
@@ -435,7 +451,8 @@ class TRH_Absence extends TObjetStd {
 		parent::add_champs('etat',array('type'=>'string','length'=>50, 'index'=>true));			//état (à valider, validé...)
 		parent::add_champs('avertissement',array('type'=>'integer'));
 		parent::add_champs('libelleEtat,avertissementInfo');			//état (à valider, validé...)
-		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation
+		parent::add_champs('niveauValidation',array('type'=>'integer'));	//niveau de validation @deprecated
+		parent::add_champs('level',array('type'=>'integer', 'default' => 1));	//niveau de validation pour la notion de hiérarchie
 		parent::add_champs('idAbsImport',array('type'=>'integer','index'=>true));	//niveau de validation
 		parent::add_champs('fk_user, fk_user_valideur',array('type'=>'integer','index'=>true));	//utilisateur concerné
 		parent::add_champs('entity',array('type'=>'integer','index'=>true));
@@ -474,6 +491,8 @@ class TRH_Absence extends TObjetStd {
 		$this->date_hourStart = strtotime(date('Y-m-d 8:00:00'));
 		$this->date_hourEnd = strtotime(date('Y-m-d 17:00:00'));
 		$this->date_lunchBreak = strtotime(date('Y-m-d 1:30:00'));
+		
+		$this->level = 1;
 	}
 
 	function delete(&$PDOdb)
@@ -510,30 +529,28 @@ class TRH_Absence extends TObjetStd {
 
 	function valid(&$PDOdb)
 	{
-		global $user,$conf,$langs;
-
-		//Valideur fort
-		if (TRH_valideur_groupe::isStrong($PDOdb, $user->id, 'Conges', $conf->entity) || $user->rights->absence->myactions->voirToutesAbsencesListe)
+		global $user,$conf;
+		
+		$canValidate = $user->rights->absence->myactions->valideurConges;
+		
+		if (!empty($conf->valideur->enabled))
 		{
-			$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
+			define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/valideur/config.php');
+			dol_include_once('/valideur/class/valideur.class.php');
 
-			//Validation final
-			$this->setAcceptee($PDOdb, $user->id);
+			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
 		}
-		//Valideur faible
+		
+		if ($canValidate)
+		{
+			$this->setAcceptee($PDOdb, $user->id);
+			return 1;
+		}
 		else
 		{
-			if (!TRH_valideur_object::alreadyAcceptedByThisUser($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS'))
-			{
-				$TRH_valideur_object = TRH_valideur_object::addLink($PDOdb, $conf->entity, $user->id, $this->getId(), 'ABS');
-
-				//check si tous le monde a validé
-				if (TRH_valideur_object::checkAllAccepted($PDOdb, $user, 'ABS', $this->getId(), $this))
-				{
-					//Validation final
-					$this->setAcceptee($PDOdb, $user->id);
-				}
-			}
+			$this->error = 'Permission insuffisante pour valider l\'absence';
+			return 0;
 		}
 
 	}
@@ -667,7 +684,7 @@ class TRH_Absence extends TObjetStd {
 		mailConges($this,$isPresence);
 	}
 
-	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false) {
+	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false, $TPieceJointe = array()) {
 		global $db, $langs,$user,$conf;
 
 		if($this->etat=='Validee') return false;
@@ -690,7 +707,7 @@ class TRH_Absence extends TObjetStd {
 		}
 		else {
 			$this->save($PDOdb);
-			mailConges($this, $isPresence);
+			mailConges($this, $isPresence, $TPieceJointe);
 
 			return true;
 		}
@@ -2629,6 +2646,33 @@ END:VCALENDAR
 		//print_r($TRetour);
 		return $TRetour;
 	}
+	
+	private function getTValideurFromTUser(&$PDOdb, &$TUser)
+	{
+		$TValideur = array();
+		foreach ($TUser as &$user)
+		{
+			$Tab = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $this, 'Conges', 'object');
+			foreach ($Tab as &$u)
+			{
+				$TValideur[$u->id] = $u;
+			}
+		}
+//		var_dump($TValideur); exit;
+		return $TValideur;
+	}
+	
+	public function getNextTValideur(&$PDOdb)
+	{
+		global $db;
+		
+		if ($this->getId() <= 0) return array();
+		
+		$u = new User($db);
+		$u->fetch($this->fk_user);
+		$TUser = array($u);
+		return $this->getTValideurFromTUser($PDOdb, $TUser);
+	}
 }
 
 
@@ -2728,7 +2772,7 @@ class TRH_EmploiTemps extends TObjetStd {
 	function save(&$db) {
 		global $conf;
 
-		parent::save($db);
+		return parent::save($db);
 	}
 
 	function initCompteurHoraire (&$PDOdb, $idUser){
@@ -3160,7 +3204,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3172,7 +3216,7 @@ class TRH_TypeAbsence extends TObjetStd {
 					";
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}
@@ -3185,7 +3229,7 @@ class TRH_TypeAbsence extends TObjetStd {
 				;
 			$PDOdb->Execute($sql);
 			while($PDOdb->Get_line()) {
-				$Tab[$PDOdb->Get_field('typeAbsence')]=$PDOdb->Get_field('libelleAbsence');
+				$Tab[$PDOdb->Get_field('typeAbsence')]=dol_html_entity_decode($PDOdb->Get_field('libelleAbsence'),ENT_QUOTES);
 			}
 
 		}

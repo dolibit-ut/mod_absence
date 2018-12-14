@@ -19,6 +19,7 @@ function absencePrepareHead(&$obj, $type='absence') {
 				return array(
 					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
 					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
+					,array(dol_buildpath('/absence/document.php?id='.$obj->getId(),1), $langs->trans('Documents'),'document')
 				);
 				
 			}
@@ -118,10 +119,15 @@ function edtPrepareHead(&$obj, $type='absence') {
 	switch ($type) {
 		
 		case 'emploitemps':
-				
+			
+		    // to return on default planning
+		    $PDOdb = new TPDOdb();
+		    $defaultEmploiTemps = new TRH_EmploiTemps();
+		    $defaultEmploiTemps->load_by_fkuser($PDOdb, $obj->fk_user);
+		    
 			$Tab=array(
 				array(dol_buildpath(
-					($obj->getId() > 0 ? '/absence/emploitemps.php?action=view&id='.$obj->getId() : '/absence/emploitemps.php') ,1)
+				    ($obj->getId() > 0 ? '/absence/emploitemps.php?action=view&id='.$defaultEmploiTemps->getId() : '/absence/emploitemps.php') ,1)
 					, $langs->trans('Schedule')
 					,'emploitemps')
 			);
@@ -285,7 +291,7 @@ function php2dmy($phpDate){
 
 
 //fonction permettant l'envoi de mail
-function mailConges(&$absence,$presence=false){
+function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 	global $db, $langs,$conf, $user;		
 
 	//$from = USER_MAIL_SENDER;
@@ -445,7 +451,11 @@ function mailConges(&$absence,$presence=false){
 			$fileics = absenceCreateICS($absence);
 			$mail->add_piece_jointe('absence-'.$absence->getId().'-'.date('Ymdhis').'.ics', $fileics, 'application/ics');
 		}
-		
+
+        foreach($TPieceJointe as $pj) {
+            $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid).'/'.$pj);     // C'est moche mais c'est comme ça
+        }
+
 		$result = $mail->send(true, 'utf-8');
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
 		else setEventMessage('Erreur lors de l\'envoi du mail à l\'utilisateur');*/
@@ -463,7 +473,7 @@ function absenceCreateICS(&$absence){
 	return $tmfile;
 }
 //fonction permettant la récupération
-function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
+function mailCongesValideur(&$PDOdb, &$absence,$presence=false, $TPieceJointe = array()){
 	global $conf,$user;
 
 	dol_include_once('/valideur/class/valideur.class.php');
@@ -483,7 +493,7 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 	
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
-			envoieMailValideur($PDOdb, $absence, $idVal,$presence);
+			envoieMailValideur($PDOdb, $absence, $idVal,$presence, $TPieceJointe);
 		}
 	}
 	
@@ -491,7 +501,7 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false){
 
 
 //fonction permettant l'envoi de mail aux valideurs de la demande d'absence
-function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
+function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TPieceJointe = array()){
 	global $db, $langs, $user, $conf;
 		
 	$from = !empty($user->email) ? $user->email : $conf->global->MAIN_MAIL_EMAIL_FROM;
@@ -568,6 +578,9 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false){
 	
 	if(!$dont_send_mail){
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
+
+        foreach($TPieceJointe as $pj) $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid));
+
 	    	$result = $mail->send(true, 'utf-8');
 	    	
 		if($result) setEventMessage('Email envoyé avec succès au valideur '.$sendto);
@@ -784,163 +797,16 @@ global $conf,$db,$user;
 	
 }
 
-function _getSQLListValidation($userid) {
-	// TODO AA encore une grosse merde bien collante sous la semelle
-
-	global $db, $conf,$user;
-		
- 	//LISTE DES GROUPES À VALIDER
- 	$sql=" SELECT DISTINCT fk_usergroup, nbjours, validate_himself, level
- 			FROM `".MAIN_DB_PREFIX."rh_valideur_groupe`
-			WHERE fk_user=".$userid." 
-			AND type='Conges' AND pointeur !=1 ";
-			//AND entity IN (0,".$conf->entity.")";
-
-	$res = $db->query($sql);
-	$TabGroupe=array();
-	$k=0;
-	while($obj = $db->fetch_object($res)) {
-				$TabGroupe[$k]['fk_usergroup']=$obj->fk_usergroup;
-				$TabGroupe[$k]['nbjours']=$obj->nbjours;
-				$TabGroupe[$k]['validate_himself']=$obj->validate_himself;
-				$TabGroupe[$k]['level']=$obj->level;
-				$k++;
+function _getSQLListValidation($userid)
+{
+	if (!class_exists('TRH_valideur_groupe')) 
+	{
+		if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', 1);
+		dol_include_once('/valideur/config.php');
+		dol_include_once('/valideur/class/valideur.class.php');
 	}
 	
-	//LISTE USERS À VALIDER
-	if($k==1){		//on n'a qu'un groupe de validation
-		$sql=" SELECT DISTINCT u.fk_user, 
-				a.rowid as 'ID', a.date_cre  as 'DateCre',a.date_debut, a.date_fin, a.duree,
-			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.etat";
-			
-				if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
-				
-				$sql.= ", a.avertissement, ta.typeAbsence,'' as 'action'
-				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
-				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
-				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
-				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
-				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)
-				";
-			
-				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
-							
-				$sql.= "
-				WHERE v.fk_user=".$userid." 
-				AND a.etat LIKE 'AValider'
-				AND v.fk_usergroup=".$TabGroupe[0]['fk_usergroup'];
-				
-				if($TabGroupe[0]['level']==1){	//on teste le niveau de validation : si il est de niveau 1, il faut qu'il puisse voir le 2 et 3
-					$sql.=" AND ( a.niveauValidation>=1)";
-				}else if($TabGroupe[0]['level']==2){
-					$sql.=" AND ( a.niveauValidation>=2)";
-				}
-				else if($TabGroupe[0]['level']==3){
-					$sql.=" AND a.niveauValidation>=3";
-				}
-
-				
-			if($TabGroupe[0]['validate_himself']==0){
-				$sql.=" AND u.fk_user NOT IN (SELECT a.fk_user FROM ".MAIN_DB_PREFIX."rh_absence as a where a.fk_user=".$userid.")";
-			}
-
-			return $sql;
-	}else if($k>1){		//on a plusieurs groupes de validation
-		$sql=" SELECT DISTINCT u.fk_user, 
-				a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin, 
-			  	ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-			 	a.etat, a.avertissement";
-			
-				if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
-				
-				$sql.= ", a.duree, ta.typeAbsence,'' as 'action'
-				FROM `".MAIN_DB_PREFIX."rh_valideur_groupe` as v
-				INNER JOIN ".MAIN_DB_PREFIX."usergroup_user as u ON ( v.fk_usergroup=u.fk_usergroup )
-				INNER JOIN ".MAIN_DB_PREFIX."rh_absence as a ON(a.fk_user = u.fk_user)
-				INNER JOIN ".MAIN_DB_PREFIX."user as s ON (u.fk_user=s.rowid)
-				INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (ta.typeAbsence=a.type)";
-			
-				if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
-							
-				$sql.= " 
-				WHERE v.fk_user=".$userid." 
-				AND a.etat LIKE 'AValider'";
- 		
- 		$j=0;
-		foreach($TabGroupe as $TGroupe){ 	//on affiche les absences des différents groupe de validation
-			if($j==0){
-				if($TabGroupe[$j]['level']==1){	//on teste le niveau de validation  si il est de niveau 1, il faut qu'il puisse voir le 2 et 3
-					$sql.=" AND ( (v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-					AND (a.niveauValidation>=1)
-					AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-					)";
-				}else if($TabGroupe[$j]['level']==2){
-					$sql.=" AND ( (v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-					AND (a.niveauValidation>=2)
-					AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-					)";
-				}
-				else if($TabGroupe[$j]['level']==3){
-					$sql.=" AND ( (v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-					AND a.niveauValidation>=3
-					AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-					)";
-				}
-				
-			}else{
-				if($TabGroupe[$j]['level']==1){	//on teste le niveau de validation
-					$sql.=" OR ( v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-						AND (a.niveauValidation>=1) 
-						AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-						)";
-				}
-				else if($TabGroupe[$j]['level']==2){
-					$sql.=" OR ( v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-						AND (a.niveauValidation>=2) 
-						AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-						)";
-				}
-				else if($TabGroupe[$j]['level']==3){
-					$sql.=" OR ( v.fk_usergroup=".$TabGroupe[$j]['fk_usergroup']."
-						AND a.niveauValidation>=3
-						AND NOW() >= ADDDATE(a.date_cre, ".$TabGroupe[$j]['nbjours'].")
-						)";
-				}	
-			}
- 			
-			$j++;
- 		}
- 		$sql.=")";
-		
-		return $sql;
-	}
-	else if($user->rights->absence->myactions->voirToutesAbsencesListe) {
-			 $sql=" SELECT DISTINCT a.fk_user,
-                    a.rowid as 'ID', a.date_cre as 'DateCre',a.date_debut, a.date_fin,
-                    ta.libelleAbsence as libelle,a.fk_user,  s.firstname, s.lastname,
-                    a.etat";
-							
-					if($conf->multicompany->enabled) $sql.=",e.label as entity";	  	
-					
-					$sql.= ", a.avertissement, a.duree, ta.typeAbsence,'' as 'action'
-                    FROM ".MAIN_DB_PREFIX."rh_absence as a
-                	INNER JOIN ".MAIN_DB_PREFIX."user as s ON (a.fk_user = s.rowid)
-                	INNER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON ( ta.typeAbsence=a.type ) ";
-
-					if($conf->multicompany->enabled) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."entity as e ON (e.rowid = a.entity) ";
-								
-					$sql.= "
-                    WHERE 1
-                    AND a.etat LIKE 'AValider'";
-
-		return $sql;
-	}
- 	else {
-		return false;
-	}
- 
-	
+	return TRH_valideur_groupe::getSqlListObject('Conges');
 }
 
 function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, &$TStatPlanning) {

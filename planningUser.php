@@ -122,6 +122,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			$sql.=" WHERE ug.fk_usergroup=".$idGroupeRecherche;
 		}
 		
+		$sql.=" ORDER BY u.lastname, u.firstname";
 	}
 	elseif($user->rights->absence->myactions->voirGroupesAbsences)  {
 		
@@ -144,11 +145,13 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	}
 	
 
-	$sql.=" ORDER BY u.lastname, u.firstname";
-	//print $sql;
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')]=$ATMdb->Get_field('lastname')." ".$ATMdb->Get_field('firstname');
+	if (!empty($sql))
+	{
+		//print $sql;
+		$ATMdb->Execute($sql);
+		while($ATMdb->Get_line()) {
+			$TUser[$ATMdb->Get_field('rowid')]=$ATMdb->Get_field('lastname')." ".$ATMdb->Get_field('firstname');
+		}
 	}
 	
 	llxHeader('', $langs->trans('Summary'));
@@ -388,7 +391,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 						
 					});
 					
-					$(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					if ($.tipTip) $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
+					else $(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
 				});
 			}
 	

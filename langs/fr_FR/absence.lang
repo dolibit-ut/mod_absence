@@ -28,7 +28,7 @@ AbsencesPresencesAdministration=Administration des absences et présences
 AbsencesPresencesCalendar=Calendrier des absences/présences
 AbsencesPresencesDiary=Agenda des absences/présences
 AbsencesPresencesRequestRulesList=Liste des règles sur les demandes d'abs./présence
-AbsencesPresencesRequestRulesMaxTimeOut= la durée dépasse la durée préconisée ou ne nombre de personnes présentes est insuffisante
+AbsencesPresencesRequestRulesMaxTimeOut=La durée dépasse la durée préconisée ou le nombre de personnes présentes est insuffisant
 AbsencesPresencesRequestRulesMaxTimeOutRestrictif=Demande refusée : La durée de l'absence dépasse une règle restrictive en vigueur
 AbsencesRules=Règles des absences
 AbsencesStatsDetailled=Statistiques absences découpées
@@ -473,7 +473,7 @@ CanReportPresence=Gérer les Présences
 NbDaysAcquiredByYear=Nombre de jours acquis à l'an
 NbDayOffAcquired=Nombre de RTT acquis à l'an pour tous
 NbDayOffNCAcquired=Nombre de RTT Non cumulé acquis à l'an pour tous
-ListUserAlreadyAccepted=Liste des valideurs ayant déjà accéptés
+ListUserAlreadyAccepted=Liste des valideurs ayant déjà acceptés
 AbsenceSecable = Absence Non Sécable ?
 ApplyEmploiTempToGroup=Appliquer cet emploi du temps sur un groupe
 NewAbsenceRequestCollective=Nouvelle absence collective
@@ -517,7 +517,19 @@ absenceTicketRestoOnUserCreate=Par défaut, un nouvel utilisateur souscrit aux t
 ABSENCE_ALERT_OTHER_VALIDEUR=Alerter tout les valideurs qui en auront le droit d'une acception de congé par un valideur du même groupe
 IfAllValideurAlertedAlerteMe=Si l'alerte pour tous les valideurs d'acception de congés est active, me l'envoyer
 
-AbsenceCopy=Copie
+AbsenceCopy=Nouveau planning
+DefaultSchedule=Planning utilisé par defaut si pas de période correspondante 
+GoToDefaultPlanning=Retour au planning par defaut
+archiveHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut avec comme date de fin ce jour et une date de début calculé en fonction des plannings précédents  
+copytoNewHelpToolTip=Créé un nouvel emploi du temps à partir de l'emploi du temps par defaut 
+PlanningListByPeriod=Liste des emplois du temps par périodes
+View=Consulter
+AllFormAreRequired=Tous les champs sont requis.
+copytoNewModalTitle=Créer un nouveau planning
+copytoNewDateWarning=Dates incorrectes
+PlanningRangeAllreadyUsed=Cette periode est déjà utilisée.
+invalidDatesRange=Plage de dates invalide.
+ArchiveErrorPlanningRangeAllreadyUsed=Un planning existe dejà pour cette plage de date
 
 absenceRecupAcuisitionRules=Règle d'acquisition du temps de récupération
 recupRulesDeclare=Sur déclaration du temps de travail
@@ -534,3 +546,13 @@ NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suiv
 
 
 absence_load_compteur_error=Accès refusé<br />Erreur sur le chargement du compteur
+Absence_CanUpdateDatesClotures=Autoriser la modification des dates de clôtures sur une fiche compteur
+
+NextValideur=Prochain(s) valideur(s)
+
+AbsenceCongesAcquisN=Congés acquis N
+AbsenceCongesAnciennete=Congés Ancienneté
+AbsenceCongesAcquisNM1=Conges Acquis N-1
+AbsenceCongesPrisNM1=Conges Pris N-1
+AbsenceNM1=N-1
+AbsenceN=N

@@ -59,7 +59,7 @@ class modAbsence extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = $langs->trans('ModuleAbsenceDesc');
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.1.0';
+		$this->version = '1.2.1';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -89,7 +89,7 @@ class modAbsence extends DolibarrModules
 		$this->config_page_url = array("admin.php@absence");
 
 		// Dependencies
-		$this->depends = array('modAbricot','modJouroff','modfullcalendar');   		// List of modules id that must be enabled if this module is enabled
+		$this->depends = array('modAbricot','modJouroff','modfullcalendar','modValideur');   		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
@@ -412,12 +412,13 @@ class modAbsence extends DolibarrModules
         $this->rights[$r][5] = 'CanAvoidSendMail';
 		$r++;	
 		
-		$this->rights[$r][0] = 7135;
-		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'myactions';
-	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
-		$r++;
+		// Droit mis en commentaire car plus utilisé par le module, maintenant c'est l'attribut validate_himself sur la définition d'un groupe de validation
+//		$this->rights[$r][0] = 7135;
+//		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
+//		$this->rights[$r][3] = 0;
+//		$this->rights[$r][4] = 'myactions';
+//	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
+		$r++; //!\ Conserver l'incrémentation car les droits suivants utilise la variable pour numéroter les droits (ça évitera de changer de valeur sur désactivation/activation pour les ldap)
         
 		$this->rights[$r][0] = $this->numero.$r;
 		$this->rights[$r][1] = $langs->trans('CanDeclareAbsenceAutoValidated');
@@ -431,6 +432,13 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'IfAllValideurAlertedAlerteMe';
+		$r++;
+		
+		$this->rights[$r][0] = $this->numero.$r;
+		$this->rights[$r][1] = $langs->trans('Absence_CanUpdateDatesClotures');
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'update_date_cloture';
 		$r++;
 		
 
