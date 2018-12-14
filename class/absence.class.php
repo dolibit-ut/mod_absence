@@ -871,12 +871,12 @@ class TRH_Absence extends TObjetStd {
 
 		$typeAbs->load_by_type($PDOdb, $this->type);
 
-		//print_r($typeAbs);
-		$emploiTemps = new TRH_EmploiTemps;
-		$emploiTemps->load_by_fkuser($PDOdb, $this->fk_user);
-
 		while($t_current<=$t_end) {
-			//print date('Y-m-d', $t_current).'<br>';;
+		    
+		    // il faut vérifier l'emploi du temps chaque jour à cause des palnnings dans le future
+		    $emploiTemps = new TRH_EmploiTemps;
+		    $emploiTemps->load_by_fkuser($PDOdb, $this->fk_user, !empty($t_current)?date('Y-m-d', $t_current):'');
+		    
 			$current_day = $TJourSemaine[(int)date('w', $t_current)];
 			if(!@in_array($current_day, $TJourNonTravailleEntreprise)) {
 
