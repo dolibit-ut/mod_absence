@@ -81,7 +81,8 @@
 
 
 			case 'save':
-				$pointeuse->load($ATMdb, $_REQUEST['id']);
+				if(!empty($_REQUEST['id'])) $pointeuse->load($ATMdb, $_REQUEST['id']);
+				else $pointeuse->loadByDate($ATMdb, date('Y-m-d'), $_REQUEST['fk_user']);
 
 				$pointeuse->set_values($_REQUEST);
 
@@ -252,7 +253,7 @@ function _fiche(&$ATMdb, &$pointeuse, $mode) {
 
 	//echo $_REQUEST['validation'];
 
-	$fk_user = $user->id; //TODO admin
+	$fk_user = !empty($pointeuse->fk_user) ? $pointeuse->fk_user : $user->id; //TODO admin
 
 	if($pointeuse->getId() == 0) {
 
