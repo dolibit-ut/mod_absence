@@ -11,7 +11,7 @@
 		
 		<br>
 		<div style=" display:inline-block;">                  
-		<table class="border" style="width:130%;" >	
+		<table class="noborder border" style="width:130%;" ><!--  why noborder border : for compatibility... yeah it's not cool -->	
 				<tr>
 					<td>       </td>
 					<td style="text-align:center;"><b>[translate.Morning;strconv=no;protect=no]</b></td>
