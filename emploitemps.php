@@ -582,8 +582,6 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
         
             dialog = $( "#dialog-form-copynew" ).dialog({
                 autoOpen: false,
-                /*height: 400,
-                width: 350,*/
                 modal: true,
                 buttons: {
                     "<?php echo $langs->transnoentitiesnoconv('Validate'); ?>": copytoNewHelpToolTip,
@@ -596,12 +594,7 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
                 }
             });
                 
-            /*form = dialog.find( "form" ).on( "submit", function( event ) {
-                event.preventDefault();
-                dialog.find( "form" ).submit();
-            });*/
-                
-            $( "#copytoNewHelpToolTipBtn" ).button().on( "click", function( event ) {
+            $( "#copytoNewHelpToolTipBtn" ).on( "click", function( event ) {
                 event.preventDefault();
                 dialog.dialog( "open" );
             });
