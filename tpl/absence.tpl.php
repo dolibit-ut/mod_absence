@@ -1,13 +1,4 @@
 
-	[onshow;block=begin;when [view.mode]=='view']
-        	[view.head;strconv=no]
-     [onshow;block=end] 
-     
-     [onshow;block=begin;when [view.mode]=='edit']
-        	[view.head2;strconv=no]
-     [onshow;block=end] 
-
-
 			[onshow;block=begin;when [view.mode]=='edit']
            		[absenceCourante.titreNvDemande;strconv=no;protect=no]                        
 			[onshow;block=end]

@@ -494,6 +494,20 @@ class TRH_Absence extends TObjetStd {
 		
 		$this->level = 1;
 	}
+	
+	function getName($user){
+	    $return = '';
+	    
+	    $PDOdb=new TPDOdb;
+	    
+	    $typeAbsence=new TRH_TypeAbsence;
+	    if($typeAbsence->load_by_type($PDOdb, $this->type))
+	    {
+	        $return = $typeAbsence->_getName($user, $this->isPresence, $this->libelle, $this->fk_user);
+	    }
+	    
+	    return $return;
+	}
 
 	function delete(&$PDOdb)
 	{
@@ -760,6 +774,45 @@ class TRH_Absence extends TObjetStd {
 
 	}
 
+	
+
+	/**
+	 *	Return status label of Order
+	 *
+	 *	@param      int		$mode       0=Long label, 1=Picto + Short label
+	 *	@return     string      		Label of status
+	 */
+	function getLibStatut($mode)
+	{
+	    return $this->LibStatut($this->etat, $mode);
+	}
+	
+	/**
+	 *	Return label of status
+	 *
+	 *	@param		int		$statut      	  Id statut
+	 *  @param      int		$billed    		  If invoiced
+	 *	@param      int		$mode        	  0=Long label, 1=Short label, 2=Picto + Short label, 3=Picto, 4=Picto + Long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @param      int     $donotshowbilled  Do not show billed status after order status
+	 *  @return     string					  Label of status
+	 */
+	function LibStatut($statut,$mode)
+	{
+	    global $langs, $conf;
+	    
+	    if($mode == 2 || $mode == 3 || $mode == 4 || $mode == 5)
+	    {
+	        if ($statut=='Refusee') return img_picto($this->libelleEtat,'statut5').' '.$this->libelleEtat;
+	        if ($statut=='Avalider') return img_picto($this->libelleEtat,'statut0').' '.$this->libelleEtat;
+	        if ($statut=='Validee') return img_picto($this->libelleEtat,'statut1').' '.$this->libelleEtat;
+	    }
+	    else
+	    {
+	        return $this->libelleEtat;
+	    }
+	    
+	}
+	
 	/*
 	 * Récupère la liste des jours fériés sur la période d'absence
 	 */
@@ -3236,6 +3289,37 @@ class TRH_TypeAbsence extends TObjetStd {
 
 		return $Tab;
 
+	}
+	
+	/*
+	 * Return absence name coresponding to user rights
+	 */
+	function getName($user, $showUserID = 0){
+	    global $langs;
+	    
+	    return self::_getName($user, $this->isPresence, $this->libelleAbsence, $showUserID);
+	}
+	
+	static function _getName($user, $isPresence, $libelleAbsence, $showUserID = 0){
+	    global  $langs;
+	    
+	    if(class_exists('TRH_valideur_groupe')){
+	       $PDOdb=new TPDOdb;
+	       $TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges'); // si l'utilisateur est valideur il doit voir le type d'absence
+	    }
+	    
+	    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation || $showUserID == $user->id) ){
+	        return $libelleAbsence;
+	    }
+	    else
+	    {
+	        if(!empty($isPresence)){
+	            return  $langs->trans('Presence');
+	        }
+	        else{
+	            return  $langs->trans('Absence');
+	        }
+	    }
 	}
 
 }
