@@ -850,7 +850,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$TNextValideur = !empty($conf->valideur->enabled) ? $absence->getNextTValideur($PDOdb) : array();
 
     $input_doc = '<input class="flat minwidth400" type="file"'.((! empty($conf->global->MAIN_DISABLE_MULTIPLE_FILEUPLOAD) || $conf->browser->layout != 'classic')?' name="userfile"':' name="userfile[]" multiple').
-                 (empty($conf->global->MAIN_UPLOAD_DOC) || empty($user->rights->absence->myactions->creerAbsenceCollaborateur)?' disabled':'').' />';
+                 (empty($conf->global->MAIN_UPLOAD_DOC) ?' disabled':'').' />';
 
 //    var_dump($droitSupprimer);
     print $TBS->render('./tpl/absence.tpl.php'

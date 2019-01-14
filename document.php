@@ -99,8 +99,8 @@ if ($object->id > 0)
 
 	$modulepart = 'absence';
 //    var_dump($user->rights->absence);exit;
-	$permission = $user->rights->absence->myactions->creerAbsenceCollaborateur;
-	$permtoedit = $user->rights->absence->myactions->creerAbsenceCollaborateur;
+	$permission = 1;
+	$permtoedit = 0;
 	$param = '&id=' . $object->id;
 	include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
 }
