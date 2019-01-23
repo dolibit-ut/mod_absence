@@ -94,11 +94,11 @@
      	[absenceCourante.titreJourRestant;strconv=no;protect=no] 			
             <table class="border" id="compteur-user"  width="100%">
                 <tr>
-                    <td>[translate.HolidaysPaid;strconv=no;protect=no] N-1</td>
+                    <td>[translate.HolidaysPaidNMoinsUn;strconv=no;protect=no]</td>
                     <td id="reste"></td>
                 </tr>   
                 <tr>
-                    <td>[translate.HolidaysPaid;strconv=no;protect=no] N</td>
+                    <td>[translate.HolidaysPaidN;strconv=no;protect=no]</td>
                     <td id="resteN"></td>
                 </tr>   
 				<tr>
