@@ -51,7 +51,7 @@
 		$juin=date('Ymd');
 //var_dump( $juin , $dateMD);
 		echo $juin.'?='.$dateMD.'...';	
-
+exit;
 		if(!strcmp($juin,$dateMD)/* || isset($_REQUEST['force_for_test'])*/){
 			
 			echo 'Oui...';

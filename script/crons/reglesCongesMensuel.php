@@ -25,6 +25,7 @@
 	
 	/////chaque mois, les congés année N sont incrémentés de 2,08
 	$jour=date("d");
+
 	if($jour=='01' || isset($_REQUEST['forceCompteur'])){
 		$k=0;
 		$sqlReqUser="SELECT fk_user, nombreCongesAcquisMensuel FROM `".MAIN_DB_PREFIX."rh_compteur`";

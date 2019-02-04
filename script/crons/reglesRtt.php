@@ -45,7 +45,7 @@
 		$date=strtotime($TabRtt['date_rttCloture']);
 		$date=strtotime('+1day',$date);
 		
-		
+		$mars = date('dm');
 		$dateMD=date("dm",$date);
 
 		//on reporte les RTT pour ceux pour qui c'est autorisé
@@ -60,7 +60,6 @@
 		
 		//COMPTEUR MENSUEL
 		////// 1er mars, tous les rtt de l'année N sont remis à 0 pour ceux qui les accumulent par mois, sauf si reportRtt=1
-		$mars=date("dm");
 		if($mars==$dateMD){
 			//on remet à 0 les compteurs
 			$sqlRaz="UPDATE ".MAIN_DB_PREFIX."rh_compteur 
