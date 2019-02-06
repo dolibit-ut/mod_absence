@@ -296,8 +296,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 
 
     $morehtmlref.='<div class="refidno">';
-    $morehtmlref.= $langs->trans('HolidaysTaken').' : <strong>'.round2Virgule($compteur->congesPrisN).'</strong> &nbsp;&nbsp;&nbsp;';
-    $morehtmlref.= $langs->trans('RemainingBefore').' '.dol_print_date($compteur->date_congesCloture ).' : <strong>'.round2Virgule($compteur->congesPrisN).'</strong>';
+    $morehtmlref.= $langs->trans('HolidaysTaken').' : <strong>'.round2Virgule($compteur->congesPrisNM1).'</strong> &nbsp;&nbsp;&nbsp;';
+    $morehtmlref.= $langs->trans('RemainingBefore').' '.dol_print_date($compteur->date_congesCloture ).' : <strong>'.round2Virgule($congePrecReste).'</strong>';
     $morehtmlref.='</div>';
     $morehtmlref.= $userCourant->getNomUrl(1);
     
