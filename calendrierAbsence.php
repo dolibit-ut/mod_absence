@@ -77,9 +77,8 @@
 	
 	
 	while($ATMdb->Get_line()) {
-		$TabUser[$ATMdb->Get_field('rowid')]=ucwords(strtolower($ATMdb->Get_field('lastname'))).' '.$ATMdb->Get_field('firstname');
+		$TabUser[$ATMdb->Get_field('rowid')]=ucwords($ATMdb->Get_field('lastname')).' '.ucfirst(strtolower($ATMdb->Get_field('firstname')));
 	}
-
 
 	$idUser=$_REQUEST['idUtilisateur']? $_REQUEST['idUtilisateur']:0;
 	
