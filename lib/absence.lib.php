@@ -1054,7 +1054,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
  */
 function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fieldid='rowid', $fieldref='ref', $morehtmlref='', $moreparam='', $nodbprefix=0, $morehtmlleft='', $morehtmlstatus='', $onlybanner=0, $morehtmlright='')
 {
-    global $conf, $form, $user, $langs;
+    global $conf, $form, $user, $langs, $db;
     
     $error = 0;
     
@@ -1097,6 +1097,14 @@ function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fi
         $morehtmlstatus.=ajax_object_onoff($object, 'status_buy', 'tobuy', 'ProductStatusOnBuy', 'ProductStatusNotOnBuy');
     } else {
         $morehtmlstatus.='<span class="statusrefbuy">'.$object->getLibStatut(5,1).'</span>';
+    }
+    
+
+    if($object->fk_user>0){
+        $absUser = new User($db);
+        if($absUser->fetch($object->fk_user)){
+            $morehtmlref.= ' - '.$absUser->getFullName($langs);
+        }
     }
     
     
