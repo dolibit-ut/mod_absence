@@ -4,17 +4,22 @@ dol_include_once('/jouroff/class/jouroff.class.php');
 
 class TRH_absenceDay {
 
-	var $date = '';
-	var $isPresence = 0;
-	var $label = '';
-	var $AM=false;
-	var $PM=false;
-	var $DAM=false;
-	var $DPM=false;
-	var $FPM=false;
-	var $FAM=false;
-	var $colorId = 0;
-	var $description='';
+	public $date = '';
+	public $isPresence = 0;
+	public $label = '';
+	public $AM=false;
+	public $PM=false;
+	public $DAM=false;
+	public $DPM=false;
+	public $FPM=false;
+	public $FAM=false;
+	public $colorId = 0;
+	public $description='';
+
+	/** @var string $ddMoment matin|apresmidi */
+	public $ddMoment;
+	/** @var string $dfMoment matin|apresmidi */
+	public $dfMoment;
 
 	function __construct() {
 
@@ -53,12 +58,32 @@ class TRH_absenceDay {
 			return 'non';
 		}
 
-
-
-
-
 	}
 
+	public function isPresence()
+	{
+		return $this->isPresence;
+	}
+
+	public function getTypeMoment()
+	{
+		$type = 'non';
+
+		if($this->DAM) $type = 'DAM';
+		else if($this->FAM) $type = 'FAM';
+		else if($this->DPM) $type = 'DPM';
+		else if($this->FPM) $type = 'FPM';
+		else if($this->AM) $type = 'AM'; // Attention, il est possible que l'objet soit typé FAM & AM
+		else if($this->PM) $type = 'PM'; // Attention, il est possible que l'objet soit typé FPM & PM
+
+		return $type;
+	}
+
+	public function isFullDay()
+	{
+		// si ces 2 attributs sont différents c'est que nous sommes dans le cas suivant : ddMoement = matin et dfMoment = apresmidi
+		return ($this->ddMoment != $this->dfMoment);
+	}
 }
 
 //TRH_CONGE
@@ -547,7 +572,7 @@ class TRH_Absence extends TObjetStd {
 			$this->setAcceptee($PDOdb, $user->id);
 			return 1;
 		}
-		else
+		else // si le mode hiérarchique est actif, il est possible de tomber dans ce cas s'il reste des valideurs en attente de réponse (l'erreur n'est pas affichée)
 		{
 			$this->error = 'Permission insuffisante pour valider l\'absence';
 			return 0;
@@ -1703,7 +1728,7 @@ class TRH_Absence extends TObjetStd {
 
 	}
 	function mailAlertEffectif($idGroup) {
-		global $db;
+		global $db,$langs,$conf;
 		if (!class_exists('UserGroup')) {
 			require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 		}
@@ -2347,183 +2372,221 @@ END:VCALENDAR
 	}
 
 	static function getPlanning(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin){
-
+		global $conf;
 		dol_include_once('/absence/class/pointeuse.class.php');
-
+		
 			$abs = new TRH_Absence;
 
 			$t_current = strtotime($date_debut);
 			$t_end = strtotime($date_fin);
+			
+			$extra_params = array(
+				'extrafields' => array(
+					'ue.ticketresto_ok' => 1
+				)
+				, 'ue.ldap_entity_login' => $conf->entity
+			);
 
-			while($t_current <= $t_end) {
+			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
+			$Tab = array(); // Tableau de retour de fonction
+			
+			foreach ($TPlanning as $t_current => $TAbsence)
+			{
+				$date = date('Y-m-d', $t_current);
+				$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
 
-				$TPlanning = $abs->requetePlanningAbsence($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_current));
-
-				list($dt, $TAbsence) = each($TPlanning);
-
-				foreach($TAbsence as $fk_user => $ouinon) {
-					$date = date('Y-m-d', $t_current);
-
-					$presence = strpos($ouinon, '[Présence]') !== false; //TODO refondre un peu ça pour éviter cette grosse merde de strpos
-
+				foreach($TAbsence as $fk_user => $TRH_absenceDay)
+				{
+					// OUI = jour entier; AM = que le matin; PM = que l'aprem; NON = jour non présent (non travaillé)
 					$estUnJourTravaille = TRH_EmploiTemps::estTravaille($PDOdb, $fk_user, $date);
-					$estFerie = TRH_JoursFeries::estFerie($PDOdb, $date);
 
-					@$Tab[$fk_user][$date]['presence_jour_entier'] = (int)($estUnJourTravaille=='OUI' && $ouinon=='non' && !$estFerie) ;
-					@$Tab[$fk_user][$date]['presence'] = (int)(($estUnJourTravaille!='NON' && $ouinon=='non' && !$estFerie) || $presence) ;
+					$Tab[$fk_user][$date]['ferie'] = (int) $estFerie ;
+					$Tab[$fk_user][$date]['estUnJourTravaille'] = $estUnJourTravaille;
 
-					if($Tab[$fk_user][$date]['presence_jour_entier']==1)@$Tab[$fk_user][$date]['nb_jour_presence'] = 1;
-					else if($Tab[$fk_user][$date]['presence_jour_entier']==0 && $Tab[$fk_user][$date]['presence']==1)@$Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
-					else @$Tab[$fk_user][$date]['nb_jour_presence'] = 0;
+					$Tab[$fk_user][$date]['presence'] = 0; // *
+					$Tab[$fk_user][$date]['absence'] = 0; // *
+					$Tab[$fk_user][$date]['presence_jour_entier'] = null; // *
 
-					@$Tab[$fk_user][$date]['absence'] = (int)($ouinon!='non' && !$estFerie) ;
+					$Tab[$fk_user][$date]['nb_jour_ferie'] = ($estFerie && $estUnJourTravaille!='NON') ? 1 : 0;
+					$Tab[$fk_user][$date]['nb_jour_presence'] = 0; // *
+					$Tab[$fk_user][$date]['nb_jour_absence'] = 0; // *
 
-					if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille=='OUI')@$Tab[$fk_user][$date]['nb_jour_absence'] = 1;
-					else if($Tab[$fk_user][$date]['absence']==1 && $estUnJourTravaille!='NON')@$Tab[$fk_user][$date]['nb_jour_absence'] = 0.5;
-					else $Tab[$fk_user][$date]['nb_jour_absence'] = 0;
+					if (empty($TRH_absenceDay))
+					{
+						$presence_jour_entier = (int) ($estUnJourTravaille=='OUI' && !$estFerie);
+						$presence_demi_journee = (int) (in_array($estUnJourTravaille, array('AM', 'PM')) && !$estFerie);
 
-					//$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
+						$Tab[$fk_user][$date]['presence_jour_entier'] = $presence_jour_entier;
+						$Tab[$fk_user][$date]['presence'] = (int) ($presence_jour_entier || $presence_demi_journee);
+
+						if ($presence_jour_entier==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 1;
+						else if ($presence_demi_journee==1) $Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
+						else $Tab[$fk_user][$date]['nb_jour_presence'] = 0;
+
+						$Tab[$fk_user][$date]['typeAbsence'] = null;
+
+					}
+					else
+					{
+						$countAbsenceDay = count($TRH_absenceDay);
+						/** @var TRH_absenceDay[] $TRH_absenceDay */
+						/** @var TRH_absenceDay $ouinon */
+						foreach ($TRH_absenceDay as $k => $ouinon)
+						{
+							$Tab[$fk_user][$date]['typeAbsence'][] = $ouinon;
+							$Tab[$fk_user][$date]['presence'] |= $ouinon->isPresence();
+
+							if ($ouinon->isPresence())
+							{
+								$Tab[$fk_user][$date]['presence_jour_entier'] = (int) ($ouinon->isFullDay());
+
+								if ($Tab[$fk_user][$date]['presence_jour_entier'] == 1) $Tab[$fk_user][$date]['nb_jour_presence'] = 1;
+								else $Tab[$fk_user][$date]['nb_jour_presence']+= 0.5;
+							}
+							else
+							{
+								$Tab[$fk_user][$date]['absence'] = (int) (!$estFerie);
+
+								$absence_jour_entier = (int) $ouinon->isFullDay();
+								$absence_demi_journee = !$absence_jour_entier;
+
+								if (!$estFerie)
+								{
+									if ($absence_jour_entier) $Tab[$fk_user][$date]['nb_jour_absence'] = 1;
+									else $Tab[$fk_user][$date]['nb_jour_absence']+= 0.5;
+								}
+
+								$Tab[$fk_user][$date]['presence'] |= (int) $absence_demi_journee;
+
+								// Inc présence uniquement si j'ai qu'une demi journée de posé, il est possible d'avoir un autre objet mais de type Présence
+								if ($countAbsenceDay < 2 && $absence_demi_journee) $Tab[$fk_user][$date]['nb_jour_presence'] = 0.5;
+
+								$Tab[$fk_user][$date]['absence'] = (int) (!$estFerie);
+							}
+						}
+					}
+
+					/* TODO C'est une ... sans nom, je mets en commentaire, car de toute façon ce n'est plus en place depuis 6cbf66b2
+					$TTime = TRH_EmploiTemps::getWorkingTimeForDayUser($PDOdb, $fk_user,$date);
 					$t_am = $TTime['am'];
 					$t_pm = $TTime['pm'];
-
 					$Tab[$fk_user][$date]['t_am'] = $t_am;
 					$Tab[$fk_user][$date]['t_pm'] = $t_pm;
 
-					if ($Tab[$fk_user][$date]['nb_jour_presence'] == 1 || ($Tab[$fk_user][$date]['nb_jour_absence'] == 1 && $presence)) {
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_am + $t_pm;
-					}
-					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='AM')
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_am;
-					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='PM')
-						$Tab[$fk_user][$date]['nb_heure_presence'] = $t_pm;
-					else
-						$Tab[$fk_user][$date]['nb_heure_presence'] = 0;
+					if ($Tab[$fk_user][$date]['nb_jour_absence'] == 1 && $Tab[$fk_user][$date]['presence']) $Tab[$fk_user][$date]['nb_heure_presence'] = $t_am + $t_pm;
+					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='AM') $Tab[$fk_user][$date]['nb_heure_presence'] = $t_am;
+					else if ($Tab[$fk_user][$date]['nb_jour_presence']==0.5 && $estUnJourTravaille=='PM') $Tab[$fk_user][$date]['nb_heure_presence'] = $t_pm;
+					else $Tab[$fk_user][$date]['nb_heure_presence'] = 0;
 
-					if($Tab[$fk_user][$date]['nb_jour_absence']==1)$Tab[$fk_user][$date]['nb_heure_absence'] = $t_am + $t_pm;
-					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='AM')$Tab[$fk_user][$date]['nb_heure_absence'] = $t_am;
-					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='PM')$Tab[$fk_user][$date]['nb_heure_absence'] = $t_pm;
+
+					if ($Tab[$fk_user][$date]['nb_jour_absence']==1) $Tab[$fk_user][$date]['nb_heure_absence'] = $t_am + $t_pm;
+					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='AM') $Tab[$fk_user][$date]['nb_heure_absence'] = $t_am;
+					else if($Tab[$fk_user][$date]['nb_jour_absence']==0.5 && $estUnJourTravaille=='PM') $Tab[$fk_user][$date]['nb_heure_absence'] = $t_pm;
 					else $Tab[$fk_user][$date]['nb_heure_absence'] = 0;
 
-					@$Tab[$fk_user][$date]['ferie'] = (int)$estFerie ;
-
-					$Tab[$fk_user][$date]['nb_jour_ferie'] = ($Tab[$fk_user][$date]['ferie'] && $estUnJourTravaille!='NON') ? 1:0;
-
-					$Tab[$fk_user][$date]['estUnJourTravaille'] = $estUnJourTravaille;
-					$Tab[$fk_user][$date]['typeAbsence'] = $ouinon;
 
 					$timePresencePresume = $Tab[$fk_user][$date]['nb_heure_presence'] * 3600;
 
 					$Tab[$fk_user][$date]['nb_heure_presence_reelle'] = TRH_Pointeuse::tempsTravailReelDuJour(
-							$PDOdb
-							, $fk_user
-							, $date
-							, $timePresencePresume
-						); // en heure*/
+						$PDOdb
+						, $fk_user
+						, $date
+						, $timePresencePresume
+					); // en heure
 
 					$Tab[$fk_user][$date]['nb_heure_suplementaire'] = $Tab[$fk_user][$date]['nb_heure_presence_reelle'] - $Tab[$fk_user][$date]['nb_heure_presence'];
-
+					*/
 				}
-
-				$t_current = strtotime('+1day', $t_current);
 			}
 
 			return $Tab;
 	}
 
 	//fonction qui va renvoyer la requête sql de recherche pour le planning
-	function requetePlanningAbsence(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin){
-			// TODO cette fonction est une horreur, à recoder
 
+	/**
+	 * @return array
+	 * @deprecated semble être utilisé une dernière fois par le module "report" -> report_atm.php:741 (fonction _rs_get_user_stat)
+	 * @see requetePlanningAbsence2
+	 */
+	function requetePlanningAbsence(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $extra_params=array())
+	{
+			// TODO cette fonction est une horreur, à recoder
+			// [PH] un petit peu moins maintenant, mais vraiment qu'un petit peu moins...
 		global $conf;
 
-		if(!is_array($idGroupeRecherche)) {
-			$idGroupeRecherche = array($idGroupeRecherche);
-		}
+		if(!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
+		
+		$date_debut = strtotime(str_replace("/","-",$date_debut));
+		$date_fin = strtotime(str_replace("/","-",$date_fin));
 
-
-
-		if(array_sum($idGroupeRecherche)>0){	//on recherche un groupe précis
-
-				$sql="SELECT  a.rowid as 'ID', u.rowid as 'idUser', u.login, u.lastname,u.firstname, DATE_FORMAT(a.date_debut, '%d/%m/%Y') as 'date_debut',
-					DATE_FORMAT(a.date_fin, '%d/%m/%Y') as 'date_fin', a.libelle, a.libelleEtat, a.ddMoment, a.dfMoment,ta.isPresence,ta.colorId, a.commentaire
-					FROM ".MAIN_DB_PREFIX."rh_absence as a LEFT OUTER JOIN ".MAIN_DB_PREFIX."user as u ON (a.fk_user=u.rowid)
-					LEFT OUTER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (a.type=ta.typeAbsence)
-					LEFT OUTER JOIN ".MAIN_DB_PREFIX."usergroup_user as g ON (g.fk_user=u.rowid)
-					WHERE 1 ";
-
-					$sql.= " AND g.fk_usergroup IN (".implode(',',$idGroupeRecherche).")";
-
-				$sql.=" AND a.etat!='Refusee'
-					AND (a.date_debut between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-					OR a.date_fin between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-					OR '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' between a.date_debut AND a.date_fin
-					OR '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."' between a.date_debut AND a.date_fin)";
-
-
-		}
-
-		else if($idUserRecherche>0){	//on recherche une  personne précis
-
-			$sql="SELECT  a.rowid as 'ID', u.rowid as 'idUser', u.login, u.lastname,u.firstname, DATE_FORMAT(a.date_debut, '%d/%m/%Y') as 'date_debut',
-				DATE_FORMAT(a.date_fin, '%d/%m/%Y') as 'date_fin', a.libelle, a.libelleEtat, a.ddMoment, a.dfMoment,ta.isPresence,ta.colorId, a.commentaire
-				FROM ".MAIN_DB_PREFIX."rh_absence as a LEFT OUTER JOIN ".MAIN_DB_PREFIX."user as u ON (a.fk_user=u.rowid)
-				LEFT OUTER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (a.type=ta.typeAbsence)
-				LEFT OUTER JOIN ".MAIN_DB_PREFIX."usergroup_user as g ON (g.fk_user=u.rowid)
-				WHERE a.fk_user=".$idUserRecherche."
-				AND a.etat!='Refusee'
-				AND (a.date_debut between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-				OR a.date_fin between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-				OR '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' between a.date_debut AND a.date_fin
-				OR '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."' between a.date_debut AND a.date_fin)";
-
-		}
-		else
-		{	//on recherche pour tous les utilisateurs
-			$sql="SELECT a.rowid as 'ID',  u.rowid as 'idUser', u.login, u.lastname, u.firstname,
-				DATE_FORMAT(a.date_debut, '%d/%m/%Y') as date_debut, a.ddMoment, a.dfMoment, a.commentaire,
-				DATE_FORMAT(a.date_fin, '%d/%m/%Y') as date_fin, a.libelle, a.libelleEtat,ta.isPresence,ta.colorId
-				FROM ".MAIN_DB_PREFIX."rh_absence as a LEFT OUTER JOIN ".MAIN_DB_PREFIX."user as u ON (a.fk_user=u.rowid)
-				LEFT OUTER JOIN ".MAIN_DB_PREFIX."rh_type_absence as ta ON (a.type=ta.typeAbsence)
-				LEFT OUTER JOIN ".MAIN_DB_PREFIX."usergroup_user as g ON (g.fk_user=u.rowid)
-				WHERE a.fk_user=u.rowid
-				AND a.etat!='Refusee'
-				AND (a.date_debut between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-				OR a.date_fin between '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' AND '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."'
-				OR '".$this->php2Date(strtotime(str_replace("/","-",$date_debut)))."' between a.date_debut AND a.date_fin
-				OR '".$this->php2Date(strtotime(str_replace("/","-",$date_fin)))."' between a.date_debut AND a.date_fin
-				)";
-		}
-
+		dol_include_once('/valideur/class/valideur.class.php');
+		$params = array(
+			'ajax' => true
+			, 'fk_user' => $idUserRecherche
+			, 'fk_usergroup' => $idGroupeRecherche
+			, 'date_start' => date('Y-m-d H:i:s', $date_debut)
+			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
+			, 'typeAbsence' => 'Tous'
+			, 'statut' => 1
+		);
+		
+		if (!empty($extra_params)) $params += $extra_params;
+		
+		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
+			
+		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
+		
+		$TRow = $PDOdb->ExecuteAsArray($sql);
+		
 		// on traite la recherche pour le planning
 		$k=0;
-		$PDOdb->Execute($sql);
-		$TabLogin=array();
-		while ($PDOdb->Get_line()) {
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['date_debut']=$PDOdb->Get_field('date_debut');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['date_fin']=$PDOdb->Get_field('date_fin');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['idUser']=$PDOdb->Get_field('idUser');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['type']=$PDOdb->Get_field('libelle');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['ddMoment']=$PDOdb->Get_field('ddMoment');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['dfMoment']=$PDOdb->Get_field('dfMoment');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['isPresence']=$PDOdb->Get_field('isPresence');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['colorId']=$PDOdb->Get_field('colorId');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['commentaire']=$PDOdb->Get_field('commentaire');
-			$TabAbsence[$PDOdb->Get_field('idUser')][$k]['idAbsence']=$PDOdb->Get_field('ID');
-
+		$TabLogin = $TabAbsence = array();
+		foreach ($TRow as $row)
+		{
+			$TabAbsence[$row->fk_user][$k]['date_debut']=$row->date_debut;
+			$TabAbsence[$row->fk_user][$k]['date_fin']=$row->date_fin;
+			$TabAbsence[$row->fk_user][$k]['idUser']=$row->fk_user;
+			$TabAbsence[$row->fk_user][$k]['type']=$row->libelle;
+			$TabAbsence[$row->fk_user][$k]['ddMoment']=$row->ddMoment;
+			$TabAbsence[$row->fk_user][$k]['dfMoment']=$row->dfMoment;
+			$TabAbsence[$row->fk_user][$k]['isPresence']=$row->isPresence;
+			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
+			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
+			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
 
 			$k++;
 		}
 
+		unset($TRow);
+		
 		//on récupère les différents utilisateurs concernés par la recherche
 
 		if($idUserRecherche>0) {
-			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u WHERE rowid=".$idUserRecherche;
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.rowid=".$idUserRecherche."
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
 		}
 		else if(array_sum($idGroupeRecherche)>0 ) {	//on recherche un groupe précis
-			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."usergroup_user as g
-			WHERE u.rowid=g.fk_user AND g.fk_usergroup IN (".implode(',',$idGroupeRecherche).") AND u.statut=1 ORDER BY u.lastname";
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user g ON (u.rowid=g.fk_user)
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE g.fk_usergroup IN (".implode(',',$idGroupeRecherche).")
+				AND u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+				ORDER BY u.lastname
+			";
 		}else{
-			$sql="SELECT rowid, login, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE statut=1";
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
 		}
 		$PDOdb->Execute($sql);
 		while ($PDOdb->Get_line()) {
@@ -2560,73 +2623,144 @@ END:VCALENDAR
 			}
 
 		}
+		
 
-
-
-		$jourFin=strtotime(str_replace("/","-",$date_fin));
-		$jourDebut=strtotime(str_replace("/","-",$date_debut));
+//		$jourFin=strtotime(str_replace("/","-",$date_fin));
+//		$jourDebut=strtotime(str_replace("/","-",$date_debut));
+		$jourFin = $date_fin;
+		$jourDebut = $date_debut;
 
 		$TRetour=array();
 		//on remplit le tableau de non
-		foreach ($TabLogin as $id=>$user) {
-			$jourDebut=strtotime(str_replace("/","-",$date_debut));
+		foreach ($TabLogin as $id=>$username) {
+			$jourDebut = $date_debut;
 			//echo "ici".$id." ";
-			while($jourFin>=$jourDebut){
-					$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
-					$jourDebut=strtotime('+1day',$jourDebut);
+			while ($jourFin >= $jourDebut)
+			{
+				$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
+				$jourDebut=strtotime('+1day',$jourDebut);
 			}
 		}
-
-
-
-
-		foreach ($TabLogin as $id=>$user) {
-			$jourDebut=strtotime(str_replace("/","-",$date_debut)); //TODO so moche
-			if(!empty($TabAbsence[$id])){
-				foreach($TabAbsence as $tabAbs){
+	
+		foreach ($TabLogin as $id => $username)
+		{
+			$jourDebut = $date_debut;
+			if (!empty($TabAbsence[$id]))
+			{
+				foreach ($TabAbsence[$id] as $tabAbs)
+				{
+					$jourDebut = $date_debut;
+					
 					//print_r($tabAbs[$k]);exit;
-					foreach($tabAbs as $key=>$value){
-						$jourDebut=strtotime(str_replace("/","-",$date_debut));
-						//print_r($value);exit;
-						if($value['idUser']==$id){
-							while($jourFin>=$jourDebut){
-								if($TRetour[date('d/m/Y',$jourDebut)][$id]=='non'){
-
-									$moment=new TRH_absenceDay;
-									if(strtotime(str_replace("/","-",$value['date_debut']))<=$jourDebut&&strtotime(str_replace("/","-",$value['date_fin']))>=$jourDebut){
-										if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))&&$jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
-											if($value['ddMoment']==$value['dfMoment']){
-												if($value['ddMoment']=='matin'){
-													$moment->AM = true;
-												}else $moment->PM = true;
+					if (isset($tabAbs[0]))
+					{
+						foreach ($tabAbs as $key => $value)
+						{
+							$jourDebut = $date_debut;
+							//print_r($value);exit;
+							if ($value['idUser'] == $id)
+							{
+								while ($jourFin >= $jourDebut)
+								{
+									if ($TRetour[date('d/m/Y', $jourDebut)][$id] == 'non')
+									{
+										$time_debut = strtotime($value['date_debut']);
+										$time_fin = strtotime($value['date_fin']);
+										
+										$moment = new TRH_absenceDay;
+										if ($time_debut <= $jourDebut && $time_fin >= $jourDebut)
+										{
+											if ($jourDebut == $time_debut && $jourDebut == $time_fin)
+											{
+												if ($value['ddMoment'] == $value['dfMoment'])
+												{
+													if ($value['ddMoment'] == 'matin') $moment->AM = true;
+													else $moment->PM = true;
+												}
 											}
-										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_debut']))){
-											if($value['ddMoment']=='matin'){
-												$moment->DAM=$moment->AM=true;
-											}else $moment->DPM=$moment->PM=true;
-										}else if($jourDebut==strtotime(str_replace("/","-",$value['date_fin']))){
-											if($value['dfMoment']=='matin'){
-												$moment->FAM=$moment->AM=true;
-											}else $moment->FPM=$moment->PM=true;
+											else if ($jourDebut == $time_debut)
+											{
+												if ($value['ddMoment'] == 'matin') $moment->DAM = $moment->AM = true;
+												else $moment->DPM = $moment->PM = true;
+											}
+											else if ($jourDebut == $time_fin)
+											{
+												if ($value['dfMoment'] == 'matin') $moment->FAM = $moment->AM = true;
+												else $moment->FPM = $moment->PM = true;
+											}
+
+											if ($value['isPresence'] > 0) $moment->isPresence = 1;
+											$moment->label = $value['type'];
+											$moment->description = $value['commentaire'];
+											$moment->colorId = $value['colorId'];
+											$moment->date = date('Y-m-d', $jourDebut);
+
+											$moment->idAbsence = $value['idAbsence'];
+
+											$TRetour[date('d/m/Y', $jourDebut)][$id] = $moment;
+										}
+										else
+										{
+											$TRetour[date('d/m/Y', $jourDebut)][$id] = new TRH_absenceDay;
+										}
+									}
+									//$typeTemp=$value['type'];
+									$jourDebut = strtotime('+1day', $jourDebut);
+								}
+							}
+						}
+					}
+					else
+					{
+						if ($tabAbs['idUser'] == $id)
+						{
+							$jourDebut = $date_debut;
+							while ($jourFin >= $jourDebut)
+							{
+								if ($TRetour[date('d/m/Y', $jourDebut)][$id] == 'non')
+								{
+									$time_debut = strtotime($tabAbs['date_debut']);
+									$time_fin = strtotime($tabAbs['date_fin']);
+									
+									$moment = new TRH_absenceDay;
+									if ($time_debut <= $jourDebut && $time_fin >= $jourDebut)
+									{
+										if ($jourDebut == $time_debut && $jourDebut == $time_fin)
+										{
+											if ($tabAbs['ddMoment'] == $tabAbs['dfMoment'])
+											{
+												if ($tabAbs['ddMoment'] == 'matin') $moment->AM = true;
+												else $moment->PM = true;
+											}
+										}
+										else if ($jourDebut == $time_debut)
+										{
+											if ($tabAbs['ddMoment'] == 'matin') $moment->DAM = $moment->AM = true;
+											else $moment->DPM = $moment->PM = true;
+										}
+										else if ($jourDebut == $time_fin)
+										{
+											if ($tabAbs['dfMoment'] == 'matin') $moment->FAM = $moment->AM = true;
+											else $moment->FPM = $moment->PM = true;
 										}
 
-										if($value['isPresence']>0) $moment->isPresence = 1;
-										$moment->label = $value['type'];
-										$moment->description = $value['commentaire'];
-										$moment->colorId = $value['colorId'];
+										if ($tabAbs['isPresence'] > 0) $moment->isPresence = 1;
+										$moment->label = $tabAbs['type'];
+										$moment->description = $tabAbs['commentaire'];
+										$moment->colorId = $tabAbs['colorId'];
 										$moment->date = date('Y-m-d', $jourDebut);
 
-										$moment->idAbsence =  $value['idAbsence'];
+										$moment->idAbsence = $tabAbs['idAbsence'];
 
-										$TRetour[date('d/m/Y',$jourDebut)][$id]=$moment;
-
-									}else{
-
-										$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
+										$TRetour[date('d/m/Y', $jourDebut)][$id] = $moment;
+									}
+									else
+									{
+										$TRetour[date('d/m/Y', $jourDebut)][$id] = new TRH_absenceDay;
 									}
 								}
-								//$typeTemp=$value['type'];
-								$jourDebut=strtotime('+1day',$jourDebut);
+								//$typeTemp=$tabAbs['type'];
+								$jourDebut = strtotime('+1day', $jourDebut);
 							}
 						}
 
@@ -2634,11 +2768,14 @@ END:VCALENDAR
 
 
 				}
-			}else{
+			}
+			else
+			{
 				//echo "ici".$id." ";
-				while($jourFin>=$jourDebut){
-						$TRetour[date('d/m/Y',$jourDebut)][$id]=new TRH_absenceDay;
-						$jourDebut=strtotime('+1day',$jourDebut);
+				while ($jourFin >= $jourDebut)
+				{
+					$TRetour[date('d/m/Y', $jourDebut)][$id] = new TRH_absenceDay;
+					$jourDebut = strtotime('+1day', $jourDebut);
 				}
 			}
 
@@ -2647,6 +2784,207 @@ END:VCALENDAR
 		return $TRetour;
 	}
 	
+	/**
+	 * Ré-écriture de requetePlanningAbsence() qui est encore utilisé dans absence.lib.php ainsi que dans le module "report" => "report_atm.php:l741"
+	 * 
+	 * @return array \TRH_absenceDay
+	 */
+	function requetePlanningAbsence2(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $extra_params=array())
+	{
+		global $conf;
+
+		if (strlen($date_fin) == 10) $date_fin.= ' 23:59:59';
+
+		$date_debut = strtotime(str_replace("/","-",$date_debut));
+		$date_fin = strtotime(str_replace("/","-",$date_fin));
+
+		// clean params
+		if (empty($idGroupeRecherche)) $idGroupeRecherche = array();
+		elseif (!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
+
+		dol_include_once('/valideur/class/valideur.class.php');
+		$params = array(
+			'ajax' => true
+			, 'fk_user' => $idUserRecherche
+			, 'fk_usergroup' => $idGroupeRecherche
+			, 'date_start' => date('Y-m-d H:i:s', $date_debut)
+			, 'date_end' => date('Y-m-d H:i:s', $date_fin)
+			, 'typeAbsence' => 'Tous'
+			, 'statut' => 1
+			, 'etat' => array('Validee')
+		);
+		
+		if (!empty($extra_params)) $params += $extra_params;
+		
+		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
+			
+		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
+		$sql.= ' ORDER BY r.fk_user, r.date_debut ASC, r.ddMoment DESC';
+//		echo $sql;exit;
+		$TRow = $PDOdb->ExecuteAsArray($sql);
+		
+		// on traite la recherche pour le planning
+		$k=0;
+		$TabLogin = $TabAbsence = array();
+		foreach ($TRow as $row)
+		{
+			$TabAbsence[$row->fk_user][$k]['date_debut']=$row->date_debut;
+			$TabAbsence[$row->fk_user][$k]['date_fin']=$row->date_fin;
+			$TabAbsence[$row->fk_user][$k]['idUser']=$row->fk_user;
+			$TabAbsence[$row->fk_user][$k]['type']=$row->libelle;
+			$TabAbsence[$row->fk_user][$k]['ddMoment']=$row->ddMoment;
+			$TabAbsence[$row->fk_user][$k]['dfMoment']=$row->dfMoment;
+			$TabAbsence[$row->fk_user][$k]['isPresence']=$row->isPresence;
+			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
+			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
+			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
+
+			$k++;
+		}
+
+		unset($TRow);
+
+		//on récupère les différents utilisateurs concernés par la recherche
+
+		if($idUserRecherche>0) {
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.rowid=".$idUserRecherche."
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
+		}
+		else if(array_sum($idGroupeRecherche)>0 ) {	//on recherche un groupe précis
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user as u
+				LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user g ON (u.rowid=g.fk_user)
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE g.fk_usergroup IN (".implode(',',$idGroupeRecherche).")
+				AND u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+				ORDER BY u.lastname
+			";
+		}else{
+			$sql="SELECT u.rowid, u.login, u.lastname, u.firstname
+				FROM ".MAIN_DB_PREFIX."user u
+				LEFT JOIN ".MAIN_DB_PREFIX."user_extrafields ue ON (ue.fk_object = u.rowid)
+				WHERE u.statut=1
+				AND ue.ldap_entity_login=".$conf->entity."
+			";
+		}
+		$PDOdb->Execute($sql);
+		while ($PDOdb->Get_line()) {
+			$TabLogin[$PDOdb->Get_field('rowid')]=$PDOdb->Get_field('firstname')." ".$PDOdb->Get_field('lastname');
+		}
+
+		if($conf->global->RH_PLANNING_SEARCH_MODE == 'INTERSECTION') {
+		// élimination des users non présent dans tous les groupes. AA peu opti mais je n'ai guère le choix si je veux pas refondre toutes la requête
+
+			foreach($TabLogin as $idUser=>$row) {
+
+				$TLGroup = array();
+
+				$sql="SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user WHERE fk_user=".$idUser;
+
+				$PDOdb->Execute($sql);
+				while($obj = $PDOdb->Get_line()) {
+					$TLGroup[] = $obj->fk_usergroup;
+				}
+
+				foreach($idGroupeRecherche as $idGroup) {
+
+					if($idGroup>0) {
+
+						if(!in_array($idGroup, $TLGroup)) {
+							unset($TabLogin[$idUser]);
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+//		$jourFin=strtotime(str_replace("/","-",$date_fin));
+//		$jourDebut=strtotime(str_replace("/","-",$date_debut));
+
+		$jourDebut = $date_debut;
+		$jourFin = $date_fin;
+
+
+		$TRetour=array();
+		//on remplit le tableau de non
+		foreach ($TabLogin as $id=>$username) {
+			$jourDebut = $date_debut;
+			//echo "ici".$id." ";
+			while ($jourFin >= $jourDebut)
+			{
+				$TRetour[$jourDebut][$id]=array();
+				$jourDebut=strtotime('+1day',$jourDebut);
+			}
+		}
+	
+		foreach ($TabLogin as $id => $username)
+		{
+			$jourDebut = $date_debut;
+			if (!empty($TabAbsence[$id]))
+			{
+				foreach ($TabAbsence[$id] as $tabAbs)
+				{
+					$time_debut = strtotime($tabAbs['date_debut']);
+					if ($time_debut < $jourDebut) $time_debut = $jourDebut;
+
+					$time_fin = strtotime($tabAbs['date_fin']);
+					if ($time_fin > $jourFin) $time_fin = $jourFin;
+
+					$time_debut_inc = $time_debut;
+
+					while ($time_debut_inc <= $time_fin)
+					{
+						$moment = new TRH_absenceDay;
+
+						$moment->ddMoment = $tabAbs['ddMoment'];
+						$moment->dfMoment = $tabAbs['dfMoment'];
+
+						if ($time_debut_inc == $time_debut && $time_debut_inc == $time_fin)
+						{
+							if ($tabAbs['ddMoment'] == $tabAbs['dfMoment'])
+							{
+								if ($tabAbs['ddMoment'] == 'matin') $moment->AM = true;
+								else $moment->PM = true;
+							}
+						}
+						else if ($time_debut_inc == $time_debut) 
+						{
+							if ($tabAbs['ddMoment'] == 'matin') $moment->DAM = $moment->AM = true;
+							else $moment->DPM = $moment->PM = true;
+						}
+						else if ($time_debut_inc == $time_fin)
+						{
+							if ($tabAbs['dfMoment'] == 'matin') $moment->FAM = $moment->AM = true;
+							else $moment->FPM = $moment->PM = true;
+						}
+
+						if ($tabAbs['isPresence'] > 0) $moment->isPresence = 1;
+						$moment->label = $tabAbs['type'];
+						$moment->description = $tabAbs['commentaire'];
+						$moment->colorId = $tabAbs['colorId'];
+						$moment->date = date('Y-m-d', $time_debut_inc);
+
+						$moment->idAbsence = $tabAbs['idAbsence'];
+
+						$TRetour[$time_debut_inc][$id][] = $moment;
+						$time_debut_inc = strtotime('+1day', $time_debut_inc);
+					}
+				}
+			}
+		}
+
+		return $TRetour;
+	}
+
 	private function getTValideurFromTUser(&$PDOdb, &$TUser)
 	{
 		$TValideur = array();

@@ -83,6 +83,8 @@
 				    _fiche($PDOdb, $emploiTemps,'view');
 				}
 				
+				$mesg = '<div class="ok">' . $langs->trans('RegistedRequest') . '</div>';
+				_fiche($PDOdb, $emploiTemps,'view');
 				break;
 			case 'archive':
 				if(GETPOST('id','int')>0) $emploiTemps->load($PDOdb, GETPOST('id','int'));
@@ -102,9 +104,9 @@
 				$emploiTempsArchive->is_archive=1;
 				
 				// check planning override
-				$sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps  
-                        WHERE fk_user=".$emploiTempsArchive->fk_user."  AND is_archive=1 
-                                AND date_debut < '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_fin)."' 
+				$sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps
+                        WHERE fk_user=".$emploiTempsArchive->fk_user."  AND is_archive=1
+                                AND date_debut < '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_fin)."'
                                 AND date_fin > '".date('Y-m-d 00:00:00',$emploiTempsArchive->date_debut)."'";
 				$PDOdb->Execute($sql);
 				$row = $PDOdb->Get_line();
@@ -118,9 +120,7 @@
 				    setEventMessage($langs->trans('ArchivedSchedule'));
 				}
 				
-				
 				_fiche($PDOdb, $emploiTemps,'view');
-				
 				
 				break;
 				
@@ -335,8 +335,8 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			'date_debut'=>array('30/11/-0001'=>'-')
 			,'date_fin'=>array('30/11/-0001'=>'-')
 		)		
-	     ,'link'=>array(
-	         'ID'=>'<a href="?id=@ID@&action=view">@val@</a>',
+		,'link'=>array(
+		    'ID'=>'<a href="?id=@ID@&action=view">@val@</a>',
 			'Actions'=>'
 			<a href="?id=@ID@&action=view">' . $langs->trans('View') . '</a> &nbsp;  &nbsp; 
 			<a href="?id=@ID@&action=edit">' . $langs->trans('Update') . '</a> &nbsp;  &nbsp; 
@@ -347,10 +347,9 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 			,'date_fin'=> $langs->trans('EndDate')
 			,'tempsHebdo'=> $langs->trans('WeeklyWorkingTimeInHour')
 		)
-	     ,'liste' => array(
+	    ,'liste' => array(
 	         'titre' => $langs->trans('PlanningListByPeriod'),
 	     )
-		
 	 ));
 	
 	$TEmploiTemps = $emploiTemps->get_values();
@@ -358,7 +357,8 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$TEmploiTemps['date_debut'] = $form->calendrier('', 'date_debut', $emploiTemps->get_date('date_debut')  );
 	$TEmploiTemps['date_fin'] = $form->calendrier('', 'date_fin',  $emploiTemps->get_date('date_fin'));
 	
-
+	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($_REQUEST['id'])))	$can_modify_edt = 1;
+	
 	
 	// to return on default planning
 	$defaultEmploiTemps = new TRH_EmploiTemps();
@@ -367,8 +367,6 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	if($defaultEmploiTemps->getId() > 0 && $emploiTemps->getId() != $defaultEmploiTemps->getId()){
 	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 2).'?action=view&id='.$defaultEmploiTemps->getId();
 	}
-
-if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($defaultEmploiTemps->id))) $can_modify_edt = 1;
 	
 	$cardTitle = $langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname);
 	
@@ -428,14 +426,12 @@ if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->my
 				'Register' 				=> $langs->trans('Register'),
 				'Cancel' 				=> $langs->trans('Cancel'),
 				'Modify' 				=> $langs->trans('Modify'),
-			    'Archive' 				=> $langs->trans('Archive'),
+				'Archive' 				=> $langs->trans('Archive'),
 			    'is_tempspartiel'		=> $langs->trans('is_tempspartiel'),
 			    'GoToDefaultPlanning'   => $langs->trans('GoToDefaultPlanning'),
 			    'AbsenceCopy'           => $langs->trans('AbsenceCopy'),
 			    'archiveHelpToolTip'    => $langs->trans('archiveHelpToolTip'),
 			    'copytoNewHelpToolTip'  => $langs->trans('copytoNewHelpToolTip'),
-			    
-			    
 			)
 			
 		)	
@@ -466,10 +462,12 @@ if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->my
 	printModalJsForm_copynew($PDOdb,$emploiTemps);
 	
 	
+	
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
 }
+
 
 function printModalJsForm_copynew($PDOdb,$emploiTemps){
     global $langs;
@@ -487,21 +485,19 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
             $date_fin = time();
         }
     }
-
     
     
-	print '<div id="dialog-form-copynew" title="'.$langs->trans('copytoNewModalTitle').'">';
-	print '<p class="validateTips">'.$langs->trans('AllFormAreRequired').'</p>';
-
- 
-    $form=new TFormCore($_SERVER['PHP_SELF'],'form-copynew','POST'); 
-	 
-	echo $form->hidden('action', 'copytoNew');
-	echo $form->hidden('fk_user', $emploiTemps->fk_user);
-	 
-	print '<div id="errors-dialog-copynew" ></div>';
-
-	print '<table >';
+    
+    print '<div id="dialog-form-copynew" title="'.$langs->trans('copytoNewModalTitle').'">';
+    print '<p class="validateTips">'.$langs->trans('AllFormAreRequired').'</p>';
+    
+    $form=new TFormCore($_SERVER['PHP_SELF'],'form-copynew','POST');
+    
+    echo $form->hidden('action', 'copytoNew');
+    echo $form->hidden('fk_user', $emploiTemps->fk_user);
+    
+    print '<div id="errors-dialog-copynew" ></div>';
+    print '<table >';
     print '<tr>';
     print '<td>'.$langs->trans('StartDate').'</td>';
     print '<td>'.$langs->trans('EndDate').'</td>';
@@ -515,17 +511,16 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
     print '</td>';
     print '</tr>';
     print '</table>';
-	print '<!-- Allow form submission with keyboard without duplicating the dialog button --><input type="submit" tabindex="-1" style="position:absolute; top:-1000px">';
+    print '<!-- Allow form submission with keyboard without duplicating the dialog button --><input type="submit" tabindex="-1" style="position:absolute; top:-1000px">';
     
-	$form->end();
-	print '</div>';
-   
-?>
+    $form->end();
+    print '</div>';
+    
+    ?>
 <script>
     $( function() {
         var dialog, form;
-
-        	function copytoNewHelpToolTip (){
+         	function copytoNewHelpToolTip (){
             	//check traitement
             	var date_debut = $("#copynew_date_debut").val();
             	var date_fin   = $("#copynew_date_fin").val();
@@ -557,7 +552,8 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
     
                             $( "#errors-dialog-copynew" ).html(htmlerrors);
                         }
-                    
+
+                        
                    
                   }).done(function() {
                 	    console.log( "second success" );
@@ -575,8 +571,7 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
                   	}
                 	  
                   });
-
-            	console.log(formIsValid);
+             	console.log(formIsValid);
             	
         	}
         
@@ -606,12 +601,12 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
                 dialog.dialog( "open" );
             });
 
+
             
     } );
 </script>
     <?php 
 }
-
 
 /**
  * Détermine si l'emploi du temps sur lequel on se trouve appartient à un utilisateur dont le user courant est supérieur hiérarchique
