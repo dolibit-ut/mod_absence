@@ -180,14 +180,14 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'valideurConges';
-		$r++;
-		
-		$this->rights[$r][0] = 7103;
-		$this->rights[$r][1] = 'ConsultCollabHolidayCounter';
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'myactions';
+        $r++;
+        
+        $this->rights[$r][0] = 7103;
+        $this->rights[$r][1] = 'ConsultCollabHolidayCounter';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'visualiserCompteur';
-		$r++;
+        $r++;
 		
 		$this->rights[$r][0] = 7104;
 		$this->rights[$r][1] = 'ModifyCollabHolidayCounter';
@@ -439,9 +439,21 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'update_date_cloture';
-		$r++;
-		
-
+	    $r++;
+	    
+	    $this->rights[$r][0] = $this->numero.$r;
+	    $this->rights[$r][1] = 'ViewCollabAbsenceType';
+	    $this->rights[$r][3] = 0;
+	    $this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'ViewCollabAbsenceType';
+	    $r++;
+	    
+	    $this->rights[$r][0] = $this->numero.$r;
+	    $this->rights[$r][1] = 'ViewCompteurAllData';
+	    $this->rights[$r][3] = 0;
+	    $this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'ViewCompteurAllData';
+	    $r++;
 		
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		// Example:

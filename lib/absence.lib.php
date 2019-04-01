@@ -1029,3 +1029,95 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	
 	return $html;
 }
+
+
+/**
+ *  Show tab footer of a card.
+ *  Note: $object->next_prev_filter can be set to restrict select to find next or previous record by $form->showrefnav.
+ *
+ *  @param	Object	$object			Object to show
+ *  @param	string	$paramid   		Name of parameter to use to name the id into the URL next/previous link
+ *  @param	string	$morehtml  		More html content to output just before the nav bar
+ *  @param	int		$shownav	  	Show Condition (navigation is shown if value is 1)
+ *  @param	string	$fieldid   		Nom du champ en base a utiliser pour select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
+ *  @param	string	$fieldref   	Nom du champ objet ref (object->ref) a utiliser pour select next et previous
+ *  @param	string	$morehtmlref  	More html to show after ref
+ *  @param	string	$moreparam  	More param to add in nav link url.
+ *	@param	int		$nodbprefix		Do not include DB prefix to forge table name
+ *	@param	string	$morehtmlleft	More html code to show before ref
+ *	@param	string	$morehtmlstatus	More html code to show under navigation arrows
+ *  @param  int     $onlybanner     Put this to 1, if the card will contains only a banner (this add css 'arearefnobottom' on div)
+ *	@param	string	$morehtmlright	More html code to show before navigation arrows
+ *  @return	void
+ */
+function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fieldid='rowid', $fieldref='ref', $morehtmlref='', $moreparam='', $nodbprefix=0, $morehtmlleft='', $morehtmlstatus='', $onlybanner=0, $morehtmlright='')
+{
+    global $conf, $form, $user, $langs, $db;
+    
+    $error = 0;
+    
+    $maxvisiblephotos=1;
+    $showimage=1;
+    $entity=(empty($object->entity)?$conf->entity:$object->entity);
+    $showbarcode=empty($conf->barcode->enabled)?0:($object->barcode?1:0);
+    if (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && empty($user->rights->barcode->lire_advance)) $showbarcode=0;
+    $modulepart='unknown';
+    
+
+    
+    if (class_exists("Imagick"))
+    {
+        if ($object->element == 'propal')            $modulepart='propal';
+        if ($object->element == 'commande')          $modulepart='commande';
+        if ($object->element == 'facture')           $modulepart='facture';
+        if ($object->element == 'fichinter')         $modulepart='ficheinter';
+        if ($object->element == 'contrat')           $modulepart='contract';
+        if ($object->element == 'supplier_proposal') $modulepart='supplier_proposal';
+        if ($object->element == 'order_supplier')    $modulepart='supplier_order';
+        if ($object->element == 'invoice_supplier')  $modulepart='supplier_invoice';
+        if ($object->element == 'expensereport')     $modulepart='expensereport';
+    }
+
+    $width='80'; $cssclass='photoref';
+    $nophoto=dol_buildpath('absence/img/absenceOLD.png',1);
+    $morehtmlleft.='<div class="floatleft inline-block valignmiddle divphotoref"><img class="photo'.$modulepart.($cssclass?' '.$cssclass:'').'" alt="No photo" border="0"'.($width?' width="'.$width.'"':'').' src="'.$nophoto.'"></div>';
+
+        
+    
+    
+    
+    if ($showbarcode) $morehtmlleft.='<div class="floatleft inline-block valignmiddle divphotoref">'.$form->showbarcode($object).'</div>';
+    
+
+
+    //$morehtmlstatus.=$langs->trans("Status").' ('.$langs->trans("Buy").') ';
+    if (! empty($conf->use_javascript_ajax) && $user->rights->produit->creer && ! empty($conf->global->MAIN_DIRECT_STATUS_UPDATE)) {
+        $morehtmlstatus.=ajax_object_onoff($object, 'status_buy', 'tobuy', 'ProductStatusOnBuy', 'ProductStatusNotOnBuy');
+    } else {
+        $morehtmlstatus.='<span class="statusrefbuy">'.$object->getLibStatut(5,1).'</span>';
+    }
+    
+
+    if($object->fk_user>0){
+        $absUser = new User($db);
+        if($absUser->fetch($object->fk_user)){
+            $morehtmlref.= ' - '.$absUser->getFullName($langs);
+        }
+    }
+    
+    
+    $morehtmlref.='<div class="refidno">'.dol_print_date($object->date_debut).' '.$object->TddMoment[$object->ddMoment].' - '.dol_print_date($object->date_fin).' '.$object->TddMoment[$object->dfMoment].'</div>';
+    $morehtmlref.='<div class="refidno">'.round2Virgule($object->duree).' '.($object->duree>1?$langs->trans('Days'):$langs->trans('Day')).'</div>';
+    
+    if (! empty($conf->global->MAIN_SHOW_TECHNICAL_ID))
+    {
+        $morehtmlref.='<div style="clear: both;"></div><div class="refidno">';
+        $morehtmlref.=$langs->trans("TechnicalID").': '.$object->id;
+        $morehtmlref.='</div>';
+    }
+    
+    print '<div class="'.($onlybanner?'arearefnobottom ':'arearef ').'heightref valignmiddle" width="100%">';
+    print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $morehtmlright);
+    print '</div>';
+    print '<div class="underrefbanner clearboth"></div>';
+}

@@ -1,24 +1,23 @@
 
-    [view.head;strconv=no]
-
 <div class="fichecenter">
 		
 	[congesCourant.titreConges;strconv=no;protect=no]
 	
-		<div class="underbanner clearboth"></div>
-		<table class="border " style="width:100%;"  >
+	<div class="underbanner clearboth"></div>
+	
+	<div class="twocolumns" >
+	
+	<div class="firstcolumn fichehalfleft" >
+		<table class="noborder" style="width:100%;"  >
+
 				<tr class="liste_titre">
-					<td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" > 
-				    [translate.Year;strconv=no;protect=no] [translate.AbsenceNM1;strconv=no;protect=no] (année en cours)</td> </div>
+					<td colspan="2"  >[congesPrec.title;strconv=no;protect=no]</td>
 				</tr>
-				<tr>
-					<td width="30%">[translate.CurrentUser;strconv=no;protect=no]</td>
-					<td>[userCourant.link;strconv=no;protect=no]</td>
-				</tr>	
 				<tr>
 					<td>[translate.AcquiredOnExercise;strconv=no;protect=no] ([congesPrec.dates])</td>
 					<td>[congesPrec.acquisEx;strconv=no;protect=no]</td>
 				</tr>
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
 				<tr>
 					<td>[translate.AcquiredSeniority;strconv=no;protect=no]</td>
 					<td> [congesPrec.acquisAnc;strconv=no;protect=no]</td>
@@ -31,10 +30,12 @@
 					<td>[translate.OpenPostponement;strconv=no;protect=no]</td>
 					<td>[congesPrec.reportConges;strconv=no;protect=no]</td>
 				</tr>
+[onshow;block=end]
 				<tr>
 					<td><b>[translate.TotalHolidays;strconv=no;protect=no]</b></td>
 					<td><b>[congesPrec.total;strconv=no;protect=no] </b></td>
 				</tr>
+				
 				<tr>
 					<td>[translate.HolidaysTaken;strconv=no;protect=no]</td>
 					<td>[congesPrec.congesPris;strconv=no;protect=no]</td>
@@ -44,10 +45,19 @@
 					<td><b>[congesPrec.reste;strconv=no;protect=no]</b></td>
 				</tr>
 
+		    </table>
+		</div>    
+
+
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
+	   
+	   <div class="fichehalfright" > 
+			<table class="noborder " style="width:100%;"  >
 				<tr class="liste_titre">
-					<td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" > 
-						[translate.Year;strconv=no;protect=no] [translate.AbsenceN;strconv=no;protect=no] (année suivante)   </td> 
+					<td colspan="2" >[congesCourant.title;strconv=no;protect=no]</td>
 				</tr>
+				
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
 				<tr>
 					<td>[translate.AcquiredExercise;strconv=no;protect=no]</td>
 					<td>[congesCourant.acquisEx;strconv=no;protect=no]</td>
@@ -70,32 +80,46 @@
 					<td>[translate.NbDaysAcquiredByMonth;strconv=no;protect=no]</td>
 					<td> [congesCourant.nombreCongesAcquisMensuel;strconv=no;protect=no]</td>
 				</tr>
+[onshow;block=end]
 				<tr>
 					<td>[translate.NbDaysAcquiredByYear;strconv=no;protect=no]</td>
 					<td> [congesCourant.nombreCongesAcquisAnnuel;strconv=no;protect=no]</td>
 				</tr>
-				
+
 				<tr>
 					<td><b>[translate.Total;strconv=no;protect=no]</b></td>
 					<td><b>[congesCourant.total;strconv=no;protect=no]</b></td>
 				</tr>
 				<tr>
 					<td><b>[translate.LastClosingHoliday;strconv=no;protect=no]</b></td>
-					<td>[congesCourant.date_congesCloture;strconv=no;protect=no]</td>
+					<td><b>[congesCourant.date_congesCloture;strconv=no;protect=no]</b></td>
 				</tr>
+
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']				
 				<tr>
 					<td>[translate.acquisRecuperation;strconv=no;protect=no]</td>
 					<td>[congesCourant.acquisRecuperation;strconv=no;protect=no]</td>
 				</tr>
+[onshow;block=end]
 				
-			</tbody>
 		</table>
+	</div>	
+[onshow;block=end]
+
+</div>		
+		
 <br />
 
 	
 	[rttCourant.titreRtt;strconv=no;protect=no]
 		<div class="underbanner clearboth"></div>
-		<table class="border" style="width:100%">
+		
+
+	
+<div class="twocolumns" >
+	<div class="firstcolumn fichehalfleft" >
+			
+		<table class="noborder" style="width:100%">
 				<tr class="liste_titre">
 					 <td  colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.CounterCumulatedDayOff;strconv=no;protect=no] </td>
@@ -109,6 +133,8 @@
 					<td>[translate.CumulatedDayOffTaken;strconv=no;protect=no]</td>
 					<td>[rttCourant.cumulePris;strconv=no;protect=no]	</td>
 				</tr>
+				
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']	
 				<tr>
 					<td>[translate.langs.transnoentities(CumulatedDayOffTakenNextYear)] N+1</td>
 					<td>[rttCourant.cumulePrisN1;strconv=no;protect=no]	</td>
@@ -117,10 +143,18 @@
 					<td>[translate.PostponedCumulatedDayOff;strconv=no;protect=no] N-1</td>
 					<td>[rttCourant.cumuleReport;strconv=no;protect=no]	</td>
 				</tr>
+[onshow;block=end]
 				<tr>
 					<td><b>[translate.CumulatedDayOffToTake;strconv=no;protect=no]</b></td>
 					<td>[rttCourant.cumuleTotal;strconv=no;protect=no]</td>
 				</tr>
+		</table>
+		
+	
+		</div>
+	   <div class="fichehalfright" > 
+			
+	   <table class="noborder" style="width:100%">	
 				<tr class="liste_titre">
 					 <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.CounterNonCumulatedDayOff;strconv=no;protect=no]</td>
@@ -133,6 +167,7 @@
 					<td>[translate.NonCumulatedDayOffTaken;strconv=no;protect=no]</td>
 					<td>[rttCourant.nonCumulePris;strconv=no;protect=no]	</td>
 				</tr>
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
 				<tr>
 					<td>[translate.langs.transnoentities(NonCumulatedDayOffTakenNextYear)] N+1</td>
 					<td>[rttCourant.nonCumulePrisN1;strconv=no;protect=no]	</td>
@@ -141,12 +176,19 @@
 					<td>[translate.PostponedNonCumulatedDayOff;strconv=no;protect=no] N-1</td>
 					<td>[rttCourant.nonCumuleReport;strconv=no;protect=no]	</td>
 				</tr>
+[onshow;block=end]
 				<tr>
 					<td><b>[translate.NonCumulatedDaysOffToTake;strconv=no;protect=no]</b></td>
 					<td>[rttCourant.nonCumuleTotal;strconv=no;protect=no]</td>
 				</tr>
+		</table>
+	
+	</div>	
 
-		             
+</div>	   	
+		
+		<div class="underbanner clearboth"></div>
+		<table class="noborder" style="width:100%">		             
 				<tr class="liste_titre">
 					  <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.AcquisitionMethodOfDays;strconv=no;protect=no]</h2></td>
@@ -187,9 +229,8 @@
 					<td>[rttCourant.date_rttCloture;strconv=no;protect=no]</td>
 				</tr>	
 		</table>
-	       
+    
 
-</div>
 		
 		[onshow;block=begin;when [view.mode]=='edit']
 			<div class="tabsAction" >
