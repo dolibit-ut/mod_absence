@@ -2846,10 +2846,15 @@ END:VCALENDAR
 	{
 		global $conf;
 
-		if (strlen($date_fin) == 10) $date_fin.= ' 23:59:59';
-
-		$date_debut = strtotime(str_replace("/","-",$date_debut));
-		$date_fin = strtotime(str_replace("/","-",$date_fin));
+        if (!is_numeric($date_debut))
+        {
+            $date_debut = strtotime(str_replace("/","-",$date_debut));
+        }
+        if (!is_numeric($date_fin))
+        {
+            if (strlen($date_fin) == 10) $date_fin.= ' 23:59:59';
+            $date_fin = strtotime(str_replace("/","-",$date_fin));
+        }
 
 		// clean params
 		if (empty($idGroupeRecherche)) $idGroupeRecherche = array();

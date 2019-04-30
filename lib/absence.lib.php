@@ -758,19 +758,23 @@ global $conf,$db,$user;
 			
 			$annee = date('Y', $t_current);
 			if($t_current==$absence->date_debut_planning) {
-				$date_debut =date('d/m/Y', $absence->date_debut_planning);	
+//				$date_debut =date('d/m/Y', $absence->date_debut_planning);
+				$date_debut = strtotime(date('Y-m-d 00:00:00', $absence->date_debut_planning));
 			}
 			else {
-				$date_debut =date('01/m/Y', $t_current);	
+//				$date_debut =date('01/m/Y', $t_current);
+				$date_debut = strtotime(date('Y-m-01 00:00:00', $t_current));
 			}
 			
 			$t_fin_periode= strtotime(date('Y-m-t',  $t_current));
 			
 			if($t_fin_periode>=$absence->date_fin_planning) {
-				$date_fin =date('d/m/Y', $absence->date_fin_planning);	
+//				$date_fin =date('d/m/Y', $absence->date_fin_planning);
+				$date_fin = strtotime(date('Y-m-d 23:59:59', $absence->date_fin_planning));
 			}
 			else {
-				$date_fin =date('d/m/Y', $t_fin_periode);	
+//				$date_fin =date('d/m/Y', $t_fin_periode);
+				$date_fin = strtotime(date('Y-m-d 23:59:59', $t_fin_periode));
 			}
 			
 			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
