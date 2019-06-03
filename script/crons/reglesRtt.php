@@ -48,8 +48,10 @@ if ($resql)
 	}
 }
 
+$timezone = !empty($conf->global->ABSENCE_TIMEZONE) ? $conf->global->ABSENCE_TIMEZONE : 'Europe/Paris';
+$tz = new DateTimeZone($timezone);
 
-$now = new DateTime();
+$now = new DateTime('now', $tz);
 $now->setTime(0, 0, 0); // H:i:s => 00:00:00
 
 $first_day_of_now = dol_get_first_day($now->format('Y'), $now->format('m')); // timestamp
@@ -65,7 +67,7 @@ foreach ($TCompteur as $compteur)
 {
 	echo '* Compteur id = '.$compteur->getId().' date_rttCloture = '.dol_print_date($compteur->date_rttCloture, 'day')."<br />\n";
 
-	$date_rttCloture = new DateTime();
+	$date_rttCloture = new DateTime('now', $tz);
 	$date_rttCloture->setTimestamp($compteur->date_rttCloture);
 	$date_rttCloture->modify('+1 day');
 	$date_rttCloture->setTime(0, 0, 0); // H:i:s => 00:00:00

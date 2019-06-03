@@ -31,7 +31,10 @@ if (!isset($_REQUEST['force_http']))
 	$PDOdb=new TPDOdb;
 //	$PDOdb->debug=true;
 
-	$now = new DateTime();
+    $timezone = !empty($conf->global->ABSENCE_TIMEZONE) ? $conf->global->ABSENCE_TIMEZONE : 'Europe/Paris';
+    $tz = new DateTimeZone($timezone);
+
+	$now = new DateTime('now', $tz);
 	$now->setTime(0, 0, 0); // H:i:s => 00:00:00
 	
 	$o=new TRH_Compteur;
@@ -56,7 +59,7 @@ if (!isset($_REQUEST['force_http']))
 		
 		echo '* Compteur id = '.$compteur->getId().' date_congesCloture = '.dol_print_date($compteur->date_congesCloture, 'day')."<br />\n";
 		
-		$date_congesCloture = new DateTime();
+		$date_congesCloture = new DateTime('now', $tz);
 		$date_congesCloture->setTimestamp($compteur->date_congesCloture);
 		$date_congesCloture->modify('+1 day');
 		$date_congesCloture->setTime(0, 0, 0); // H:i:s => 00:00:00
