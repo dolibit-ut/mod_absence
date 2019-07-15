@@ -3324,7 +3324,9 @@ class TRH_EmploiTemps extends TObjetStd {
 			$TRHCacheUserDateEntree[$id_user] = $u->array_options['options_DDA'];
 		}
 ///		var_dump($TRHCacheUserDateEntree[$id_user], $date);exit;
-		if(!empty($TRHCacheUserDateEntree[$id_user]) && strtotime($TRHCacheUserDateEntree[$id_user]) > strtotime($date) ) return 'NON';
+        $userDateEntree = $TRHCacheUserDateEntree[$id_user];
+        if(! is_int($userDateEntree)) $userDateEntree = strtotime($userDateEntree);
+        if(!empty($TRHCacheUserDateEntree[$id_user]) && $userDateEntree > strtotime($date) ) return 'NON';
 
 		if(!empty($TCacheUserPlanning[$id_user])) {
 				$time = strtotime($date);
