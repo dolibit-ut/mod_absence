@@ -3653,7 +3653,7 @@ class TRH_TypeAbsence extends TObjetStd {
 	       $TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges'); // si l'utilisateur est valideur il doit voir le type d'absence
 	    }
 	    
-	    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation || $showUserID == $user->id) ){
+	    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation) || $showUserID == $user->id) {
 	        return $libelleAbsence;
 	    }
 	    else
