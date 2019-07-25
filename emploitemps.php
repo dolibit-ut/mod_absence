@@ -357,7 +357,7 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$TEmploiTemps['date_debut'] = $form->calendrier('', 'date_debut', $emploiTemps->get_date('date_debut')  );
 	$TEmploiTemps['date_fin'] = $form->calendrier('', 'date_fin',  $emploiTemps->get_date('date_fin'));
 	
-	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($_REQUEST['id'])))	$can_modify_edt = 1;
+	if($user->rights->absence->myactions->modifierEdt || ($user->rights->absence->myactions->modifierEdtByHierarchy && _userCanModifyEdt($emploiTemps->fk_user)))	$can_modify_edt = 1;
 	
 	
 	// to return on default planning
