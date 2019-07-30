@@ -48,7 +48,17 @@ function _get(&$ATMdb, $case) {
 		    
 		    $ATMdb=new TPDOdb;
 		    $absence=new TRH_Absence;
-		    
+
+		    $groupe = GETPOST('groupe', 'int');
+		    $groupe2 = GETPOST('groupe2', 'int');
+		    $groupe3 = GETPOST('groupe3', 'int');
+
+		    $TGroupes = array();
+
+		    if(! empty($groupe)) $TGroupes[] = $groupe;
+		    if(! empty($groupe2)) $TGroupes[] = $groupe2;
+		    if(! empty($groupe3)) $TGroupes[] = $groupe3;
+
 		    $absence->date_debut_planning = strtotime('-3month');
 		    $absence->date_fin_planning = strtotime('+1month');
 		    
@@ -56,7 +66,7 @@ function _get(&$ATMdb, $case) {
 		    if(isset($_REQUEST['date_fin_search'])) $absence->set_date('date_fin_planning', $_REQUEST['date_fin_search']);
 		    if(isset($_REQUEST['date_debut_search']) && is_numeric($_REQUEST['date_debut_search'])) $absence->date_debut_planning = intval($_REQUEST['date_debut_search']);
 		    if(isset($_REQUEST['date_fin_search']) && is_numeric($_REQUEST['date_fin_search'])) $absence->date_fin_planning = intval($_REQUEST['date_fin_search']); 
-		    $html = getPlanningAbsence($ATMdb, $absence, array((int)GETPOST('groupe'),(int)GETPOST('groupe2'),(int)GETPOST('groupe3')), GETPOST('fk_user'));
+		    $html = getPlanningAbsence($ATMdb, $absence, $TGroupes, GETPOST('fk_user'));
 		    __out($html);
 		    
 		    break;

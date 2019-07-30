@@ -352,8 +352,13 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			
 		}
 		else{
-		
-			echo getPlanningAbsence($ATMdb, $absence, array((int)$idGroupeRecherche,(int)$idGroupeRecherche2,(int)$idGroupeRecherche3), $idUserRecherche);
+			$TGroupes = array();
+
+			if(! empty($idGroupeRecherche)) $TGroupes[] = $idGroupeRecherche;
+			if(! empty($idGroupeRecherche2)) $TGroupes[] = $idGroupeRecherche2;
+			if(! empty($idGroupeRecherche3)) $TGroupes[] = $idGroupeRecherche3;
+
+			echo getPlanningAbsence($ATMdb, $absence, $TGroupes, $idUserRecherche);
 			
 		}
 		
