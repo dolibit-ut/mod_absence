@@ -821,7 +821,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	
 //on va obtenir la requête correspondant à la recherche désirée
 	// Test si somme des trois groupes = (99999 * 3) Tous les select sur Aucun alors recherche vide
-	if(array_sum($idGroupeRecherche) == 299997)$idGroupeRecherche = array('0'=>0); //TODO mais c'est quoi cette merde ?!
+	if(array_sum($idGroupeRecherche) == 299997)$idGroupeRecherche = array(); //TODO mais c'est quoi cette merde ?!
 	if(array_sum($idGroupeRecherche)>0) $idUserRecherche = 0; // si un groupe est sélectionner on ne prend pas en compte l'utilisateur
 
 
