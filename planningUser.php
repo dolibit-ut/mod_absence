@@ -22,7 +22,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$date_fin=strtotime( date('Y-m-t') );
 	$idGroupeRecherche=$idGroupeRecherche2=$idGroupeRecherche3=0;
 	$idUserRecherche = (GETPOST('mode')=='auto') ? $user->id : 0;
-	
+
 	if(!isset($_GET['actionSearch'])) {
 		
 		if(!empty($_COOKIE['TRHPlanning']) ){
@@ -36,7 +36,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 				$date_debut=$_COOKIE['TRHPlanning']['date_debut_search'];
 				$date_debut_time= str_replace('/', '-', $date_debut);
 				$date_debut_time=strtotime($date_debut_time);
-				$date_debut_time_1_month = strtotime("+1 month", $date_debut_time);
+				$date_debut_time_1_month = strtotime("+1 month -1 day", $date_debut_time);
 				$date_debut_recherche = $date_debut;
 			}
 
