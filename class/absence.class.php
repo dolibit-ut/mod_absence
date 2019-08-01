@@ -3309,21 +3309,34 @@ class TRH_EmploiTemps extends TObjetStd {
 	}
 
 	static function estTravaille(&$PDOdb, $id_user, $date) {
-		global $db,$TCacheUserDateEntree, $TCacheUserPlanning;
+		global $db, $TRHCacheUserDateEntree, $TRHCacheUserDateSortie, $TRHCacheUserPlanning;
 
-		if(!isset($TRHCacheUserDateEntree))$TRHCacheUserDateEntree=array();
-		if(!isset($TCacheUserPlanning))$TCacheUserPlanning=array();
+		if(!isset($TRHCacheUserDateEntree)) $TRHCacheUserDateEntree = array();
+		if(!isset($TRHCacheUserDateSortie) && (float) DOL_VERSION >= 5) $TRHCacheUserDateSortie = array();
+		if(!isset($TCacheUserPlanning)) $TCacheUserPlanning = array();
 
 		if(empty($TRHCacheUserDateEntree[$id_user])) {
 			$u =new User($db);
 			$u->fetch($id_user);
 
 			$TRHCacheUserDateEntree[$id_user] = $u->array_options['options_DDA'];
+
+			if((float) DOL_VERSION >= 5)
+			{
+				$TRHCacheUserDateSortie[$id_user] = $u->dateemploymentend;
+			}
 		}
-///		var_dump($TRHCacheUserDateEntree[$id_user], $date);exit;
+
         $userDateEntree = $TRHCacheUserDateEntree[$id_user];
         if(! is_int($userDateEntree)) $userDateEntree = strtotime($userDateEntree);
-        if(!empty($TRHCacheUserDateEntree[$id_user]) && $userDateEntree > strtotime($date) ) return 'NON';
+        if(! empty($userDateEntree) && $userDateEntree > strtotime($date) ) return 'NON';
+
+        if((float) DOL_VERSION >= 5)
+        {
+        	$userDateSortie = $TRHCacheUserDateSortie[$id_user];
+	        if(! is_int($userDateSortie)) $userDateSortie = strtotime($userDateSortie);
+	        if(! empty($userDateSortie) && $userDateSortie < strtotime($date) ) return 'NON';
+        }
 
 		if(!empty($TCacheUserPlanning[$id_user])) {
 				$time = strtotime($date);
