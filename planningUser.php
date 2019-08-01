@@ -283,32 +283,56 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	function popAddAbsence(date, fk_user) {
 		$('#popAbsence').remove();
 		$('body').append('<div id="popAbsence"></div>');
-		
-		var url = "<?php echo dol_buildpath('/absence/absence.php?action=new',1) ?>&dfMoment=apresmidi&ddMoment=matin&fk_user="+fk_user+"&date_debut="+date+"&date_fin="+date+"&popin=1 #fiche-abs";
-		
-		$('#popAbsence').load(url, function() {
-			$('#popAbsence form').submit(function() {
-				$.post($(this).attr('action'), $(this).serialize())
-					.done(function(data) {
-						$.jnotify('<?php echo $langs->trans('AbsenceAdded') ?>', "ok");
-					});
-			
-				$("#popAbsence").dialog('close');
-				
-				refreshPlanning();
 
-				return false;
-		
-			});
+		var url = "<?php echo dol_buildpath('/absence/absence.php?action=new',1) ?>&dfMoment=apresmidi&ddMoment=matin&fk_user="+fk_user+"&date_debut="+date+"&date_fin="+date+"&popin=1";
+        var selector = "#fiche-abs>#form1";
 
-		});
-		
-		
-		$('#popAbsence').dialog({
-			title:"Créer une nouvelle absence ou présence" /* TODO langs */
-			,width:500
-			,modal:true
-		});
+		$.ajax({
+            url: url
+            , method: 'GET'
+            , success: function(data)
+            {
+                $(data).find(selector).first().appendTo('#popAbsence');
+
+                $('#popAbsence form').submit(function() {
+                    $.ajax({
+                        url: "<?php echo dol_escape_js(dol_buildpath('/absence/script/interface.php', 1)) ?>?post=saveAbsence&inc=main"
+                        , method: 'POST'
+                        , data: $(this).serialize()
+                        , success : function (data)
+                        {
+                            if(data.saved)
+                            {
+                                $.jnotify(data.TMessages.ok, 'ok');
+                            }
+                            else
+                            {
+                                $.jnotify(data.TMessages.error, 'error');
+                            }
+
+                            if(data.TMessages.warning)
+                            {
+                                $.jnotify(data.TMessages.warning, 'warning');
+                            }
+                        }
+                    });
+
+                    $("#popAbsence").dialog('close');
+
+                    refreshPlanning();
+
+                    return false;
+                });
+
+                $('#popAbsence').dialog(
+                {
+                    title:"Créer une nouvelle absence ou présence"
+                    , width:'700'
+                    , position: { my: "center", at: "center center+40", of: window }
+                    , modal:true
+                });
+            }
+        });
 	}	
 
 	</script>
