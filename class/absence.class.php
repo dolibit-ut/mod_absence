@@ -755,23 +755,22 @@ class TRH_Absence extends TObjetStd {
 	}
 
 
-	function save(&$PDOdb, $runTrigger = true) {
-
-		global $conf, $user,$db,$langs;
+	function save(&$PDOdb, $runTrigger = true)
+	{
+		global $conf, $user, $db, $langs;
 		$this->entity = $conf->entity;
 
-		if(empty($this->code) || empty($this->libelle)) {
-
+		if(empty($this->code) || empty($this->libelle))
+		{
 			$ta = new TRH_TypeAbsence;
 			$ta->load_by_type($PDOdb, $this->type);
 
-			$this->code=$ta->codeAbsence;
-			$this->libelle=$ta->libelleAbsence;
-
+			$this->code = $ta->codeAbsence;
+			$this->libelle = $ta->libelleAbsence;
 		}
 
 		// Appel des triggers
-		dol_include_once('/core/class/interfaces.class.php');
+		require_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 		$interface = new Interfaces($db);
 
 		$f_mode = $this->getId() > 0 ? 'UPDATE' : 'CREATE';
@@ -788,7 +787,7 @@ class TRH_Absence extends TObjetStd {
 
 		if($saveReturn > 0 && $runTrigger)
 		{
-			$result = $interface->run_triggers('ABSENCE_'.$f_mode,$this,$user,$langs,$conf);
+			$result = $interface->run_triggers('ABSENCE_' . $f_mode, $this, $user, $langs, $conf);
 		}
 
 		return $saveReturn;
