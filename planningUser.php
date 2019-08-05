@@ -314,12 +314,12 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
                             {
                                 $.jnotify(data.TMessages.warning, 'warning');
                             }
+
+                            refreshPlanning();
                         }
                     });
 
                     $("#popAbsence").dialog('close');
-
-                    refreshPlanning();
 
                     return false;
                 });
