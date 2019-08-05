@@ -303,6 +303,8 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
                         {
                             if(data.saved)
                             {
+                                refreshPlanning();
+                                $("#popAbsence").dialog('close');
                                 $.jnotify(data.TMessages.ok, 'ok');
                             }
                             else
@@ -314,12 +316,9 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
                             {
                                 $.jnotify(data.TMessages.warning, 'warning');
                             }
-
-                            refreshPlanning();
                         }
                     });
 
-                    $("#popAbsence").dialog('close');
 
                     return false;
                 });
