@@ -755,48 +755,42 @@ class TRH_Absence extends TObjetStd {
 	}
 
 
-	function save(&$PDOdb, $runTrigger = true) {
-
-		global $conf, $user,$db,$langs;
+	function save(&$PDOdb, $runTrigger = true)
+	{
+		global $conf, $user, $db, $langs;
 		$this->entity = $conf->entity;
 
-		if(empty($this->code) || empty($this->libelle)) {
-
+		if(empty($this->code) || empty($this->libelle))
+		{
 			$ta = new TRH_TypeAbsence;
 			$ta->load_by_type($PDOdb, $this->type);
 
-			$this->code=$ta->codeAbsence;
-			$this->libelle=$ta->libelleAbsence;
-
+			$this->code = $ta->codeAbsence;
+			$this->libelle = $ta->libelleAbsence;
 		}
 
 		// Appel des triggers
-		dol_include_once('/core/class/interfaces.class.php');
+		require_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 		$interface = new Interfaces($db);
 
-		if($this->getId()>0) {
-			$result = $interface->run_triggers('ABSENCE_BEFOREUPDATE',$this,$user,$langs,$conf);
-			$f_mode = 'UPDATE';
-		}
-		else{
-			$result = $interface->run_triggers('ABSENCE_BEFORECREATE',$this,$user,$langs,$conf);
-			$f_mode = 'CREATE';
-		}
+		$f_mode = $this->getId() > 0 ? 'UPDATE' : 'CREATE';
 
-		if ($result < 0) {
-			$error++; $this->errors=$interface->errors;
+		$result = $interface->run_triggers('ABSENCE_BEFORE' . $f_mode, $this, $user, $langs, $conf);
+
+		if ($result < 0)
+		{
+			$this->errors = $interface->errors;
 			return false;
 		}
-		// Fin appel triggers
-		else {
-			parent::save($PDOdb);
 
-			if($runTrigger) $result = $interface->run_triggers('ABSENCE_'.$f_mode,$this,$user,$langs,$conf);
+		$saveReturn = parent::save($PDOdb);
 
-			return true;
+		if($saveReturn > 0 && $runTrigger)
+		{
+			$result = $interface->run_triggers('ABSENCE_' . $f_mode, $this, $user, $langs, $conf);
 		}
 
-
+		return $saveReturn;
 	}
 
 	

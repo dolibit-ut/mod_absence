@@ -15,9 +15,11 @@ dol_include_once('/absence/lib/absence.lib.php');
 //Interface qui renvoie les congés maladie (maintenue ou non) et les jours ancienneté acquis du collaborateur souhaité durant la période demandée
 $ATMdb=new TPDOdb;
 
-$get = isset($_REQUEST['get'])?$_REQUEST['get']:'';
+$get = isset($_REQUEST['get']) ? $_REQUEST['get'] : '';
+$post = isset($_REQUEST['post']) ? $_REQUEST['post'] : '';
 
 _get($ATMdb, $get);
+_post($ATMdb, $post);
 
 function _get(&$ATMdb, $case) {
     global $langs;
@@ -112,6 +114,24 @@ function _get(&$ATMdb, $case) {
 		    break;
 	}
 }
+
+
+
+function _post(&$PDOdb, $case)
+{
+	switch ($case)
+	{
+		case 'saveAbsence':
+			top_httphead('application/json');
+			$absence = new TRH_Absence();
+			$absence->loadTypeAbsencePerTypeUser($PDOdb);
+
+			__out(_saveAbsence($PDOdb, $absence), 'json');
+			break;
+	}
+}
+
+
 
 function _jourAnciennete(&$ATMdb, $userId){
 	global $user, $conf;
@@ -427,4 +447,43 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 	$TabRecapConges['congesDivers']=$nb_jours_conges_divers;
 	
 	return $TabRecapConges;
+}
+
+
+
+function _saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
+{
+	global $langs;
+
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	dol_include_once('/valideur/class/valideur.class.php');
+
+	$absenceSaved = saveAbsence($PDOdb, $absence);
+
+	$mesgs = '';
+	$warnings = '';
+	$errors = '';
+
+	if($absenceSaved)
+	{
+		$mesgs = $langs->trans('RegistedRequest');
+
+		if(! empty($absence->avertissementInfo))
+		{
+			$warnings = $absence->avertissementInfo;
+		}
+	}
+	else
+	{
+		$errors = $absence->error;
+	}
+
+	return array(
+		'saved' => $absenceSaved
+		, 'TMessages' => array(
+			'ok' => $mesgs
+			, 'warning' => $warnings
+			, 'error' => $errors
+		)
+	);
 }

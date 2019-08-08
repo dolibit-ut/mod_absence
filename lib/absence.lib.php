@@ -1125,3 +1125,84 @@ function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fi
     print '</div>';
     print '<div class="underrefbanner clearboth"></div>';
 }
+
+
+function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
+{
+	global $langs, $user, $conf;
+
+	$absence->load($PDOdb, $_REQUEST['id']);
+	$absence->set_values($_REQUEST);
+
+	$absence->set_date('date_debut', GETPOST('date_debutday').'/'.GETPOST('date_debutmonth').'/'.GETPOST('date_debutyear'));
+	$absence->set_date('date_fin', GETPOST('date_finday').'/'.GETPOST('date_finmonth').'/'.GETPOST('date_finyear'));
+
+	$absence->niveauValidation = 1;
+	$existeDeja = $absence->testExisteDeja($PDOdb, $absence);
+
+	if(! empty($existeDeja))
+	{
+		$absence->error = $langs->trans('ImpossibleCreation') . ' : ' . $langs->trans('ErrExistingRequestInPeriod', date('d/m/Y', strtotime($existeDeja[0])), date('d/m/Y',  strtotime($existeDeja[1])));
+		return false;
+	}
+
+	$absence->code = saveCodeTypeAbsence($PDOdb, $absence->type);
+
+	// Test de la cohérence des dates
+	if(!$user->rights->absence->myactions->creerAbsenceCollaborateur && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)
+		&& !$user->rights->absence->myactions->declarePastAbsence
+		&& ($absence->date_debut <= strtotime('midnight') || $absence->date_fin <= strtotime('midnight') )) {
+
+		// Ok le mec n'a pas le droit de créer une absence dans le passé mais est-ce qu'il peut le jour même
+		if ($user->rights->absence->myactions->declareToDayAbsence && $absence->date_debut >= strtotime('midnight') && $absence->date_fin >= strtotime('midnight'))
+		{
+			// RAS il peut créer l'absence le jour même
+		}
+		else
+		{
+			/*
+				Si ce n'est pas un user avec droit, pas le droit de créer des anciennes absences
+			*/
+			$absence->error = $langs->trans('ErrOnlyUserWithPowerCanCreatePastAbsence');
+			return false;
+		}
+	}
+
+	$saveReturn = $absence->save($PDOdb);
+	if (empty($saveReturn))
+	{
+		$absence->error = implode('<br />', $absence->errors);
+		return false;
+	}
+
+	$absence->load($PDOdb, $_REQUEST['id']);
+
+	// Submit file
+	$TPieceJointe = array();
+	if (! empty($_FILES['userfile']['name']))
+	{
+		$TPieceJointe = $_FILES['userfile']['name'];
+	}
+
+	// Quand l'input est vide $_FILES n'est pas vide ce qui crée une erreur
+	if (count($_FILES['userfile']['name']) == 1 && empty($_FILES['userfile']['name'][0]))
+	{
+		unset($_FILES['userfile']['name']);
+	}
+
+	$res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->getId()), 0, 1, 'userfile', '');
+
+	if (GETPOST('autoValidatedAbsence') > 0)
+	{
+		$absence->setAcceptee($PDOdb, $user->id, false, $TPieceJointe);
+	}
+	// on vérifie si l'absence a été créée par l'user avant d'envoyer un mail
+	elseif ($absence->fk_user == $user->id)
+	{
+		mailConges($absence, false, $TPieceJointe);
+		mailCongesValideur($PDOdb,$absence, false, $TPieceJointe);
+	}
+
+	return true;
+}
+
