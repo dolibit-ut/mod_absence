@@ -2374,7 +2374,7 @@ END:VCALENDAR
 
 			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
 			$Tab = array(); // Tableau de retour de fonction
-			
+
 			foreach ($TPlanning as $t_current => $TAbsence)
 			{
 				$date = date('Y-m-d', $t_current);
@@ -2435,7 +2435,7 @@ END:VCALENDAR
 								$absence_jour_entier = (int) $ouinon->isFullDay();
 								$absence_demi_journee = !$absence_jour_entier;
 
-								if (!$estFerie)
+								if (!$estFerie && $estUnJourTravaille=='OUI')
 								{
 									if ($absence_jour_entier) $Tab[$fk_user][$date]['nb_jour_absence'] = 1;
 									else $Tab[$fk_user][$date]['nb_jour_absence']+= 0.5;
