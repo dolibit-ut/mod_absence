@@ -2927,6 +2927,20 @@ END:VCALENDAR
 						$moment->ddMoment = $tabAbs['ddMoment'];
 						$moment->dfMoment = $tabAbs['dfMoment'];
 
+						// Absence sur plusieurs jours, il faut modifier les 'matin/apresmidi' des jours complets
+						if($time_debut < $time_fin) { // Absence sur plusieurs jours
+							if($time_debut_inc == $time_debut) { // Premier jour de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'matin') $moment->dfMoment = 'apresmidi';
+							}
+							if($time_debut_inc > $time_debut && $time_debut_inc < $time_fin) { // Jour au milieu de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'matin') $moment->dfMoment = 'apresmidi';
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'apresmidi') $moment->ddMoment = 'matin';
+							}
+							if($time_debut_inc == $time_fin) { // Dernier jour de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'apresmidi') $moment->ddMoment = 'matin';
+							}
+						}
+
 						if ($time_debut_inc == $time_debut && $time_debut_inc == $time_fin)
 						{
 							if ($tabAbs['ddMoment'] == $tabAbs['dfMoment'])
