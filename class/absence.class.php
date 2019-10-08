@@ -2436,7 +2436,7 @@ END:VCALENDAR
 
 			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
 			$Tab = array(); // Tableau de retour de fonction
-			
+
 			foreach ($TPlanning as $t_current => $TAbsence)
 			{
 				$date = date('Y-m-d', $t_current);
@@ -2497,7 +2497,7 @@ END:VCALENDAR
 								$absence_jour_entier = (int) $ouinon->isFullDay();
 								$absence_demi_journee = !$absence_jour_entier;
 
-								if (!$estFerie)
+								if (!$estFerie && $estUnJourTravaille=='OUI')
 								{
 									if ($absence_jour_entier) $Tab[$fk_user][$date]['nb_jour_absence'] = 1;
 									else $Tab[$fk_user][$date]['nb_jour_absence']+= 0.5;
@@ -2996,6 +2996,20 @@ END:VCALENDAR
 
 						$moment->ddMoment = $tabAbs['ddMoment'];
 						$moment->dfMoment = $tabAbs['dfMoment'];
+
+						// Absence sur plusieurs jours, il faut modifier les 'matin/apresmidi' des jours complets
+						if($time_debut < $time_fin) { // Absence sur plusieurs jours
+							if($time_debut_inc == $time_debut) { // Premier jour de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'matin') $moment->dfMoment = 'apresmidi';
+							}
+							if($time_debut_inc > $time_debut && $time_debut_inc < $time_fin) { // Jour au milieu de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'matin') $moment->dfMoment = 'apresmidi';
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'apresmidi') $moment->ddMoment = 'matin';
+							}
+							if($time_debut_inc == $time_fin) { // Dernier jour de l'absence
+								if($tabAbs['ddMoment'] == $tabAbs['dfMoment'] && $tabAbs['ddMoment'] == 'apresmidi') $moment->ddMoment = 'matin';
+							}
+						}
 
 						if ($time_debut_inc == $time_debut && $time_debut_inc == $time_fin)
 						{
