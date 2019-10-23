@@ -768,7 +768,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		$droitSupprimer=1;
 	}
 
-	if($absence->etat === 'Validee' || $absence->etat === 'Refusee') $droitSupprimer=0; // Pour éviter une double réincrémentation du compteur si refusée puis supprimée
+	if(!empty($conf->global->ABSENCE_DELETE_IS_FORBIDDEN_IF_VALIDATED_OR_REFUSED) && ($absence->etat === 'Validee' || $absence->etat === 'Refusee')) $droitSupprimer=0; // Pour éviter une double réincrémentation du compteur si refusée puis supprimée
 
 	//var_dump($droitSupprimer, $absence->duree,date('Y-m-d', $absence->date_debut), $absence->fk_user, $absence->etat);
 
