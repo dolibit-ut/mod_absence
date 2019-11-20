@@ -32,10 +32,7 @@
 					$absence->code=saveCodeTypeAbsence($PDOdb, $absence->type);
 
 					// Test de la cohérence des dates
-					if(!$user->rights->absence->myactions->creerAbsenceCollaborateur && !TRH_valideur_groupe::isValideur($PDOdb, $user->id)
-					&& !$user->rights->absence->myactions->declarePastAbsence
-					&& ($absence->date_debut <= strtotime('midnight') ||$absence->date_fin <= strtotime('midnight') )) {
-						
+					if(empty($user->rights->absence->myactions->declarePastAbsence) && ($absence->date_debut <= strtotime('midnight') || $absence->date_fin <= strtotime('midnight') )) {
 						//Ok le mec n'a pas le droit de créer une absence dans le passé mais est-ce qu'il peut le jour même
 						if ($user->rights->absence->myactions->declareToDayAbsence && $absence->date_debut >= strtotime('midnight') && $absence->date_fin >= strtotime('midnight'))
 						{
