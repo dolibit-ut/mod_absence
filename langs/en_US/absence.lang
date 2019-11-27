@@ -451,3 +451,4 @@ YearlyNonCumulatedDaysOff=Jours RTT non cumulés annuels
 YourAbsPresences=Vos abs./présence
 ListUserAlreadyAccepted=Liste des valideurs ayant déjà accéptés
 RH_USER_MAIL_OVERWRITE=Forcer l'adresse mail lors d'une demande d'absence
+ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER=Tickets restaurant : prendre en compte les absences "A valider"

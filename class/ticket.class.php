@@ -154,8 +154,16 @@ class TRH_TicketResto extends TObjetStd {
 	
 	static function getTicketFor(&$ATMdb, $date_debut, $date_fin, $idGroup=0, $fk_user=0)
 	{
+		global $conf;
+
 		$Tab=array();
-		$planningFilters = array('etat' => array('Avalider', 'Validee'));
+
+		$planningFilters = array();
+		if (! empty($conf->global->ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER))
+		{
+			$planningFilters = array('etat' => array('Avalider', 'Validee'));
+		}
+
 		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin, $planningFilters);
 
 		$TUserToScan = self::getTUserIdWithTicketOption();

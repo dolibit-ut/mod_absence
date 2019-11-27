@@ -120,6 +120,15 @@ function showParameters(&$form, &$doliform) {
 		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		print '</td>';
 		print '</tr>';
+
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER');
+		print '</td>';
+		print '</tr>';
 		
 		print '<tr>';
 		print '<td>';

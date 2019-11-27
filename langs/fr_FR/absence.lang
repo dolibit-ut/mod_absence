@@ -538,7 +538,9 @@ RH_COMPTEUR_BY_ENTITY_IN_TRANSVERSE_MODE=AJouter un compteur par entité en mode
 lunchBreak=Pause de midi
 RH_JOURS_NON_TRAVAILLE=Jour(s) non travaillé(s) (déprécié)
 
-ABSENCE_REPORT_CONGE=Autorisé le report de congés non consommé N-1
+ABSENCE_REPORT_CONGE=Autoriser le report de congés non consommé N-1
 
 CumulatedDayOffTakenNextYear=Jours RTT cumulés pris sur la période suivante
 NonCumulatedDayOffTakenNextYear=Jours RTT non cumulés pris sur la période suivante
+
+ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER=Tickets restaurant : prendre en compte les absences "A valider"
