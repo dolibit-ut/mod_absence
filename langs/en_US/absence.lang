@@ -455,3 +455,4 @@ RH_USER_MAIL_OVERWRITE=Forcer l'adresse mail lors d'une demande d'absence
 
 
 absence_load_compteur_error=Access denied<br />Error on load
+ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER=Tickets restaurant : prendre en compte les absences "A valider"
