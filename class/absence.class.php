@@ -2418,7 +2418,7 @@ END:VCALENDAR
 		return false;
 	}
 
-	static function getPlanning(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin){
+	static function getPlanning(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $filters = array()){
 		global $conf;
 		dol_include_once('/absence/class/pointeuse.class.php');
 		
@@ -2433,6 +2433,8 @@ END:VCALENDAR
 				)
 				, 'ue.ldap_entity_login' => $conf->entity
 			);
+
+			$extra_params = array_merge($extra_params, $filters);
 
 			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
 			$Tab = array(); // Tableau de retour de fonction
@@ -2866,8 +2868,8 @@ END:VCALENDAR
 			, 'etat' => array('Validee')
 		);
 		
-		if (!empty($extra_params)) $params += $extra_params;
-		
+		if (!empty($extra_params)) $params = array_merge($params, $extra_params);
+
 		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
 			
 		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
