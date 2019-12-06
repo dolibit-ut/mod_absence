@@ -1709,19 +1709,19 @@ class TRH_Absence extends TObjetStd {
 
 			switch($this->type){
 				case "rttcumule" :
-					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture);
+					//$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture); // commenté voir TK#10339 si une absence contient des jours fériés erronés (24 et 31 décembre par exemple) et que l'on supprime le(s) jour(s) férié(s) avant de supprimer l'absence, le nombre de jours pris est décrémenté de la durée de l'absence additionnée au nombre de jours fériés erronés supprimés.
 					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus rtt cumulé');
 
 				break;
 				case "rttnoncumule" :
-					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture);
+					//$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_rttCloture); // commenté voir TK#10339 si une absence contient des jours fériés erronés (24 et 31 décembre par exemple) et que l'on supprime le(s) jour(s) férié(s) avant de supprimer l'absence, le nombre de jours pris est décrémenté de la durée de l'absence additionnée au nombre de jours fériés erronés supprimés.
 					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus rtt non cumulé');
 
 				break;
 				case 'conges':
 				case 'cppartiel':
 
-					$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_congesCloture);
+					//$this->calculDureeAbsenceParAddition($PDOdb, $compteur->date_congesCloture); // commenté voir TK#10339 si une absence contient des jours fériés erronés (24 et 31 décembre par exemple) et que l'on supprime le(s) jour(s) férié(s) avant de supprimer l'absence, le nombre de jours pris est décrémenté de la durée de l'absence additionnée au nombre de jours fériés erronés supprimés.
 
 					$compteur->add($PDOdb, $this->type, array(-$this->congesPrisNM1, -$this->congesPrisN), 'Refus ou suppression congé');
 
