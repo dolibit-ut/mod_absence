@@ -107,9 +107,10 @@
 				
 				if($absence->fk_user == $user->id) { // Si le collaborateur supprime sa demande d'absence on prévient les valideurs
 
+				    $old_etat = $absence->etat;
 					$absence->etat = 'deleted';
 					mailCongesValideur($PDOdb, $absence);
-					
+                    $absence->etat = $old_etat;
 				}
 				
 				$absence->delete($PDOdb);
