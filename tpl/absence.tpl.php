@@ -337,7 +337,7 @@
                         ,async: true
                         ,crossDomain: true
                         ,data: {
-                            actionSearch:1
+                            action_search:1
                             ,fk_user : fk_user
                             ,'no-link':1
                         }

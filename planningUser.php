@@ -23,7 +23,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$idGroupeRecherche=$idGroupeRecherche2=$idGroupeRecherche3=0;
 	$idUserRecherche = (GETPOST('mode')=='auto') ? $user->id : 0;
 
-	if(!isset($_GET['actionSearch'])) {
+	if(!isset($_GET['action_search'])) {
 		
 		if(!empty($_COOKIE['TRHPlanning']) ){
 				
@@ -165,7 +165,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	
 	$form=new TFormCore($_SERVER['PHP_SELF'],'formPlanning','GET');
 	echo $form->hidden('jsonp', 1);
-	echo $form->hidden('actionSearch', 1);
+	echo $form->hidden('action_search', 1);
 	$form->Set_typeaff($mode);
 	
 	$TStatPlanning=array();
@@ -337,7 +337,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	</script>
 	<?php
 	
-	if(!empty( $_GET['actionSearch'] ) || GETPOST('mode')=='auto' || $idUserRecherche>0) {
+	if(!empty( $_GET['action_search'] ) || GETPOST('mode')=='auto' || $idUserRecherche>0) {
 		
 		if($idUserRecherche>0 && empty( $date_debut_recherche )) {
 			
