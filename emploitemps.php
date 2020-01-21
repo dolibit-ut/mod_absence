@@ -75,7 +75,7 @@
 				$newId = $emploiTemps->save($PDOdb);
 				
 				if($newId>0){
-				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 1).'?action=edit&id='.$newId);
 				    exit();
 				}
 				else{
@@ -168,7 +168,7 @@
 			    
 			    $newId = $emploiTempsArchive->save($PDOdb);
 			    
-			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 2).'?action=edit&id='.$newId);
+			    header("Location: ".dol_buildpath('/absence/emploitemps.php', 1).'?action=edit&id='.$newId);
 			    exit;
 			    
 			case 'deleteArchive':
@@ -365,7 +365,7 @@ function _fiche(&$PDOdb, &$emploiTemps, $mode) {
 	$defaultEmploiTemps->load_by_fkuser($PDOdb, $emploiTemps->fk_user);
 	$defaultPlanningUrl = '';
 	if($defaultEmploiTemps->getId() > 0 && $emploiTemps->getId() != $defaultEmploiTemps->getId()){
-	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 2).'?action=view&id='.$defaultEmploiTemps->getId();
+	    $defaultPlanningUrl = dol_buildpath('/absence/emploitemps.php', 1).'?action=view&id='.$defaultEmploiTemps->getId();
 	}
 	
 	$cardTitle = $langs->trans('ScheduleOf', $userCourant->firstname, $userCourant->lastname);
@@ -526,7 +526,7 @@ function printModalJsForm_copynew($PDOdb,$emploiTemps){
             	var date_fin   = $("#copynew_date_fin").val();
             	var formIsValid = true;
             	
-            	$.getJSON( "<?php print dol_buildpath("absence/script/interface.php",2) ?>?get=checkPlanningOverride&date_debut_search=" + date_debut + "&date_fin_search=" + date_fin + "&fk_user=<?php print $emploiTemps->fk_user; ?>"  
+            	$.getJSON( "<?php print dol_buildpath("absence/script/interface.php", 1) ?>?get=checkPlanningOverride&date_debut_search=" + date_debut + "&date_fin_search=" + date_fin + "&fk_user=<?php print $emploiTemps->fk_user; ?>"  
                     , function( data ) {
                         //console.log(data);
     
