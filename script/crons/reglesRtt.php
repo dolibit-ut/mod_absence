@@ -140,7 +140,7 @@ foreach ($TCompteur as $compteur)
 
 
 	// Nous sommes sur un 1er jour du mois, donc on crédite les compteurs mensuel
-	if ($compteur->rttTypeAcquisition === 'Mensuel' && $md_now === $md_first_day_of_now && isset($_REQUEST['force_cumul_mensuel']))
+	if (($compteur->rttTypeAcquisition === 'Mensuel' && $md_now === $md_first_day_of_now) || isset($_REQUEST['force_cumul_mensuel']))
 	{
 		echo '---- Cumul mensuel rttCumuleAcquis += '.$compteur->rttAcquisMensuelInit."<br />\n";
 		// Attention à prendre avec des pincettes car c'est du spécifique
