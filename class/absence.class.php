@@ -581,14 +581,14 @@ class TRH_Absence extends TObjetStd {
 			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
 		}
 		
-		if ($canValidate)
+		if ($canValidate > 0)
 		{
 			$this->setAcceptee($PDOdb, $user->id);
 			return 1;
 		}
 		else // si le mode hiérarchique est actif, il est possible de tomber dans ce cas s'il reste des valideurs en attente de réponse (l'erreur n'est pas affichée)
 		{
-			$this->error = 'Permission insuffisante pour valider l\'absence';
+            if ($canValidate < 0) $this->error = 'Permission insuffisante pour valider l\'absence';
 			return 0;
 		}
 
