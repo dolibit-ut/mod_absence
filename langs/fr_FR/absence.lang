@@ -254,7 +254,8 @@ MailNewRequest=Une nouvelle demande de
 MailStateIsNow=Son état est désormais
 MailYourRequestOf=Votre demande de
 MaintainedSickness=Maladie maintenue
-ManagersInDayPlan=Salariés cadres en forfait jours
+# Suite tk10937 - la table llx_overwrite_trans a une contrainte sur lang+transkey au lieu de entity+lang+transkey et le passage sur entité 0 ne marche pas
+ManagersInDayPlan=Salariés en forfait jours
 ManageTickets=Gérer les tickets restaurants
 Mariage=Mariage
 MaternityAbsence=Absence maternité
