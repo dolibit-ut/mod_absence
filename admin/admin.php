@@ -44,7 +44,7 @@ if($action=='save') {
 	
 	foreach($_REQUEST['TConst'] as $name=>$param) {
 		
-		dolibarr_set_const($db, $name, $param);
+		dolibarr_set_const($db, $name, $param, 'chaine', 0, '', $conf->entity);
 		
 		// Traitement supplémentaire sue enregistrement de cette conf à "oui"
 		if($name == 'RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE' && $param == 1) {
