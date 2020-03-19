@@ -1188,7 +1188,7 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 		unset($_FILES['userfile']['name']);
 	}
 
-	$res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->getId()), 0, 1, 'userfile', '');
+	if (!empty($TPieceJointe)) $res = dol_add_file_process($conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->getId()), 0, 1, 'userfile', '');
 
 	if (GETPOST('autoValidatedAbsence') > 0)
 	{
