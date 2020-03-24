@@ -1002,7 +1002,8 @@ class TRH_Absence extends TObjetStd {
 			$this->dureeHeurePaie=$this->dureeHeure;
 		}
 
-		$this->dureeHeurePaie = $this->dureeHeurePaie * ($this->presence_percent / 100);
+		// Cet attribut provient nomalement du type d'absence, donc s'il n'existe pas j'évite d'appliquer un coef de 0
+		if (isset($this->presence_percent)) $this->dureeHeurePaie = $this->dureeHeurePaie * ($this->presence_percent / 100);
 
 		$this->calculDureeAddContigue($PDOdb);
 
