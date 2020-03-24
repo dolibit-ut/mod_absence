@@ -70,7 +70,8 @@
             ,'secable'=>$form->combo('', 'TTypeAbsence['.$absenceType->getId().'][insecable]', $absenceTypeDummy->TForAdmin , $absenceType->insecable)
             ,'isPresence'=>$form->hidden( 'TTypeAbsence['.$absenceType->getId().'][isPresence]', 0)
 			,'admin'=>$form->combo('', 'TTypeAbsence['.$absenceType->getId().'][admin]', $absenceTypeDummy->TForAdmin , $absenceType->admin)
-			
+			,'presence_percent'=>$form->texte('', 'TTypeAbsence['.$absenceType->getId().'][presence_percent]', $absenceType->presence_percent, 3,5).'%'
+
 			,'delete'=>(in_array($absenceType->typeAbsence,$TAbsenceTypeObligatoire) ? '' :$form->checkbox1('', 'TTypeAbsence['.$absenceType->getId().'][delete]', 1))
 		);
 		
@@ -111,7 +112,8 @@
 				'OnlyCountBusinessDay' => $langs->trans('OnlyCountBusinessDay'),
 				'New' => $langs->trans('New'),
 				'Register' => $langs->trans('Register'),
-				'AskDelete' => $langs->trans('AskDelete')
+				'AskDelete' => $langs->trans('AskDelete'),
+				'PresencePercent' => $langs->trans('PresencePercent')
 			)
 		)	
 		

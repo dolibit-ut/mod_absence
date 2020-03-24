@@ -3394,6 +3394,7 @@ class TRH_TypeAbsence extends TObjetStd {
 		parent::add_champs('entity,isPresence,colorId',array('index'=>true,'type'=>'integer'));
 
 		parent::add_champs('decompteNormal',array('type'=>'string'));
+		parent::add_champs('presence_percent',array('type'=>'float', 'default' => 100));
 
 		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak',array('type'=>'date'));
 

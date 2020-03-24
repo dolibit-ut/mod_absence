@@ -13,6 +13,7 @@
 				<th>[translate.AskReservedAdmin;strconv=no]</th>
 				<th>[translate.OnlyCountBusinessDay;strconv=no]</th>
 				<th>[translate.AbsenceSecable;strconv=no]</th>
+				<th>[translate.PresencePercent;strconv=no]</th>
 			    <th>[translate.AskDelete;strconv=no]</th>
                
             	
@@ -28,6 +29,7 @@
 				<td>[typeAbsence.admin; strconv=no]</td>
 			    <td>[typeAbsence.decompteNormal; strconv=no][typeAbsence.isPresence; strconv=no]</td>
                 <td>[typeAbsence.secable; strconv=no]</td>
+                <td>[typeAbsence.presence_percent; strconv=no]</td>
             	<td>[typeAbsence.delete; strconv=no]</td>
 			</tr>
 			</tbody>
@@ -38,7 +40,7 @@
 				<td>[typeAbsenceNew.unite; strconv=no]</td>
 				<td>[typeAbsenceNew.codeAbsence; strconv=no]</td>
 				<td>[typeAbsenceNew.admin; strconv=no]</td>
-				<td colspan="3">[typeAbsenceNew.decompteNormal; strconv=no][typeAbsenceNew.isPresence; strconv=no]</td>
+				<td colspan="4">[typeAbsenceNew.decompteNormal; strconv=no][typeAbsenceNew.isPresence; strconv=no]</td>
 				
 				<td>[translate.New]</td>
 			</tr>

@@ -70,6 +70,7 @@ Archive=Archiver
 ArchivedSchedule=Emploi du temps archivé
 ArchiveThisSending=Archiver cet envoi
 AskDelete=Supprimer ?
+PresencePercent=%%tage heure pris en compte
 AskReservedAdmin=Réservé Admin ?
 AutoValidatedReportedPresence=Présence déclarée automatiquement validée
 AvailableHolidayBefore=Congés disponible avant
