@@ -29,7 +29,6 @@
 				$absence->niveauValidation=1;
 				$existeDeja=$absence->testExisteDeja($PDOdb, $absence);
 				if($existeDeja===false){
-					$absence->code=saveCodeTypeAbsence($PDOdb, $absence->type);
 
 					// Test de la cohérence des dates
 					if(empty($user->rights->absence->myactions->declarePastAbsence) && ($absence->date_debut <= strtotime('midnight') || $absence->date_fin <= strtotime('midnight') )) {

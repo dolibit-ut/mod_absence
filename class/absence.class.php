@@ -736,6 +736,7 @@ class TRH_Absence extends TObjetStd {
 
 			$this->code=$ta->codeAbsence;
 			$this->libelle=$ta->libelleAbsence;
+			$this->presence_percent=$ta->presence_percent;
 
 		}
 
@@ -1000,6 +1001,8 @@ class TRH_Absence extends TObjetStd {
 		else{
 			$this->dureeHeurePaie=$this->dureeHeure;
 		}
+
+		$this->dureeHeurePaie = $this->dureeHeurePaie * ($this->presence_percent / 100);
 
 		$this->calculDureeAddContigue($PDOdb);
 
