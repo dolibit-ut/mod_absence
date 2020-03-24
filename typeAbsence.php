@@ -86,7 +86,8 @@
 			,'decompteNormal'=>$form->combo('', 'TTypeAbsenceNew[decompteNormal]', $absenceTypeDummy->TDecompteNormal , null)
 			,'isPresence'=>$form->hidden( 'TTypeAbsenceNew[isPresence]', 0)
 			,'admin'=>$form->combo('', 'TTypeAbsenceNew[admin]', $absenceTypeDummy->TForAdmin , null)
-			
+			,'presence_percent'=>$form->texte('', 'TTypeAbsenceNew[presence_percent]', 100, 3,5).'%'
+
 			,'colorId'=>$form->combo('', 'TTypeAbsenceNew[colorId]', $absenceTypeDummy->TColorId , null)
 		);
 

@@ -39,9 +39,11 @@
 				<td>[typeAbsenceNew.libelleAbsence; strconv=no]</td>
 				<td>[typeAbsenceNew.unite; strconv=no]</td>
 				<td>[typeAbsenceNew.codeAbsence; strconv=no]</td>
+				<td></td>
 				<td>[typeAbsenceNew.admin; strconv=no]</td>
-				<td colspan="4">[typeAbsenceNew.decompteNormal; strconv=no][typeAbsenceNew.isPresence; strconv=no]</td>
-				
+				<td colspan="2">[typeAbsenceNew.decompteNormal; strconv=no][typeAbsenceNew.isPresence; strconv=no]</td>
+
+                <td>[typeAbsenceNew.presence_percent; strconv=no]</td>
 				<td>[translate.New]</td>
 			</tr>
 			</tfoot>
