@@ -2176,6 +2176,7 @@ class TRH_Absence extends TObjetStd {
 		$this->typeAbsence = new TRH_TypeAbsence;
 		$this->typeAbsence->load_by_type($PDOdb, $this->type);
 		$this->isPresence = $this->typeAbsence->isPresence;
+		$this->presence_percent = $this->typeAbsence->presence_percent;
 
 		return $res;
 	}
