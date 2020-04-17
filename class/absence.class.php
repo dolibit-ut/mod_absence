@@ -736,6 +736,7 @@ class TRH_Absence extends TObjetStd {
 
 			$this->code=$ta->codeAbsence;
 			$this->libelle=$ta->libelleAbsence;
+			$this->presence_percent=$ta->presence_percent;
 
 		}
 
@@ -1000,6 +1001,9 @@ class TRH_Absence extends TObjetStd {
 		else{
 			$this->dureeHeurePaie=$this->dureeHeure;
 		}
+
+		// Cet attribut provient nomalement du type d'absence, donc s'il n'existe pas j'évite d'appliquer un coef de 0
+		if (isset($this->presence_percent)) $this->dureeHeurePaie = $this->dureeHeurePaie * ($this->presence_percent / 100);
 
 		$this->calculDureeAddContigue($PDOdb);
 
@@ -2172,6 +2176,7 @@ class TRH_Absence extends TObjetStd {
 		$this->typeAbsence = new TRH_TypeAbsence;
 		$this->typeAbsence->load_by_type($PDOdb, $this->type);
 		$this->isPresence = $this->typeAbsence->isPresence;
+		$this->presence_percent = $this->typeAbsence->presence_percent;
 
 		return $res;
 	}
@@ -3394,6 +3399,7 @@ class TRH_TypeAbsence extends TObjetStd {
 		parent::add_champs('entity,isPresence,colorId',array('index'=>true,'type'=>'integer'));
 
 		parent::add_champs('decompteNormal',array('type'=>'string'));
+		parent::add_champs('presence_percent',array('type'=>'float', 'default' => 100));
 
 		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak',array('type'=>'date'));
 
