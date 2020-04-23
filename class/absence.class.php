@@ -2867,7 +2867,7 @@ END:VCALENDAR
 			, 'statut' => 1
 			, 'etat' => array('Validee')
 		);
-		
+		if(!empty($conf->global->PLANNING_DISPLAY_DRAFT_ABSENCE)) $params['etat'][] = 'Avalider';
 		if (!empty($extra_params)) $params = array_merge($params, $extra_params);
 
 		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
