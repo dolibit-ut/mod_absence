@@ -85,7 +85,7 @@
 					
 						<a class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmAcceptPresenceRequest;strconv=no]')){document.location.href='?action=accept&id=[absenceCourante.id]'};">[translate.Accept;strconv=no]</a>	
 						<span class="butActionDelete" id="action-delete"  onclick="refusePresence();">[translate.Refuse;strconv=no]</span>
-						<a style='width:30%' class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]')){document.location.href='?action=niveausuperieur&id=[absenceCourante.id]&validation=ok'};">[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]</a>	
+<!--						<a style='width:30%' class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]')){document.location.href='?action=niveausuperieur&id=[absenceCourante.id]&validation=ok'};">[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]</a>	-->
 									
 					[onshow;block=end]
 				[onshow;block=end]
