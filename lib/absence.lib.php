@@ -802,7 +802,7 @@ function _getSQLListValidation($userid)
 		dol_include_once('/valideur/class/valideur.class.php');
 	}
 	
-	return TRH_valideur_groupe::getSqlListObject('Conges');
+	return TRH_valideur_groupe::getSqlListObject('Conges', array('onlyValidable' => true));
 }
 
 /**
