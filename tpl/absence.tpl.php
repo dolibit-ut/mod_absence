@@ -153,7 +153,7 @@
 					
 						<a class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmAcceptAbsenceRequest;strconv=no]')){actionValidAbsence('accept')};">[translate.Accept;strconv=no;protect=no]</a>	
 						<span class="butActionDelete" id="action-delete"  onclick="refuseAbsence()">[translate.Refuse;strconv=no;protect=no]</span>
-						<a style='width:30%' class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]')){actionValidAbsence('sendToSuperior')};">[translate.SendToSuperiorValidator;strconv=no;protect=no]</a>	
+<!--						<a style='width:30%' class="butAction" id="action-update"  onclick="if (window.confirm('[translate.ConfirmSendToSuperiorAbsenceRequest;strconv=no]')){actionValidAbsence('sendToSuperior')};">[translate.SendToSuperiorValidator;strconv=no;protect=no]</a>	-->
 									
 					[onshow;block=end]
 				[onshow;block=end]

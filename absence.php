@@ -917,7 +917,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'documents'=>$input_doc
 
 				,'fk_user_absence'=>$form->hidden('fk_user_absence', $absence->fk_user)
-				,'niveauValidation'=>$absence->niveauValidation
+				,'niveauValidation'=>$absence->level
 				,'commentaireValideur'=>$absence->commentaireValideur
 				,'dt_cre'=>$absence->get_dtcre()
 				,'time_validation'=>$absence->date_validation

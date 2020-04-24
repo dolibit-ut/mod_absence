@@ -577,8 +577,9 @@ class TRH_Absence extends TObjetStd {
 			define('INC_FROM_DOLIBARR', true);
 			dol_include_once('/valideur/config.php');
 			dol_include_once('/valideur/class/valideur.class.php');
-
+            $current_level = $this->level;
 			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
+			if($this->level != $current_level) mailCongesValideur($PDOdb,$this); //On a changé de niveau
 		}
 		
 		if ($canValidate > 0)
