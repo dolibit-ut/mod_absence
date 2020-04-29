@@ -161,7 +161,11 @@ class TRH_TicketResto extends TObjetStd {
 		$planningFilters = array();
 		if (! empty($conf->global->ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER))
 		{
-			$planningFilters = array('etat' => array('Avalider', 'Validee'));
+			$planningFilters = array('etat' => array('Avalider', 'Validee'),
+                                     'extrafields' => array(
+                                            'ue.ticketresto_ok' => 1
+                                        )
+                                    );
 		}
 
 		$TAbsence = TRH_Absence::getPlanning($ATMdb, $idGroup, $fk_user, $date_debut, $date_fin, $planningFilters);
