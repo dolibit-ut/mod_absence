@@ -75,7 +75,8 @@
 				$newId = $emploiTemps->save($PDOdb);
 				
 				if($newId>0){
-				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 1).'?action=edit&id='.$newId);
+				    header("Location: ".dol_buildpath('/absence/emploitemps.php', 1).'?action=view&id='.$newId);
+				    setEventMessage($langs->trans('TimeTableModified'), 'mesgs');
 				    exit();
 				}
 				else{
