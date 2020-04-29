@@ -713,7 +713,6 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 			@$stat['presence']+=$row['nb_jour_presence'];
 			@$stat['absence']+=$row['nb_jour_absence'];
-			@$stat['absence_heure']+=$row['nb_heure_absence'];
 			@$stat['presence+ferie']+=$row['nb_jour_presence'] + $row['nb_jour_ferie'];
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
 			@$stat['ferie']+=$row['nb_jour_ferie'] ;
