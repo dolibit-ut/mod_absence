@@ -361,7 +361,9 @@
 				
 				$("#ddMoment").change(comparerDates);
 				$("#dfMoment").change(comparerDates);
-				
+
+				$("#type").change();
+
 				loadRecapCompteur();
 				loadRecapAbsence()
 			});
