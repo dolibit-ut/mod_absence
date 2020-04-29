@@ -2426,15 +2426,10 @@ END:VCALENDAR
 
 			$t_current = strtotime($date_debut);
 			$t_end = strtotime($date_fin);
-			
-			$extra_params = array(
-				'extrafields' => array(
-					'ue.ticketresto_ok' => 1
-				)
-				, 'ue.ldap_entity_login' => $conf->entity
-			);
 
-			$extra_params = array_merge($extra_params, $filters);
+            if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN))$extra_params = array_merge(array('ue.ldap_entity_login' => $conf->entity), $filters);
+            else $extra_params = $filters;
+
 
 			$TPlanning = $abs->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y', $t_current), date('d/m/Y', $t_end), $extra_params);
 			$Tab = array(); // Tableau de retour de fonction
