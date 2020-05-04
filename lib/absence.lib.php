@@ -644,7 +644,6 @@ function getHistoryCompteurForUser($fk_user,$id_absence,$duree=null,$type=null, 
 global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 
 	if(!isset($PDOdb_getHistoryCompteurForUser)) $PDOdb_getHistoryCompteurForUser=new TPDOdb;
-
 	if(!isset($compteurCongeResteCurrentUser)) {
 		
 		$compteur =new TRH_Compteur;
@@ -652,8 +651,7 @@ global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 
 		$congePrecTotal = $compteur->acquisExerciceNM1 + $compteur->acquisAncienneteNM1 + $compteur->acquisHorsPeriodeNM1 + $compteur->reportCongesNM1;
 		$compteurCongeResteCurrentUser = $congePrecTotal - $compteur->congesPrisNM1;
-		
-	}
+    }
 		
 	if(is_null($duree) || is_null($etat) || is_null($type)) {
 		$absence = new TRH_Absence;
@@ -670,7 +668,7 @@ global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 		//return '<div align="right">'.number_format($compteurCongeResteCurrentUser,2,',',' ').'</div>';
 	}
 	else {
-		return 0;
+		return $compteurCongeResteCurrentUser;
 	}
 	
 }
