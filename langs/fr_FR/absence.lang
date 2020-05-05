@@ -571,3 +571,5 @@ TimeTableModified=Emploi du temps mis à jour
 totalHolidaysTakenNM1Future = Congés posés
 totalHolidaysTakenNM1Past = Congés pris
 totalHolidaysTaken = Total congés pris et/ou posés
+pictoTotalCongesPoseNM1 = Du %s au %s
+pictoTotalCongesPrisNM1 = Du %s au %s
