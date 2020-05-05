@@ -94,20 +94,20 @@
 				_ficheCommentaire($PDOdb, $absence,'edit');
 				break;
 
-			case 'niveausuperieur':
-				$absence->load($PDOdb, $_REQUEST['id']);
-				$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence`
-					SET niveauValidation=niveauValidation+1 WHERE rowid=".$absence->getId();
-				$PDOdb->Execute($sqlEtat);
-				$absence->load($PDOdb, $_REQUEST['id']);
-				mailConges($absence);
-				mailCongesValideur($PDOdb,$absence);
-
-				$mesg = $langs->trans('AbsenceRequestSentToSuperior');
-				setEventMessage($mesg);
-
-				_fiche($PDOdb, $absence,'view');
-				break;
+//			case 'niveausuperieur':
+//				$absence->load($PDOdb, $_REQUEST['id']);
+//				$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence`
+//					SET niveauValidation=niveauValidation+1 WHERE rowid=".$absence->getId();
+//				$PDOdb->Execute($sqlEtat);
+//				$absence->load($PDOdb, $_REQUEST['id']);
+//				mailConges($absence);
+//				mailCongesValideur($PDOdb,$absence);
+//
+//				$mesg = $langs->trans('AbsenceRequestSentToSuperior');
+//				setEventMessage($mesg);
+//
+//				_fiche($PDOdb, $absence,'view');
+//				break;
 
 			case 'refuse':
 				$absence->load($PDOdb, $_REQUEST['id']);

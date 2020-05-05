@@ -693,9 +693,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 	$html .= '<tr>
 				<td>' . $langs->trans('Name') . '</td>
 				<td>' . $langs->trans('PresenceDay') . '</td>
-				<td>' . $langs->trans('PresenceHour') . '</td>
 				<td>' . $langs->trans('AbsenceDay') . '</td>
-				<td>' . $langs->trans('AbsenceHour') . '</td>
 				<td>' . $langs->trans('Presence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
 				<td>' . $langs->trans('Absence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
 				<td>' . $langs->trans('PublicHolidayDay') . '</td>
@@ -712,9 +710,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		foreach($TStat as $date=>$row) {
 
 			@$stat['presence']+=$row['nb_jour_presence'];
-			@$stat['presence_heure']+=$row['nb_heure_presence'];
 			@$stat['absence']+=$row['nb_jour_absence'];
-			@$stat['absence_heure']+=$row['nb_heure_absence'];
 			@$stat['presence+ferie']+=$row['nb_jour_presence'] + $row['nb_jour_ferie'];
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
 			@$stat['ferie']+=$row['nb_jour_ferie'] ;
@@ -725,9 +721,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$html .= '<tr><td style="text-align:left;">'.$u->getNomUrl().'</td>';
 		
 		$html .= '<td>'.$stat['presence'].'</td>';
-		$html .= '<td>'.$stat['presence_heure'].'</td>';
 		$html .= '<td>'.$stat['absence'].'</td>';
-		$html .= '<td>'.$stat['absence_heure'].'</td>';
 		$html .= '<td>'.$stat['presence+ferie'].'</td>';
 		$html .= '<td>'.$stat['absence+ferie'].'</td>';
 		$html .= '<td>'.$stat['ferie'].'</td></tr>';
@@ -800,7 +794,7 @@ function _getSQLListValidation($userid)
 		dol_include_once('/valideur/class/valideur.class.php');
 	}
 	
-	return TRH_valideur_groupe::getSqlListObject('Conges');
+	return TRH_valideur_groupe::getSqlListObject('Conges', array('onlyValidable' => true));
 }
 
 /**

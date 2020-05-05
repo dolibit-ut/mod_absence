@@ -125,19 +125,19 @@
 				_ficheCommentaire($ATMdb, $absence,'edit');
 				break;
 				
-			case 'niveausuperieur':
-				$absence->load($ATMdb, $_REQUEST['id']);
-				
-				$absence->niveauValidation++;
-				$absence->save($ATMdb);
-				
-				mailConges($absence, true);
-				
-				$mesg = $langs->trans('PresenceRequestSentToSuperior');
-				setEventMessage($mesg);
-				
-				_fiche($ATMdb, $absence,'view');
-				break;
+//			case 'niveausuperieur':
+//				$absence->load($ATMdb, $_REQUEST['id']);
+//
+//				$absence->niveauValidation++;
+//				$absence->save($ATMdb);
+//
+//				mailConges($absence, true);
+//
+//				$mesg = $langs->trans('PresenceRequestSentToSuperior');
+//				setEventMessage($mesg);
+//
+//				_fiche($ATMdb, $absence,'view');
+//				break;
 				
 			case 'refuse':
 				$absence->load($ATMdb, $_REQUEST['id']);
