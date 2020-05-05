@@ -292,8 +292,10 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 	$rttCourantReste=$compteur->rttCumuleAcquis -$compteur->rttCumulePris;
 	
     $TTypeAbsence = TRH_TypeAbsence::getTypeAbsence($PDOdb, 'admin');
-    
 
+
+    $totalCongesPoseNM1 = TRH_Absence::getUserPeriodTotalConges($PDOdb, $user->id,date('Y-m-d', strtotime('+1 day')), date('Y-m-d', $compteur->date_congesCloture));
+    $totalCongesPrisNM1 = TRH_Absence::getUserPeriodTotalConges($PDOdb, $user->id, date('Y-m-d', strtotime('-1 year +1 day',$compteur->date_congesCloture)), date('Y-m-d'));
 
     $morehtmlref.='<div class="refidno">';
     $morehtmlref.= $langs->trans('HolidaysTaken').' : <strong>'.round2Virgule($compteur->congesPrisNM1).'</strong> &nbsp;&nbsp;&nbsp;';
@@ -316,6 +318,9 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'acquisAnc'=>$form->texte('','acquisAncienneteNM1',round2Virgule($compteur->acquisAncienneteNM1),10,50,'')
 				,'acquisHorsPer'=>$form->texte('','acquisHorsPeriodeNM1',round2Virgule($compteur->acquisHorsPeriodeNM1),10,50,'')
 				,'reportConges'=>$form->texte('','reportCongesNM1',round2Virgule($compteur->reportCongesNM1),10,50,'')
+				,'congesPris'=>$form->texte('','congesPrisNM1',round2Virgule($compteur->congesPrisNM1),10,50)
+				,'totalCongesPoseNM1'=>round2Virgule($totalCongesPoseNM1)
+				,'totalCongesPrisNM1'=>round2Virgule($totalCongesPrisNM1)
 				,'congesPris'=>$form->texte('','congesPrisNM1',round2Virgule($compteur->congesPrisNM1),10,50)
 				,'anneePrec'=>$form->texte('','anneeNM1',round2Virgule($compteur->anneeNM1),10,50,'')
 				,'total'=>round2Virgule($congePrecTotal)
@@ -412,7 +417,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'HolidaysTaken' 				=> $langs->transnoentities('HolidaysTaken'),
 				'RemainingBefore' 				=> $langs->transnoentities('RemainingBefore'),
 				'AcquiredExercise' 				=> $langs->transnoentities('AcquiredExercise'),
-				'HolidaysTaken' 				=> $langs->transnoentities('HolidaysTaken'),
+				'HolidaysTaken' 				=> $langs->transnoentities('totalHolidaysTaken'),
 				'NbDaysAcquiredByMonth' 		=> $langs->transnoentities('NbDaysAcquiredByMonth'),
 				'LastClosingHoliday' 			=> $langs->transnoentities('LastClosingHoliday'),
 				'CounterCumulatedDayOff' 		=> $langs->transnoentities('Counter').' '.$TTypeAbsence['rttcumule'],
@@ -441,6 +446,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'acquisRecuperation'=>$langs->transnoentities('acquisRecuperation'),
 				'AbsenceNM1'=>$langs->transnoentities('AbsenceNM1'),
 				'AbsenceN'=>$langs->transnoentities('AbsenceN'),
+				'totalHolidaysTakenNM1Past'=>$langs->transnoentities('totalHolidaysTakenNM1Past'),
+				'totalHolidaysTakenNM1Future'=>$langs->transnoentities('totalHolidaysTakenNM1Future'),
 				'langs'=>$langs
 			)
 		)	

@@ -35,10 +35,17 @@
 					<td><b>[translate.TotalHolidays;strconv=no;protect=no]</b></td>
 					<td><b>[congesPrec.total;strconv=no;protect=no] </b></td>
 				</tr>
-				
+            <tr>
+                <td>[translate.totalHolidaysTakenNM1Future;strconv=no;protect=no]</td>
+                <td>[congesPrec.totalCongesPoseNM1;strconv=no;protect=no]</td>
+            </tr>
+            <tr>
+                <td>[translate.totalHolidaysTakenNM1Past;strconv=no;protect=no]</td>
+                <td>[congesPrec.totalCongesPrisNM1;strconv=no;protect=no]</td>
+            </tr>
 				<tr>
-					<td>[translate.HolidaysTaken;strconv=no;protect=no]</td>
-					<td>[congesPrec.congesPris;strconv=no;protect=no]</td>
+					<td><b>[translate.HolidaysTaken;strconv=no;protect=no]</b></td>
+					<td><b>[congesPrec.congesPris;strconv=no;protect=no]</b></td>
 				</tr>
 				<tr>
 					<td><b>[translate.RemainingBefore;strconv=no;protect=no] [congesPrec.dateFin]</b></td>
