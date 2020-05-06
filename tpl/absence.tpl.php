@@ -177,10 +177,7 @@
 				<td><b>Date d'acceptation</b></td>
 				<td><b>Acceptée par</b></td>
 			</tr>
-			<tr>
-				<td>[TUserAccepted.date_acceptation;strconv=no;protect=no]</td>
-				<td>[TUserAccepted.username;strconv=no;protect=no]</td>
-			</tr>
+            [TUserAccepted.html;strconv=no;protect=no]
 		</table>
 		<br />
 	</div>
