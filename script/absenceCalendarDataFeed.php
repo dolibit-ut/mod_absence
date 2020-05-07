@@ -3,7 +3,7 @@
 require('../config.php');
 dol_include_once("/absence/class/absence.class.php");
 dol_include_once("/valideur/class/valideur.class.php");
-dol_include_once("/rhlibrary/wdCalendar/php/functions.php");
+dol_include_once("/absence/includes/wdCalendar/php/functions.php");
 require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 
 $PDOdb=new TPDOdb;
@@ -13,37 +13,37 @@ switch ($method) {
     case "afficher":
 	       	__out(listCalendarByRange($PDOdb, GETPOST('start'), GETPOST('end'), GETPOST('idUtilisateur'), GETPOST('groupe'), GETPOST('typeAbsence')),'json');
 
-        break; 
+        break;
 
 }
 
 function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idUser=0, $idGroupe=0, $typeAbsence = '')
 {
 	global $conf;
-	
+
 	if (empty($typeAbsence)) $typeAbsence = 'Tous';
-	
-	$TEvent = getJourFerie($PDOdb, $date_start, $date_end); 
+
+	$TEvent = getJourFerie($PDOdb, $date_start, $date_end);
 	$TEvent = array_merge($TEvent, getEventsAbs($PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence));
-	
+
 	if ($conf->agenda->enabled && $_REQUEST['withAgenda'] == 1)
 	{
 		$TEvent = array_merge($TEvent, getAgendaEvent($PDOdb, $date_start, $date_end));
 		//$ret['events'] = $TAgenda;
 	}
-	
+
   	return $TEvent;
 }
 
 function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $typeAbsence)
 {
 	global $conf, $user, $langs, $db;
-	
+
 	$TEvent = array();
 	$TUserTmp = array();
 	$TGoupListByUserId = array();
 //	$TValidationLevelByGroupId = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges');
-	
+
 	$sql = TRH_valideur_groupe::getSqlListObject('Conges', array(
 			'ajax' => true
 			, 'fk_user' => $idUser
@@ -196,7 +196,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 
 			if (mb_detect_encoding($label, 'UTF-8', true) === false) $label = utf8_encode($label);
 
-//	var_dump($label, $user->id,$row->fk_user,TRH_valideur_groupe::isValideur($PDOdb, $row->fk_user), '<br>');        
+//	var_dump($label, $user->id,$row->fk_user,TRH_valideur_groupe::isValideur($PDOdb, $row->fk_user), '<br>');
 //	        $label = utf8_encode($row->lastname.' '.$row->firstname).' : '.$row->libelle;
 			if ($moreOneDay)
 			{
@@ -235,7 +235,7 @@ function getEventsAbs(&$PDOdb, $date_start, $date_end, $idUser, $idGroupe, $type
 function customListGroupsForUser($fk_user)
 {
 	global $conf,$user,$db;
-	
+
 	$sql = "SELECT g.rowid, ug.entity as usergroup_entity";
 	$sql.= " FROM ".MAIN_DB_PREFIX."usergroup as g,";
 	$sql.= " ".MAIN_DB_PREFIX."usergroup_user as ug";
@@ -249,7 +249,7 @@ function customListGroupsForUser($fk_user)
 	{
 		$sql.= " AND g.entity IN (0,".$conf->entity.")";
 	}
-	
+
 	$result = $db->query($sql);
 	if ($result)
 	{
@@ -273,49 +273,49 @@ function customListGroupsForUser($fk_user)
 function _justDate($date,$frm = 'm/d/Y H:i') {
 	if(is_int($date))$time=$date;
 	else $time = strtotime($date);
-	
+
 	return date($frm, $time);
 }
 
 function getJourFerie(&$PDOdb, $date_start, $date_end) {
-	global $conf, $langs;	
-	
+	global $conf, $langs;
+
 	$TEvent=array();
 
 	$TJF=TRH_JoursFeries::getAll($PDOdb, $date_start, $date_end);
-		  //récupération des jours fériés 
+		  //récupération des jours fériés
 	foreach($TJF as $row) {
-		
-		  $timeOff = strtotime($row->date_jourOff);	
-			
+
+		  $timeOff = strtotime($row->date_jourOff);
+
 		  $allDay = 1;
 		  switch($row->moment){
-			case 'apresmidi' : 
+			case 'apresmidi' :
 				$moment= $langs->transnoentities('ClosedTheAfternoon');
-				
+
 				$allDay = 0;
 				$start = date('Y-m-d 12:00:00', $timeOff);
 				$end = date('Y-m-d 23:59:59', $timeOff);
-				
+
 				break;
 			case 'matin':
 				$moment= $langs->transnoentities('ClosedTheMorning');
-				
+
 				$allDay = 0;
 				$start = date('Y-m-d 00:00:00', $timeOff);
 				$end = date('Y-m-d 12:00:00', $timeOff);
-				
+
 				break;
 			default:
 				$moment= $langs->transnoentities('PublicHoliday');
-				
+
 				$allDay = 1;
 				$start = date('Y-m-d 00:00:00', $timeOff);
 				$end = date('Y-m-d 23:59:59', $timeOff);
-				
+
 				break;
     		}
-		  
+
 		  	$TEvent[]=array(
 				'id'=>100000000+$row->rowid
 				,'title'=>$moment
@@ -339,17 +339,17 @@ function getJourFerie(&$PDOdb, $date_start, $date_end) {
 				,'project'=>''
 				,'more'=>''
 			);
-	      
+
      }
 	//var_dump($TEvent);
 	return $TEvent;
-	
+
 }
 
 function getAgendaEvent(&$PDOdb, $date_start, $date_end) {
 global $user, $conf;
-		
-	
+
+
 	$filter=GETPOST("filter",'',3);
 	$filtera = GETPOST("userasked","int",3)?GETPOST("userasked","int",3):GETPOST("filtera","int",3);
 	$filtert = GETPOST("usertodo","int",3)?GETPOST("usertodo","int",3):GETPOST("filtert","int",3);
@@ -357,7 +357,7 @@ global $user, $conf;
 	$showbirthday = empty($conf->use_javascript_ajax)?GETPOST("showbirthday","int"):1;
 	$socid = GETPOST("socid","int",1);
 	if ($user->societe_id) $socid=$user->societe_id;
-	
+
 	if (empty($user->rights->agenda->myactions->lire) && empty($user->rights->agenda->myactions->read)) return array();
 
 	$canedit=1;
@@ -369,15 +369,15 @@ global $user, $conf;
 	    $filtert=$user->id;
 	    $filterd=$user->id;
 	}
-	
+
 	$action=GETPOST('action','alpha');
 	$pid=GETPOST("projectid","int",3);
 	$status=GETPOST("status");
 	$type=GETPOST("type");
 	$actioncode=GETPOST("actioncode","alpha",3)?GETPOST("actioncode","alpha",3):(GETPOST("actioncode")=="0"?'':(empty($conf->global->AGENDA_USE_EVENT_TYPE)?'AC_OTH':''));
-		
-		
-			
+
+
+
 	$sql = 'SELECT a.id,a.label,';
 	$sql.= ' a.datep,';
 	$sql.= ' a.datep2,';
@@ -399,8 +399,8 @@ global $user, $conf;
 	if ($pid) $sql.=" AND a.fk_project=".$PDOdb->quote($pid);
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND (a.fk_soc IS NULL OR sc.fk_user = " .$user->id . ")";
 	if ($user->societe_id) $sql.= ' AND a.fk_soc = '.$user->societe_id; // To limit to external user company
-	
-	
+
+
     $sql.= " AND (";
     $sql.= " (datep BETWEEN '".$date_start."'";
     $sql.= " AND '".$date_end."')";
@@ -425,22 +425,22 @@ global $user, $conf;
 	}
 	// Sort on date
 	$sql.= ' ORDER BY datep';
-	
-	
+
+
 	$PDOdb->Execute($sql);
 	$Tab = $PDOdb->Get_All();
-	
+
 	$TEvent=array();
-	
+
 	foreach($Tab as $row) {
-		
+
 		 if(empty($row->datep2)) $row->datep2 = date('Y-m-d H:i:s', strtotime($row->datep) + (60 * 60) ) ; // 1h
-		
-		
+
+
 		 if($row->code=='AC_OTH_AUTO')$color=5;
-		 else $color = -1; 
-			
-			
+		 else $color = -1;
+
+
 		  $TEvent[]=array(
 				'id'=>200000000 + $row->rowid
 				,'title'=>utf8_encode( $row->label )
@@ -464,10 +464,10 @@ global $user, $conf;
 				,'project'=>''
 				,'more'=>''
 			);
-		
-	  	
-		
+
+
+
 	}
-	
+
 	return $TEvent;
 }
