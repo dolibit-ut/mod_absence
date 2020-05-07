@@ -857,7 +857,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		,array(
 			//'TRegle' =>$TRegle
 			'TRecap'=>$TRecap
-			,'TUserAccepted'=>_getUserAlreadyAccepted($PDOdb, $db, $absence)
+			,'TUserAccepted'=>_getRowUserAlreadyAccepted($PDOdb, $db, $absence)
 			,'TNextValideur' => $TNextValideur
 		)
 		,array(
@@ -1067,11 +1067,11 @@ function _ficheCommentaire(&$PDOdb, &$absence, $mode) {
 	llxFooter();
 }
 
-function _getUserAlreadyAccepted(&$PDOdb, &$db, &$absence)
+function _getRowUserAlreadyAccepted(&$PDOdb, &$db, &$absence)
 {
 	$TRes = array();
 
-	$sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'rh_valideur_object WHERE type="ABS" AND fk_object='.$absence->getId();
+	$sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'rh_valideur_object WHERE type IN ("ABS", "Conges") AND fk_object='.$absence->getId();
 	$PDOdb->Execute($sql);
 
 	while ($row = $PDOdb->Get_line())
@@ -1080,14 +1080,9 @@ function _getUserAlreadyAccepted(&$PDOdb, &$db, &$absence)
 		$resql = $db->query($sql);
 		if ($resql && $db->num_rows($resql))
 		{
-			$u = $db->fetch_object($resql);
-			$TRes[] = array(
-				'date_acceptation' => date('d/m/Y', strtotime($row->date_cre))
-				,'username' => trim($u->lastname.' '.$u->firstname)
-			);
-		}
-	}
-
+            while($u = $db->fetch_object($resql)) $TRes[0]['html'] .= '<tr><td>'.date('d/m/Y', strtotime($row->date_cre)).'</td><td>'.trim($u->lastname.' '.$u->firstname).'</td></tr>';
+        }
+    }
 	return $TRes;
 }
 

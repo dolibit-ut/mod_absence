@@ -697,13 +697,22 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 				<td>' . $langs->trans('Presence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
 				<td>' . $langs->trans('Absence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
 				<td>' . $langs->trans('PublicHolidayDay') . '</td>
-				
-				
+				<td>' . $langs->trans('RemainingBeforeShort') . '</td>
+				<td>' . $langs->trans('RemainingCurrent') . '</td>
+				<td>' . $langs->trans('acquisRecuperationShort') . '</td>
 			</tr>';
 
 	foreach($TStatPlanning as $idUser=>$TStat) {
 		$u=new User($db);
 		$u->fetch($idUser);
+
+		$compteur = new TRH_Compteur;
+		$compteur->load_by_fkuser($PDOdb, $idUser);
+
+		$congePrecTotal=$compteur->acquisExerciceNM1 +$compteur->acquisAncienneteNM1+$compteur->acquisHorsPeriodeNM1+$compteur->reportCongesNM1;
+		$congePrecReste=round2Virgule($congePrecTotal-$compteur->congesPrisNM1);
+
+		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN);
 		
 		$stat=array();
 		
@@ -724,8 +733,10 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$html .= '<td>'.$stat['absence'].'</td>';
 		$html .= '<td>'.$stat['presence+ferie'].'</td>';
 		$html .= '<td>'.$stat['absence+ferie'].'</td>';
-		$html .= '<td>'.$stat['ferie'].'</td></tr>';
-		
+		$html .= '<td>'.$stat['ferie'].'</td>';
+		$html .= '<td>'.$congePrecReste.'</td>';
+		$html .= '<td>'.$congeCourantTotal.'</td>';
+		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td></tr>';
 		
 	}
 	

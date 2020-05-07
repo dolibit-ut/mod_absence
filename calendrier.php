@@ -2,7 +2,7 @@
 	require('config.php');
 	require('./class/absence.class.php');
 	require('./lib/absence.lib.php');
-	
+
 	$langs->load('absence@absence');
 	/*
 	 * Inclusion Agenda
@@ -15,7 +15,7 @@
 	dol_include_once('/core/class/html.formactions.class.php');
 	dol_include_once('/core/class/html.form.class.php');
 	if (! empty($conf->projet->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
-	
+
 	$filter=GETPOST("filter",'',3);
 	$filtera = GETPOST("userasked","int",3)?GETPOST("userasked","int",3):GETPOST("filtera","int",3);
 	$filtert = GETPOST("usertodo","int",3)?GETPOST("usertodo","int",3):GETPOST("filtert","int",3);
@@ -23,7 +23,7 @@
 	$showbirthday = empty($conf->use_javascript_ajax)?GETPOST("showbirthday","int"):1;
 	$socid = GETPOST("socid","int",1);
 	if ($user->societe_id) $socid=$user->societe_id;
-	
+
 	$result = restrictedArea($user, 'agenda', 0, '', 'myactions');
 
 	$canedit=1;
@@ -35,7 +35,7 @@
 	    $filtert=$user->id;
 	    $filterd=$user->id;
 	}
-	
+
 	$action=GETPOST('action','alpha');
 	//$year=GETPOST("year");
 	$year=GETPOST("year","int")?GETPOST("year","int"):date("Y");
@@ -47,48 +47,48 @@
 	$type=GETPOST("type");
 	$maxprint=(isset($_GET["maxprint"])?GETPOST("maxprint"):$conf->global->AGENDA_MAX_EVENTS_DAY_VIEW);
 	$actioncode=GETPOST("actioncode","alpha",3)?GETPOST("actioncode","alpha",3):(GETPOST("actioncode")=="0"?'':(empty($conf->global->AGENDA_USE_EVENT_TYPE)?'AC_OTH':''));
-		
-//print_r(get_defined_vars());	
+
+//print_r(get_defined_vars());
 	llxHeader('', $langs->trans('AbsencesCalendar'), '', '', 0,0,
-		array(//"/library/wdCalendar/src/jquery.js"   
-			"/rhlibrary/wdCalendar/src/Plugins/Common.js"    
-			,"/rhlibrary/wdCalendar/src/Plugins/datepicker_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.datepicker.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.alert.js"   
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.ifrmdailog.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/wdCalendar_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.calendar.js" )
-	
-	
-		,array("/rhlibrary/wdCalendar/css/dailog.css" 
-			,"/rhlibrary/wdCalendar/css/calendar.css"
-			,"/rhlibrary/wdCalendar/css/dp.css" 
-			,"/rhlibrary/wdCalendar/css/alert.css" 
-			,"/rhlibrary/wdCalendar/css/main.css")
+		array(//"/library/wdCalendar/src/jquery.js"
+			"/absence/includes/wdCalendar/src/Plugins/Common.js"
+			,"/absence/includes/wdCalendar/src/Plugins/datepicker_lang_FR.js"
+			,"/absence/includes/wdCalendar/src/Plugins/jquery.datepicker.js"
+			,"/absence/includes/wdCalendar/src/Plugins/jquery.alert.js"
+			,"/absence/includes/wdCalendar/src/Plugins/jquery.ifrmdailog.js"
+			,"/absence/includes/wdCalendar/src/Plugins/wdCalendar_lang_FR.js"
+			,"/absence/includes/wdCalendar/src/Plugins/jquery.calendar.js" )
+
+
+		,array("/absence/includes/wdCalendar/css/dailog.css"
+			,"/absence/includes/wdCalendar/css/calendar.css"
+			,"/absence/includes/wdCalendar/css/dp.css"
+			,"/absence/includes/wdCalendar/css/alert.css"
+			,"/absence/includes/wdCalendar/css/main.css")
 	);
-		
+
 	$ATMdb=new TPDOdb;
-	
+
 	$absence=new TRH_absence;
 	if(isset($_REQUEST['id'])){
 		$absence->load($ATMdb, $_REQUEST['id']);
 	}else{
 		$absence->load($ATMdb, $user->id);
 	}
-	
+
 	$idGroupe= isset($_REQUEST['groupe']) ? $_REQUEST['groupe'] : 0;
-	
+
 	$idCalendar= isset($_REQUEST['rowid']) ? $_REQUEST['rowid'] : '';
-	
+
 	$typeAbsence= isset($_REQUEST['typeAbsence']) ? $_REQUEST['typeAbsence'] : 'Tous';
-	
+
 	$formATM=new TFormCore($_SERVER['PHP_SELF'],'form2','GET');
 	echo $formATM->hidden('action', 'afficher');
 	echo $formATM->hidden('id',$absence->getId());
-	
+
 	$form=new Form($db);
-	
-	
+
+
 	$TabGroupe=array();
 	$TabGroupe[0] = 'Tous';
 	//récupération du tableau groupe
@@ -98,7 +98,7 @@
 	while($ATMdb->Get_line()) {
 		$TabGroupe[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
 	}
-		
+
 	//on récupère tous les types d'absences existants
 	$TTypeAbsence=array();
 	$TTypeAbsence['Tous']='Tous';
@@ -107,7 +107,7 @@
 	while($ATMdb->Get_line()) {
 		$TTypeAbsence[$ATMdb->Get_field('typeAbsence')]=$ATMdb->Get_field('libelleAbsence');
 	}
-	
+
 	//on récupère le tableau des users suivant le groupe
 	$TabUser=array();
 	$TabUser[0]='Tous';
@@ -120,23 +120,23 @@
 		$sql="SELECT u.rowid,u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u";
 	}else{
 		$sql="SELECT u.rowid,u.lastname, u.firstname FROM ".MAIN_DB_PREFIX."user as u,
-		".MAIN_DB_PREFIX."usergroup_user as g 
+		".MAIN_DB_PREFIX."usergroup_user as g
 		WHERE g.fk_user=u.rowid AND g.fk_usergroup=".$idGroupe;
 	}
 	$sql.=" ORDER BY lastname";
-	
+
 	$ATMdb->Execute($sql);
-	
-	
+
+
 	while($ATMdb->Get_line()) {
 		$TabUser[$ATMdb->Get_field('rowid')]=ucwords(strtolower(html_entity_decode(htmlentities($ATMdb->Get_field('lastname'), ENT_COMPAT , 'ISO8859-1')))).' '.html_entity_decode(htmlentities($ATMdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1'));
 	}
 
 
 	$idUser=__get('idUtilisateur', $user->id);
-	
+
 	$formactions=new FormActions($db);
-	
+
 	ob_start();
 	$formactions->select_type_actions($actioncode, "actioncode", '', (empty($conf->global->AGENDA_USE_EVENT_TYPE)?1:0));
 	$actionCodeInput = ob_get_clean();
@@ -151,8 +151,8 @@
 	}
 	else{
 		$select_project = '';
-	}	
-	
+	}
+
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/calendrierPerso.tpl.php'
 		,array()
@@ -185,7 +185,7 @@
 				,'head3'=>dol_get_fiche_head(absencePrepareHead($absence, 'index')  , 'calendrier', $langs->trans('Absence'))
 				,'titreCalendar'=>load_fiche_titre($langs->trans('MySchedule'),'', 'title.png', 0, '')
 				,'agendaEnabled'=>(int)$conf->agenda->enabled
-				
+
 				,'projectid'=>$pid
 				,'actioncode'=>$actioncode
 				,'userdone'=>$filterd
@@ -193,7 +193,7 @@
 				,'userasked'=>$filtera
 				,'filter'=>$filter
 				,'status'=>$status
-				
+
 			)
 			,'translate' => array(
 				'Absences' => $langs->trans('Absences'),
@@ -220,11 +220,11 @@
 				'Previous' => $langs->trans('Previous'),
 				'Next' => $langs->trans('Next')
 			)
-			
-		)	
-		
+
+		)
+
 	);
-	
+
 
 	llxFooter();
 
