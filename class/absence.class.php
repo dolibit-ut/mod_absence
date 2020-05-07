@@ -565,7 +565,7 @@ class TRH_Absence extends TObjetStd {
 		$interface = new Interfaces($db);
 		$result = $interface->run_triggers('ABSENCE_BEFOREDELETE',$this,$user,$langs,$conf);
 
-		TRH_valideur_object::deleteChildren($PDOdb, 'ABS', $this->getId());
+		TRH_valideur_object::deleteChildren($PDOdb, array('ABS', 'Conges'), $this->getId());
 		return parent::delete($PDOdb);
 	}
 
