@@ -712,7 +712,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$congePrecTotal=$compteur->acquisExerciceNM1 +$compteur->acquisAncienneteNM1+$compteur->acquisHorsPeriodeNM1+$compteur->reportCongesNM1;
 		$congePrecReste=round2Virgule($congePrecTotal-$compteur->congesPrisNM1);
 
-		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN);
+		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN - $compteur->congesPrisN);
 		
 		$stat=array();
 		

@@ -77,12 +77,18 @@
 					<td>[translate.AcquiredOutOfPeriod;strconv=no;protect=no]</td>
 					<td>[congesCourant.acquisHorsPer;strconv=no;protect=no]</td>
 				</tr>
-				
+                <tr>
+                    <td><b>[translate.Total;strconv=no;protect=no]</b></td>
+                    <td><b>[congesCourant.total;strconv=no;protect=no]</b></td>
+                </tr>
 				<tr>
 					<td>[translate.HolidaysTakenN;strconv=no;protect=no]</td>
 					<td>[congesCourant.congesPris;strconv=no;protect=no]</td>
 				</tr>
-				
+                <tr>
+                    <td><b>[translate.RemainingBeforeN;strconv=no;protect=no]</b></td>
+                    <td><b>[congesCourant.remainingBefore;strconv=no;protect=no]</b></td>
+                </tr>
 				<tr>
 					<td>[translate.NbDaysAcquiredByMonth;strconv=no;protect=no]</td>
 					<td> [congesCourant.nombreCongesAcquisMensuel;strconv=no;protect=no]</td>
@@ -93,10 +99,7 @@
 					<td> [congesCourant.nombreCongesAcquisAnnuel;strconv=no;protect=no]</td>
 				</tr>
 
-				<tr>
-					<td><b>[translate.Total;strconv=no;protect=no]</b></td>
-					<td><b>[congesCourant.total;strconv=no;protect=no]</b></td>
-				</tr>
+
 				<tr>
 					<td><b>[translate.LastClosingHoliday;strconv=no;protect=no]</b></td>
 					<td><b>[congesCourant.date_congesCloture;strconv=no;protect=no]</b></td>
@@ -108,7 +111,6 @@
 					<td>[congesCourant.acquisRecuperation;strconv=no;protect=no]</td>
 				</tr>
 [onshow;block=end]
-				
 		</table>
 	</div>	
 [onshow;block=end]

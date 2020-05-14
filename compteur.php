@@ -288,7 +288,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 	$congePrecReste=$congePrecTotal-$compteur->congesPrisNM1;
 	
 	$congeCourantTotal=$compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN;
-	
+	$congeRemainingBefore=$compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN-$compteur->congesPrisN;
+
 	$rttCourantReste=$compteur->rttCumuleAcquis -$compteur->rttCumulePris;
 	
     $TTypeAbsence = TRH_TypeAbsence::getTypeAbsence($PDOdb, 'admin');
@@ -348,7 +349,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				,'nombreCongesAcquisAnnuel'=>$form->texte('','nombreCongesAcquisAnnuel',round2Virgule($compteur->nombrecongesAcquisAnnuel),10,50,'')	
 				
 				,'titreConges'=>load_fiche_titre($langs->trans('HolidaysPaid'),'', 'title.png', 0, '')
-
+                , 'remainingBefore' => $congeRemainingBefore
 				,'acquisRecuperation'=>$form->texte('','acquisRecuperation',round2Virgule($compteur->acquisRecuperation),10,50)
 			    ,'title' =>  !empty($conf->global->RH_N_LABEL) ? $conf->global->RH_N_LABEL : $langs->trans('AbsenceNtitre', date('Y', strtotime('+1year',time()) ) , date('Y'))
 			)
@@ -419,6 +420,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'TotalHolidays' 				=> $langs->transnoentities('TotalHolidays'),
 				'HolidaysTaken' 				=> $langs->transnoentities('HolidaysTaken'),
 				'RemainingBefore' 				=> $langs->transnoentities('RemainingBefore'),
+				'RemainingBeforeN' 				=> $langs->transnoentities('RemainingBeforeN'),
 				'AcquiredExercise' 				=> $langs->transnoentities('AcquiredExercise'),
 				'HolidaysTaken' 				=> $langs->transnoentities('totalHolidaysTaken'),
 				'HolidaysTakenN' 				=> $langs->transnoentities('totalHolidaysTakenN'),
