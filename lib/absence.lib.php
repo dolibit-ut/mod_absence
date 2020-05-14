@@ -2,7 +2,7 @@
 
 function pointeusePrepareHead() {
 	global $langs;
-
+	
 	return array(
 		array(dol_buildpath('/absence/pointeuse.php',1), $langs->trans('PunchClock'),'fiche')
 	);
@@ -11,22 +11,22 @@ function pointeusePrepareHead() {
 
 function absencePrepareHead(&$obj, $type='absence') {
 	global $user, $langs;
-
+	
 	switch ($type) {
 		case 'absence':
-
+			
 			if($obj->getId()>0) {
 				return array(
 					array(dol_buildpath('/absence/absence.php?id='.$obj->getId(),1)."&action=view", $langs->trans('Card'),'fiche')
 					,array(dol_buildpath('/absence/calendrierAbsence.php?idUser='.$user->id.'&id='.$obj->getId(),1), $langs->trans('Calendar'),'calendrier')
 					,array(dol_buildpath('/absence/document.php?id='.$obj->getId(),1), $langs->trans('Documents'),'document')
 				);
-
+				
 			}
 			else{
 				return array();
 			}
-
+			
 			break;
 		case 'presence':
 			if($obj->getId()>0) {
@@ -49,23 +49,23 @@ function absencePrepareHead(&$obj, $type='absence') {
 				array(dol_buildpath('/absence/presence.php?action=new',1), $langs->trans('Card'),'fiche')
 			);
 			break;
-
-
+		
+		
 	}
 }
 
 
 function compteurPrepareHead(&$obj, $type='compteur', $fk_user, $nomUser='', $prenomUser='') {
 	global $user, $langs;
-
+	
 	switch ($type) {
-
+		
 		case 'compteur':
 			//eif($user->rights->absence->myactions->modifierParamGlobalConges=="1"){
 			return array(
 				array(dol_buildpath('/absence/compteur.php?action=view&fk_user='.$fk_user.'&id='.$obj->getId(),1), $langs->trans('CounterOf') . ' ' . $nomUser . ' ' . $prenomUser, 'compteur')
 				,array(dol_buildpath('/absence/compteur.php?action=log&fk_user='.$fk_user.'&id='.$obj->getId(),1), $langs->trans('Log'), 'log')
-
+				
 			);
 			break;
 	}
@@ -74,19 +74,19 @@ function compteurPrepareHead(&$obj, $type='compteur', $fk_user, $nomUser='', $pr
 function adminCompteurPrepareHead(&$obj, $type='compteur') {
 	global $user, $langs;
 	switch ($type) {
-
+		
 		case 'compteur':
 			return array(
 			array(dol_buildpath('/absence/compteur.php?action=compteurAdmin',1), $langs->trans('HolidayCounter'), 'compteur')
 			);
-			break;
+			break;				
 	}
 }
 
 function adminCongesPrepareHead($type='compteur') {
 	global $user, $langs;
 	switch ($type) {
-
+		
 		case 'compteur':
 			return array(
 				array(dol_buildpath('/absence/adminConges.php',1), $langs->trans('GlobalHolidaysData'),'adminconges')
@@ -99,7 +99,7 @@ function adminCongesPrepareHead($type='compteur') {
 function adminRecherchePrepareHead(&$obj, $type='recherche') {
 	global $user;
 	switch ($type) {
-
+		
 		case 'recherche':
 			return array(
 				array(dol_buildpath('/absence/rechercheAbsence.php',1), $langs->trans('SearchAbsence'),'recherche')
@@ -117,27 +117,27 @@ function edtPrepareHead(&$obj, $type='absence') {
 	global $user, $langs,$conf;
 
 	switch ($type) {
-
+		
 		case 'emploitemps':
-
+		    
 		    // to return on default planning
 		    $PDOdb = new TPDOdb();
 		    $defaultEmploiTemps = new TRH_EmploiTemps();
 		    $defaultEmploiTemps->load_by_fkuser($PDOdb, $obj->fk_user);
-
+		    
 			$Tab=array(
 			    array(dol_buildpath(
 			        ($obj->getId() > 0 ? '/absence/emploitemps.php?action=view&id='.$defaultEmploiTemps->getId() : '/absence/emploitemps.php') ,1)
 					, $langs->trans('Schedule')
 					,'emploitemps')
 			);
-
+            
             if($conf->jouroff->enabled) $Tab[] = array(dol_buildpath('/jouroff/admin/jouroff_setup.php?fk_user='.$user->id,1), $langs->trans('HolidaysOrNoWorkingDays'),'joursferies');
-
+            
             return $Tab;
-
+            
 			break;
-
+				
 	}
 }
 
@@ -161,7 +161,7 @@ function reglePrepareHead(&$obj, $type='regle') {
 //fonction qui permet d'enregistrer le libellé d'une absence suivant son type
 function saveLibelle($type){ //TODO deprecated
 	global $langs;
-
+	
 	switch($type){
 		case 'rttcumule':
 			return $langs->trans('CumulatedDayOff');
@@ -241,7 +241,7 @@ function saveLibelle($type){ //TODO deprecated
 		case 'cppartiel':
 			return $langs->trans('HolidayPartialTime');
 		break;
-
+		
 	}
 }
 
@@ -249,14 +249,14 @@ function saveLibelle($type){ //TODO deprecated
 function saveCodeTypeAbsence(&$PDOdb, $type){ // TODO deprecated
 	$ta = new TRH_TypeAbsence;
 	$ta->load_by_type($PDOdb, $type);
-
-	return $ta->codeAbsence;
+	
+	return $ta->codeAbsence;					
 }
 
 //fonction permettant de retourner le libelle de l'état de l'absence (à Valider...)
 function saveLibelleEtat($etat){
 	global $langs;
-
+	
 	switch($etat){
 		case 'Avalider':
 			return $langs->trans('WaitingValidation');
@@ -281,7 +281,7 @@ function round2Virgule($variable){
 		return '0';
 	}else {
 		return number_format($variable,2,'.','');
-	}
+	} 
 }
 
 //retourne la date au format "d/m/Y"
@@ -292,7 +292,7 @@ function php2dmy($phpDate){
 
 //fonction permettant l'envoi de mail
 function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
-	global $db, $langs,$conf, $user;
+	global $db, $langs,$conf, $user;		
 
 	//$from = USER_MAIL_SENDER;
 	$from = !empty($user->email) ? $user->email : $conf->global->MAIN_MAIL_EMAIL_FROM;
@@ -303,17 +303,17 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 	/*
 	 * Mail destinataire
 	 */
-	$userAbsence = new User($db);
+	$userAbsence = new User($db);	
 	$userAbsence->fetch($absence->fk_user);
 
 	$sendto=$userAbsence->email;
 	$name=$userAbsence->lastname;
 	$firstname=$userAbsence->firstname;
-
+		
 
 	$TBS=new TTemplateTBS();
 	if($absence->etat=='Avalider'){
-
+		
 		if(!$presence){
 			$subject = $langs->transnoentities('HolidayRequestCreation');
 			$tpl = dol_buildpath('/absence/tpl/mail.absence.creation.tpl.php');
@@ -322,7 +322,7 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 			$subject = $langs->transnoentities('PresenceRequestCreation');
 			$tpl = dol_buildpath('/absence/tpl/mail.presence.creation.tpl.php');
 		}
-
+		
 		$message = $TBS->render($tpl
 			,array()
 			,array(
@@ -333,7 +333,7 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 					,'date_fin'=>php2dmy($absence->date_fin)
 					,'libelle'=>htmlentities($absence->libelle, ENT_COMPAT | ENT_HTML401, 'UTF-8')
 					,'libelleEtat'=>htmlentities($absence->libelleEtat, ENT_COMPAT | ENT_HTML401, 'UTF-8')
-
+					
 				)
 				,'translate' => array(
 					'Hello' => $langs->transnoentities('Hello'),
@@ -344,8 +344,8 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 				)
 			)
 		);
-
-
+	
+		
 	}
 	else if($absence->etat=='Validee'){
 		if(!$presence){
@@ -356,7 +356,7 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 			$subject = $langs->transnoentities('PresenceRequestAcceptance');
 			$tpl = dol_buildpath('/absence/tpl/mail.presence.acceptation.tpl.php');
 		}
-
+		
 		$message = $TBS->render($tpl
 			,array()
 			,array(
@@ -384,23 +384,23 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 			dol_include_once('/valideur/class/valideur.class.php');
 			$PDOdb=new TPDOdb;
 			$TValideur = TRH_valideur_groupe::getUserValideur($PDOdb, $user, $absence, 'Conges');
-
+			
 			foreach($TValideur as $fk_valideur) {
 				$valideur=new User($db);
 				$valideur->fetch($fk_valideur);
 				$valideur->getrights('absence');
-
+				
 				if(!empty($valideur->email) && !empty($valideur->rights->absence->myactions->IfAllValideurAlertedAlerteMe) && !$dont_send_mail) {
 					$mail = new TReponseMail($from,$valideur->email,'['.$langs->trans('AbsenceCopy').'] '. $subject,$message);
-
+			
 					$result = $mail->send(true, 'utf-8');
 				//	print "{$valideur->email}<br />";
 				}
-
+				
 			}
-
-		}
-
+			
+		}		
+		
 	}
 	else if($absence->etat=='Refusee'){
 		if(!$presence){
@@ -411,9 +411,9 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 			$subject = $langs->transnoentities('PresenceRequestDenied');
 			$tpl = dol_buildpath('/absence/tpl/mail.presence.refus.tpl.php');
 		}
-
+		
 		$absence->libelleEtat=saveLibelleEtat($absence->etat);
-
+		
 		$message = $TBS->render($tpl
 			,array()
 			,array(
@@ -443,10 +443,10 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 			)
 		);
 	}
-
+	
 	if(!empty($sendto) && !$dont_send_mail) {
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
-
+		
 		if(!empty($conf->global->ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL)) {
 			$fileics = absenceCreateICS($absence);
 			$mail->add_piece_jointe('absence-'.$absence->getId().'-'.date('Ymdhis').'.ics', $fileics, 'application/ics');
@@ -460,16 +460,16 @@ function mailConges(&$absence,$presence=false, $TPieceJointe = array()){
 		/*if($result) setEventMessage('Email envoyé avec succès à l\'utilisateur');
 		else setEventMessage('Erreur lors de l\'envoi du mail à l\'utilisateur');*/
 	}
-
-	return 1;
+	
+	return 1;	
 }
 function absenceCreateICS(&$absence){
 	global $langs;
-
+	
 
 	$tmfile = tempnam('/tmp','ICS');
 	file_put_contents($tmfile, $absence->getICS());
-
+	
 	return $tmfile;
 }
 //fonction permettant la récupération
@@ -490,26 +490,26 @@ function mailCongesValideur(&$PDOdb, &$absence,$presence=false, $TPieceJointe = 
 	if($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER && $absence->code=='nonjustifiee') {
 		if(!in_array($conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER, $TValideur))  $TValideur[] = $conf->global->RH_ABSENCE_ALERT_NONJUSTIF_USER;
 	}
-
+	
 	if(!empty($TValideur)){
 		foreach($TValideur as $idVal){
 			envoieMailValideur($PDOdb, $absence, $idVal,$presence, $TPieceJointe);
 		}
 	}
-
+	
 }
 
 
 //fonction permettant l'envoi de mail aux valideurs de la demande d'absence
 function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TPieceJointe = array()){
 	global $db, $langs, $user, $conf;
-
+		
 	$from = !empty($user->email) ? $user->email : $conf->global->MAIN_MAIL_EMAIL_FROM;
 	if(!empty($conf->global->RH_USER_MAIL_OVERWRITE)) $from = $conf->global->RH_USER_MAIL_OVERWRITE;
 
-	$userr = new User($db);
+	$userr = new User($db);  
 	$userr->fetch($absence->fk_user);
-
+	
 	$name=$userr->lastname;
 	$firstname=$userr->firstname;
 
@@ -517,7 +517,7 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TP
 	 * Mail destinataire
 	 */
 
-	$userV = new User($db);
+	$userV = new User($db);  
         $userV->fetch($idValideur);
 
         $nameValideur=$userV->lastname;
@@ -525,7 +525,7 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TP
 	$sendto = $userV->email;
 
 	$TBS=new TTemplateTBS();
-
+	
 	if($absence->etat == 'deleted') {
 	if(!$presence){
 		$subject = $langs->transnoentities('NewAbsenceRequestWaitingValidationDeleted');
@@ -535,7 +535,7 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TP
 		$subject = $langs->transnoentities('NewPresenceRequestWaitingValidationDeleted');
 		$tpl = dol_buildpath('/absence/tpl/mail.absence.deletedValideur.tpl.php');
 	}
-
+		
 	}
 	else{
 		if(!$presence){
@@ -546,10 +546,10 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TP
 			$subject = $langs->transnoentities('NewPresenceRequestWaitingValidation');
 			$tpl = dol_buildpath('/absence/tpl/mail.presence.creationValideur.tpl.php');
 		}
-
+		
 	}
-
-
+	
+	
 	$message = $TBS->render($tpl
 		,array()
 		,array(
@@ -573,16 +573,16 @@ function envoieMailValideur(&$PDOdb, &$absence, $idValideur,$presence=false, $TP
 			)
 		)
 	);
-
+	
 	$dont_send_mail = GETPOST('dontSendMail');
-
+	
 	if(!$dont_send_mail){
 		$mail = new TReponseMail($from,$sendto,$subject,$message);
 
         foreach($TPieceJointe as $pj) $mail->add_piece_jointe($pj, $conf->absence->dir_output.'/'.dol_sanitizeFileName($absence->rowid));
 
 	    	$result = $mail->send(true, 'utf-8');
-
+	    	
 		if($result) setEventMessage('Email envoyé avec succès au valideur '.$sendto);
                 else setEventMessage('Erreur lors de l\'envoi du mail à un valideur '.$sendto,'errors');
 	}
@@ -601,23 +601,23 @@ function additionnerHeure($dureeTotale, $dureeDiff){
 	list($heureT, $minuteT) = explode(':', $dureeTotale);
 	//echo "heureT : ".$heureT." minutesT : ".$minuteT;
 	list($heureD, $minuteD) = explode(':', $dureeDiff);
-
+	
 	$heureT=$heureT+$heureD;
 	$minuteT=$minuteT+$minuteD;
-
+	
 	while($minuteT>60){
 		$minuteT-=60;
 		$heureT+=1;
 	}
-
+	
 	return $heureT.":".$minuteT;
 }
 
-
+		
 //donne la différence entre 2 heures (respecter l'ordre début et fin)
 function difheure($heuredeb,$heurefin)
 	{
-
+		
 		$hd=explode(":",$heuredeb);
 		$hf=explode(":",$heurefin);
 		$hd[0]=(int)($hd[0]);$hd[1]=(int)($hd[1]);$hd[2]=(int)($hd[2]);
@@ -631,7 +631,7 @@ function difheure($heuredeb,$heurefin)
 
 
 function horaireMinuteEnCentieme($horaire){
-	list($heure, $minute) = explode(':', $horaire);
+	list($heure, $minute) = explode(':', $horaire);	
 	$horaireCentieme=$heure+$minute/60;
 	return $horaireCentieme;
 }
@@ -644,45 +644,43 @@ function getHistoryCompteurForUser($fk_user,$id_absence,$duree=null,$type=null, 
 global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 
 	if(!isset($PDOdb_getHistoryCompteurForUser)) $PDOdb_getHistoryCompteurForUser=new TPDOdb;
-
 	if(!isset($compteurCongeResteCurrentUser)) {
-
+		
 		$compteur =new TRH_Compteur;
 		$compteur->load_by_fkuser($PDOdb_getHistoryCompteurForUser, $fk_user);
 
 		$congePrecTotal = $compteur->acquisExerciceNM1 + $compteur->acquisAncienneteNM1 + $compteur->acquisHorsPeriodeNM1 + $compteur->reportCongesNM1;
 		$compteurCongeResteCurrentUser = $congePrecTotal - $compteur->congesPrisNM1;
-
-	}
-
+    }
+		
 	if(is_null($duree) || is_null($etat) || is_null($type)) {
 		$absence = new TRH_Absence;
 		$absence->load($PDOdb_getHistoryCompteurForUser, $id_absence);
-
+		
 		$duree = $absence->duree;
 		$etat = $absence->etat;
 		$type = $absence->type;
 	}
-
+		
 	if($etat!='Refusee' && $duree>0 && ($type=='conges' || $type=='cppartiel')) {
 		$compteurCongeResteCurrentUser+=$duree;
 		return $compteurCongeResteCurrentUser;
 		//return '<div align="right">'.number_format($compteurCongeResteCurrentUser,2,',',' ').'</div>';
 	}
 	else {
-		return 0;
+		return $compteurCongeResteCurrentUser;
 	}
-
+	
 }
 
 function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
-	global $db, $langs;
-
+	global $db, $langs;	
+	
 	if(empty($date_debut)) return false;
 
 	$date_debut = date('Y-m-d', Tools::get_time($date_debut));
 	$date_fin = date('Y-m-d', Tools::get_time($date_fin));
-
+	
 	$TStatPlanning = TRH_Absence::getPlanning($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
 //var_dump($TStatPlanning);
 	$first=true;
@@ -715,9 +713,9 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$congePrecReste=round2Virgule($congePrecTotal-$compteur->congesPrisNM1);
 
 		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN);
-
+		
 		$stat=array();
-
+		
 		foreach($TStat as $date=>$row) {
 
 			@$stat['presence']+=$row['nb_jour_presence'];
@@ -726,11 +724,11 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
 			@$stat['ferie']+=$row['nb_jour_ferie'] ;
 		}
-
+		
 		if(empty($u->lastname)) $u->lastname = $u->login;
-
+		
 		$html .= '<tr><td style="text-align:left;">'.$u->getNomUrl().'</td>';
-
+		
 		$html .= '<td>'.$stat['presence'].'</td>';
 		$html .= '<td>'.$stat['absence'].'</td>';
 		$html .= '<td>'.$stat['presence+ferie'].'</td>';
@@ -739,9 +737,9 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$html .= '<td>'.$congePrecReste.'</td>';
 		$html .= '<td>'.$congeCourantTotal.'</td>';
 		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td></tr>';
-
+		
 	}
-
+	
 
 	$html .= '</table><p>&nbsp;</p>';
 
@@ -750,17 +748,17 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 function getPlanningAbsence(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche) {
 global $conf,$db,$user;
-
+	
 		$html='';
-
+		
 		$t_current = $absence->date_debut_planning;
-
+		
 		$annee_old = '';
-
+		
 		$t_max= strtotime(date('Y-m-t',  $absence->date_fin_planning));
 
 		while($t_current<=$t_max) {
-
+			
 			$annee = date('Y', $t_current);
 			if($t_current==$absence->date_debut_planning) {
 //				$date_debut =date('d/m/Y', $absence->date_debut_planning);
@@ -770,9 +768,9 @@ global $conf,$db,$user;
 //				$date_debut =date('01/m/Y', $t_current);
 				$date_debut = strtotime(date('Y-m-01 00:00:00', $t_current));
 			}
-
+			
 			$t_fin_periode= strtotime(date('Y-m-t',  $t_current));
-
+			
 			if($t_fin_periode>=$absence->date_fin_planning) {
 //				$date_fin =date('d/m/Y', $absence->date_fin_planning);
 				$date_fin = strtotime(date('Y-m-d 23:59:59', $absence->date_fin_planning));
@@ -781,32 +779,32 @@ global $conf,$db,$user;
 //				$date_fin =date('d/m/Y', $t_fin_periode);
 				$date_fin = strtotime(date('Y-m-d 23:59:59', $t_fin_periode));
 			}
-
+			
 			if($annee!=$annee_old) $html.= '<p style="text-align:left;font-weight:bold">'.$annee.'</strong><br />';
-
+			
 			$html.= _planning($PDOdb, $absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $TStatPlanning );
-
+		
 			$annee_old = $annee;
-
-
+		
+			
 			$t_current=strtotime('+1 month', $t_current);
 		}
 
 		if($user->rights->absence->myactions->creerAbsenceCollaborateur) $html.= _recap_abs($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
-
+		
 		return $html;
-
+	
 }
 
 function _getSQLListValidation($userid)
 {
-	if (!class_exists('TRH_valideur_groupe'))
+	if (!class_exists('TRH_valideur_groupe')) 
 	{
 		if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', 1);
 		dol_include_once('/valideur/config.php');
 		dol_include_once('/valideur/class/valideur.class.php');
 	}
-
+	
 	return TRH_valideur_groupe::getSqlListObject('Conges', array('onlyValidable' => true));
 }
 
@@ -821,9 +819,9 @@ function _getSQLListValidation($userid)
  */
 function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
 	global $langs,$user,$db;
-
+	
 	dol_include_once('/valideur/class/valideur.class.php');
-
+	
 //on va obtenir la requête correspondant à la recherche désirée
 	// Test si somme des trois groupes = (99999 * 3) Tous les select sur Aucun alors recherche vide
 	if(array_sum($idGroupeRecherche) == 299997)$idGroupeRecherche = array(); //TODO mais c'est quoi cette merde ?!
@@ -832,7 +830,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 	$TPlanningUser=$absence->requetePlanningAbsence2($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
 //var_dump($TPlanningUser);exit;
-
+	
 	$TJourTrans=array(
 		1=>substr($langs->trans('Monday'),0,1)
 		,2=>substr($langs->trans('Tuesday'),0,1)
@@ -851,31 +849,30 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 		$planning=date('d/m/Y', $planning);
 		$std = new TObjetStd;
 		$std->set_date('date_jour', $planning);
-
+		
 		$html .=  '<td colspan="2">'.$TJourTrans[date('N', $std->date_jour)].' '.substr($planning,0,5).'</td>';
 		foreach($val as $id=>$TPresent){
 			$tabUserMisEnForme[$id][$planning]=$TPresent;
 		}
 	}
 	$html .=  "</tr>";
-	//var_dump($tabUserMisEnForme);
 	$TTotal=array();
-
+	
 	global $TCacheUser;
 	if(empty($TCacheUser)) $TCacheUser=array();
-
+	
 	$isValideur =  TRH_valideur_groupe::isValideur($PDOdb, $user->id, $idGroupeRecherche);
-
+	
 	foreach($tabUserMisEnForme as $idUser => $planning){
-
+		
 		if(empty($TCacheUser[$idUser])) {
 			$user_courant=new User($db);
 			$user_courant->fetch($idUser);
-			$TCacheUser[$idUser] = $user_courant;
+			$TCacheUser[$idUser] = $user_courant;	
 		}
 		$user_courant = $TCacheUser[$idUser];
-
-		$html .=  '<tr >';
+		
+		$html .=  '<tr >';		
 		$html .=  '<td style="text-align:right; font-weight:bold;height:20px;" nowrap="nowrap">'.$user_courant->getFullName($langs).'</td>';
 //$planning=array();
 
@@ -946,7 +943,9 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 						$TTotal[$dateJour]+=1;
 					}
 					else $subclass .= ' rouge';
-
+					if($ouinon->etat == 'Avalider'){
+					    $subclass .= ' lighter';
+                    }
 					if(!empty($class) || !empty($subclass)) $subclass.= ' classfortooltip';
 
 					if($ouinon->colorId > 0) $subclass.= ' persocolor'.$ouinon->colorId;
@@ -1028,14 +1027,14 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 
 		$html .=  "</tr>";
 	}
-
+	
 	$html .=  '<tr class="footer"><td>'.$langs->trans('TotalPresent').'</td>';
 	foreach($TTotal as $date=>$nb) {
 		$html .=  '<td align="center" colspan="2">'.$nb.'</td>';
 	}
-
+	
 	$html .=  '</tr></table><p>&nbsp;</p>';
-
+	
 	return $html;
 }
 
@@ -1062,18 +1061,18 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fieldid='rowid', $fieldref='ref', $morehtmlref='', $moreparam='', $nodbprefix=0, $morehtmlleft='', $morehtmlstatus='', $onlybanner=0, $morehtmlright='')
 {
     global $conf, $form, $user, $langs, $db;
-
+    
     $error = 0;
-
+    
     $maxvisiblephotos=1;
     $showimage=1;
     $entity=(empty($object->entity)?$conf->entity:$object->entity);
     $showbarcode=empty($conf->barcode->enabled)?0:($object->barcode?1:0);
     if (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && empty($user->rights->barcode->lire_advance)) $showbarcode=0;
     $modulepart='unknown';
+    
 
-
-
+    
     if (class_exists("Imagick"))
     {
         if ($object->element == 'propal')            $modulepart='propal';
@@ -1091,12 +1090,12 @@ function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fi
     $nophoto=dol_buildpath('absence/img/absenceOLD.png',1);
     $morehtmlleft.='<div class="floatleft inline-block valignmiddle divphotoref"><img class="photo'.$modulepart.($cssclass?' '.$cssclass:'').'" alt="No photo" border="0"'.($width?' width="'.$width.'"':'').' src="'.$nophoto.'"></div>';
 
-
-
-
-
+        
+    
+    
+    
     if ($showbarcode) $morehtmlleft.='<div class="floatleft inline-block valignmiddle divphotoref">'.$form->showbarcode($object).'</div>';
-
+    
 
 
     //$morehtmlstatus.=$langs->trans("Status").' ('.$langs->trans("Buy").') ';
@@ -1105,7 +1104,7 @@ function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fi
     } else {
         $morehtmlstatus.='<span class="statusrefbuy">'.$object->getLibStatut(5,1).'</span>';
     }
-
+    
 
     if($object->fk_user>0){
         $absUser = new User($db);
@@ -1113,18 +1112,18 @@ function dol_absence_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fi
             $morehtmlref.= ' - '.$absUser->getFullName($langs);
         }
     }
-
-
+    
+    
     $morehtmlref.='<div class="refidno">'.dol_print_date($object->date_debut).' '.$object->TddMoment[$object->ddMoment].' - '.dol_print_date($object->date_fin).' '.$object->TddMoment[$object->dfMoment].'</div>';
     $morehtmlref.='<div class="refidno">'.round2Virgule($object->duree).' '.($object->duree>1?$langs->trans('Days'):$langs->trans('Day')).'</div>';
-
+    
     if (! empty($conf->global->MAIN_SHOW_TECHNICAL_ID))
     {
         $morehtmlref.='<div style="clear: both;"></div><div class="refidno">';
         $morehtmlref.=$langs->trans("TechnicalID").': '.$object->id;
         $morehtmlref.='</div>';
     }
-
+    
     print '<div class="'.($onlybanner?'arearefnobottom ':'arearef ').'heightref valignmiddle" width="100%">';
     print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $morehtmlright);
     print '</div>';
