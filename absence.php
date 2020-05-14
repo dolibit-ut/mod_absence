@@ -294,7 +294,7 @@ function _liste(&$PDOdb, &$absence) {
 }
 function _historyCompteurInForm($duree) {
 
-	if($duree>0) return '<div align="right">'.number_format($duree,2,',',' ').'</div>';
+	if(is_numeric($duree)) return '<div align="right">'.number_format($duree,2,',',' ').'</div>';
 	else return '';
 
 }

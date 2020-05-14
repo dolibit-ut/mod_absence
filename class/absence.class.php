@@ -2908,6 +2908,7 @@ END:VCALENDAR
 			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
 			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
 			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
+			$TabAbsence[$row->fk_user][$k]['etat']=$row->etat;
 
 			$k++;
 		}
@@ -3053,6 +3054,7 @@ END:VCALENDAR
 						$moment->description = $tabAbs['commentaire'];
 						$moment->colorId = $tabAbs['colorId'];
 						$moment->typeAbs = $tabAbs['typeAbs'];
+						$moment->etat = $tabAbs['etat'];
 						$moment->date = date('Y-m-d', $time_debut_inc);
 
 						$moment->idAbsence = $tabAbs['idAbsence'];
