@@ -532,7 +532,8 @@ class TRH_Absence extends TObjetStd {
                         if(in_array($typeAbs->typeAbs, TRH_Absence::$TAbsenceTypeDecompteConges)) $totalConges+=0.5;
                     }
                 } else if(count($abs['typeAbsence']) == 1 && (in_array($abs['typeAbsence'][0]->typeAbs, TRH_Absence::$TAbsenceTypeDecompteConges))) {
-                    $totalConges++;
+                    if($abs['typeAbsence'][0]->ddMoment == $abs['typeAbsence'][0]->dfMoment) $totalConges+=0.5;
+                    else $totalConges++;
                 }
             }
         }

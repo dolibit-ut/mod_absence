@@ -449,8 +449,8 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'acquisRecuperation'=>$langs->transnoentities('acquisRecuperation'),
 				'AbsenceNM1'=>$langs->transnoentities('AbsenceNM1'),
 				'AbsenceN'=>$langs->transnoentities('AbsenceN'),
-				'totalHolidaysTakenNM1Past'=>$formStd->textwithpicto($langs->transnoentities('totalHolidaysTakenNM1Past'),$langs->transnoentities('pictoTotalCongesPoseNM1', date('d/m/Y',strtotime($dateStartPoseNM1)), date('d/m/Y',strtotime($dateEndPoseNM1)))),
-				'totalHolidaysTakenNM1Future'=>$formStd->textwithpicto($langs->transnoentities('totalHolidaysTakenNM1Future'),$langs->transnoentities('pictoTotalCongesPrisNM1', date('d/m/Y',strtotime($dateStartPrisNM1)), date('d/m/Y',strtotime($dateEndPrisNM1)))),
+				'totalHolidaysTakenNM1Past'=>$formStd->textwithpicto($langs->transnoentities('totalHolidaysTakenNM1Future'),$langs->transnoentities('pictoTotalCongesPoseNM1', date('d/m/Y',strtotime($dateStartPoseNM1)), date('d/m/Y',strtotime($dateEndPoseNM1)))),
+				'totalHolidaysTakenNM1Future'=>$formStd->textwithpicto($langs->transnoentities('totalHolidaysTakenNM1Past'),$langs->transnoentities('pictoTotalCongesPrisNM1', date('d/m/Y',strtotime($dateStartPrisNM1)), date('d/m/Y',strtotime($dateEndPrisNM1)))),
 				'langs'=>$langs
 			)
 		)	
