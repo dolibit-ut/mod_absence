@@ -458,6 +458,7 @@ class TRH_CompteurLog extends TObjetStd {
 //TRH_ABSENCE
 //classe pour la définition d'une absence
 class TRH_Absence extends TObjetStd {
+    public static $TAbsenceTypeDecompteConges = array('conges','cppartiel');
 	function __construct() { /* declaration */
 		global $user,$conf, $langs;
 
@@ -519,6 +520,24 @@ class TRH_Absence extends TObjetStd {
 		
 		$this->level = 1;
 	}
+
+	static function getUserPeriodTotalConges(&$PDOdb, $fk_user, $date_start, $date_end) {
+
+        $TAbs =TRH_Absence::getPlanning($PDOdb,0, $fk_user, $date_start, $date_end);
+	    $totalConges = 0;
+        foreach($TAbs[$fk_user] as $dt => $abs) {
+            if(! empty($abs['absence']) && $abs['estUnJourTravaille']) {
+                if(count($abs['typeAbsence']) > 1) {
+                    foreach($abs['typeAbsence'] as $typeAbs) {
+                        if(in_array($typeAbs->typeAbs, TRH_Absence::$TAbsenceTypeDecompteConges)) $totalConges+=0.5;
+                    }
+                } else if(count($abs['typeAbsence']) == 1 && (in_array($abs['typeAbsence'][0]->typeAbs, TRH_Absence::$TAbsenceTypeDecompteConges))) {
+                    $totalConges++;
+                }
+            }
+        }
+        return $totalConges;
+    }
 	
 	function getName($user){
 	    $return = '';
@@ -2882,6 +2901,7 @@ END:VCALENDAR
 			$TabAbsence[$row->fk_user][$k]['date_fin']=$row->date_fin;
 			$TabAbsence[$row->fk_user][$k]['idUser']=$row->fk_user;
 			$TabAbsence[$row->fk_user][$k]['type']=$row->libelle;
+			$TabAbsence[$row->fk_user][$k]['typeAbs']=$row->type;
 			$TabAbsence[$row->fk_user][$k]['ddMoment']=$row->ddMoment;
 			$TabAbsence[$row->fk_user][$k]['dfMoment']=$row->dfMoment;
 			$TabAbsence[$row->fk_user][$k]['isPresence']=$row->isPresence;
@@ -3033,6 +3053,7 @@ END:VCALENDAR
 						$moment->label = $tabAbs['type'];
 						$moment->description = $tabAbs['commentaire'];
 						$moment->colorId = $tabAbs['colorId'];
+						$moment->typeAbs = $tabAbs['typeAbs'];
 						$moment->etat = $tabAbs['etat'];
 						$moment->date = date('Y-m-d', $time_debut_inc);
 
