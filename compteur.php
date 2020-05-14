@@ -421,6 +421,7 @@ function _fiche(&$PDOdb, &$compteur, $mode) {
 				'RemainingBefore' 				=> $langs->transnoentities('RemainingBefore'),
 				'AcquiredExercise' 				=> $langs->transnoentities('AcquiredExercise'),
 				'HolidaysTaken' 				=> $langs->transnoentities('totalHolidaysTaken'),
+				'HolidaysTakenN' 				=> $langs->transnoentities('totalHolidaysTakenN'),
 				'NbDaysAcquiredByMonth' 		=> $langs->transnoentities('NbDaysAcquiredByMonth'),
 				'LastClosingHoliday' 			=> $langs->transnoentities('LastClosingHoliday'),
 				'CounterCumulatedDayOff' 		=> $langs->transnoentities('Counter').' '.$TTypeAbsence['rttcumule'],

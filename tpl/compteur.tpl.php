@@ -79,7 +79,7 @@
 				</tr>
 				
 				<tr>
-					<td>[translate.HolidaysTaken;strconv=no;protect=no]</td>
+					<td>[translate.HolidaysTakenN;strconv=no;protect=no]</td>
 					<td>[congesCourant.congesPris;strconv=no;protect=no]</td>
 				</tr>
 				
