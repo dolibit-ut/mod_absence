@@ -594,6 +594,20 @@ class TRH_Absence extends TObjetStd {
 
 	}
 
+    function updateRecup() {
+        global $conf;
+        if($conf->global->RH_RECUP_RULES == 'AUTO') {
+            $PDOdb=new TPDOdb;
+            $duree = $this->getNbJourPresence($PDOdb);
+            //	var_dump($object->isPresence,$duree);exit;
+            if($duree > 0) {
+                $compteur=new TRH_Compteur;
+                if($compteur->load_by_fkuser($PDOdb, $this->fk_user)) {
+                    $compteur->add($PDOdb, 'recup', -$duree, 'Récupération suite à présence un jour non travaillé '.dol_print_date($this->date_debut));
+                }
+            }
+        }
+    }
 	//permet la récupération des règles liées à un utilisateur
 	//utile lors de l'affichage à la création d'une demande d'absence
 	function recuperationRegleUser(&$PDOdb, $fk_user){
@@ -732,8 +746,8 @@ class TRH_Absence extends TObjetStd {
 		$this->libelleEtat = $langs->trans('Accepted');
 		$this->date_validation=time();
 		$this->fk_user_valideur = $fk_valideur;
-		$this->isPresence = $isPresence;
-
+		if(!empty($isPresence)) $this->isPresence = $isPresence;
+        if(!empty($this->isPresence)) $this->updateRecup();
 		// Appel des triggers
 		dol_include_once('/core/class/interfaces.class.php');
 		$interface = new Interfaces($db);
