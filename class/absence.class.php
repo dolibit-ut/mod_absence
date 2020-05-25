@@ -526,7 +526,7 @@ class TRH_Absence extends TObjetStd {
         $TAbs =TRH_Absence::getPlanning($PDOdb,0, $fk_user, $date_start, $date_end);
 	    $totalConges = 0;
         foreach($TAbs[$fk_user] as $dt => $abs) {
-            if(! empty($abs['absence']) && $abs['estUnJourTravaille']) {
+            if(! empty($abs['absence']) && $abs['estUnJourTravaille'] === 'OUI') {
                 if(count($abs['typeAbsence']) > 1) {
                     foreach($abs['typeAbsence'] as $typeAbs) {
                         if(in_array($typeAbs->typeAbs, TRH_Absence::$TAbsenceTypeDecompteConges)) $totalConges+=0.5;
