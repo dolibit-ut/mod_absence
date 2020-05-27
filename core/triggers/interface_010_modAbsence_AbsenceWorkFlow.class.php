@@ -239,27 +239,7 @@ class InterfaceAbsenceWorkflow
 				}
 
 			}
-			else{
-				// type presence
-				
-				if($conf->global->RH_RECUP_RULES == 'AUTO') {
-					
-					//TODO check emploi du temps utilisateur pour voir demie journée normalement non travaillée et détermination compteur de récup en +	
-					$PDOdb=new TPDOdb;
-					$duree = $object->getNbJourPresence($PDOdb);
-				//	var_dump($object->isPresence,$duree);exit;
-					if($duree > 0) {
-						$compteur=new TRH_Compteur;
-						if($compteur->load_by_fkuser($PDOdb, $object->fk_user)) {
-							$compteur->add($PDOdb, 'recup', -$duree, 'Récupération suite à présence un jour non travaillé '.dol_print_date($object->date_debut));
-							setEventMessage("Compteur de récupération incrémenté de ".$duree." jour(s)");
-						}
-					}
-					
-				}
-				
-				
-			}
+
 			
 			return 0;
 			
