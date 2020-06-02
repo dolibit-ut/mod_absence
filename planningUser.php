@@ -250,7 +250,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	}
 	table.planning tr td.jourFerie {
 			background:none;
-			background-color:#666 !important;
+			background-color:#666;
 	}
 
 	table.planning tr.footer {
