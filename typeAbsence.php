@@ -48,7 +48,7 @@
 	$TAbsenceType = TRH_TypeAbsence::getList($ATMdb);
 
 	$absenceTypeDummy = new TRH_TypeAbsence;
-
+    unset($absenceTypeDummy->TUnite['heure']);
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 	$form->Set_typeaff('edit');
 	echo $form->hidden('action', 'save');
