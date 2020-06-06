@@ -130,7 +130,7 @@ class TRH_Compteur extends TObjetStd {
 		parent::add_champs('rttNonCumuleTotal',array('type'=>'float'));
 		parent::add_champs('rttNonCumuleAcquis',array('type'=>'float'));
 		parent::add_champs('rttNonCumulePrisN1',array('type'=>'float'));
-		
+
 
 		//RTT mensuels
 		parent::add_champs('rttAcquisMensuelInit',array('type'=>'float'));
@@ -196,7 +196,7 @@ class TRH_Compteur extends TObjetStd {
 		$this->congesPrisN=0;
 		$this->anneeNM1=$anneePrec;
 		$this->rttTypeAcquisition='Annuel';
-		
+
 		$this->rttAcquisMensuelInit=!empty($conf->global->RH_NB_RTT_MENSUEL) ? $conf->global->RH_NB_RTT_MENSUEL : 0;
 		$this->rttAcquisAnnuelCumuleInit=!empty($conf->global->RH_NB_RTT_ANNUEL) ? $conf->global->RH_NB_RTT_ANNUEL : 0;
 		$this->rttAcquisAnnuelNonCumuleInit=!empty($conf->global->RH_NB_RTTNC_ANNUEL) ? $conf->global->RH_NB_RTTNC_ANNUEL : 0;
@@ -219,24 +219,24 @@ class TRH_Compteur extends TObjetStd {
 		$this->rttannee=$annee;
 		$this->nombreCongesAcquisMensuel=$conf->global->RH_NB_CONGES_MOIS;
 		$this->nombrecongesAcquisAnnuel=$conf->global->RH_NB_CONGES_ANNUEL;
-		
+
 		// Permet de claculer la bonne année de cloture pour la création d'un compteur
 		$today = dol_now();
-		
+
 		$time_rtt_cloture = strtotime($conf->global->RH_DATE_RTT_CLOTURE);
 		$date_rtt_cloture = date('Y');
 		if (date('md', $today) > date('md', $time_rtt_cloture)) $date_rtt_cloture += 1; //+1 year
 		$date_rtt_cloture .= '-'.date('m-d', $time_rtt_cloture);
-		
+
 		$time_conges_cloture = strtotime($conf->global->RH_DATE_CONGES_CLOTURE);
 		$date_conges_cloture = date('Y');
 		if (date('md', $today) > date('md', $time_conges_cloture)) $date_conges_cloture += 1; //+1 year
 		$date_conges_cloture .= '-'.date('m-d', $time_conges_cloture);
-		
+
 		$this->date_rttCloture=strtotime($date_rtt_cloture);
 		$this->date_congesCloture=strtotime($date_conges_cloture);
-		
-		
+
+
 		$this->reportRtt=0;
 
 		$this->is_archive=0;
@@ -359,10 +359,10 @@ class TRH_Compteur extends TObjetStd {
 
 		if($type=='rttcumule'){
 			list($congesPrisNM1, $congesPrisN) = $duree;
-			
+
 			$this->rttCumulePris+= $congesPrisNM1;
 			$this->rttCumulePrisN1+= $congesPrisN;
-			
+
 			$this->rttCumuleTotal -= $congesPrisNM1+ $congesPrisN;
 
 			$this->save($PDOdb);
@@ -373,12 +373,12 @@ class TRH_Compteur extends TObjetStd {
 		}
 		else if($type=='rttnoncumule') {
 			list($congesPrisNM1, $congesPrisN) = $duree;
-			
+
 			$this->rttNonCumulePris+= $congesPrisNM1;
 			$this->rttNonCumulePrisN1+= $congesPrisN;
-			
+
 			$this->rttNonCumuleTotal-= $congesPrisNM1+ $congesPrisN;
-			
+
 			$this->save($PDOdb);
 
 			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
@@ -513,11 +513,11 @@ class TRH_Absence extends TObjetStd {
 		$this->TTypeAbsenceAdmin=$this->TTypeAbsenceUser=$this->TTypeAbsencePointeur=array(); //cf. loadTypeAbsencePerTypeUser
 
 		$this->typeAbsence=null;
-		
+
 		$this->date_hourStart = strtotime(date('Y-m-d 8:00:00'));
 		$this->date_hourEnd = strtotime(date('Y-m-d 17:00:00'));
 		$this->date_lunchBreak = strtotime(date('Y-m-d 1:30:00'));
-		
+
 		$this->level = 1;
 	}
 
@@ -539,18 +539,18 @@ class TRH_Absence extends TObjetStd {
         }
         return $totalConges;
     }
-	
+
 	function getName($user){
 	    $return = '';
-	    
+
 	    $PDOdb=new TPDOdb;
-	    
+
 	    $typeAbsence=new TRH_TypeAbsence;
 	    if($typeAbsence->load_by_type($PDOdb, $this->type))
 	    {
 	        $return = $typeAbsence->_getName($user, $this->isPresence, $this->libelle, $this->fk_user);
 	    }
-	    
+
 	    return $return;
 	}
 
@@ -559,7 +559,7 @@ class TRH_Absence extends TObjetStd {
 		global $db, $user,$langs,$conf;
 
 		$this->recrediterHeure($PDOdb);
-		
+
 		dol_include_once('/valideur/class/valideur.class.php');
 		dol_include_once('/core/class/interfaces.class.php');
 
@@ -589,9 +589,9 @@ class TRH_Absence extends TObjetStd {
 	function valid(&$PDOdb)
 	{
 		global $user,$conf;
-		
+
 		$canValidate = $user->rights->absence->myactions->valideurConges;
-		
+
 		if (!empty($conf->valideur->enabled))
 		{
 			define('INC_FROM_DOLIBARR', true);
@@ -601,7 +601,7 @@ class TRH_Absence extends TObjetStd {
 			$canValidate = TRH_valideur_groupe::checkCanValidate($this, $user, $conf->entity, 'Conges');
 			if($this->level != $current_level) mailCongesValideur($PDOdb,$this); //On a changé de niveau
 		}
-		
+
 		if ($canValidate > 0)
 		{
 			$this->setAcceptee($PDOdb, $user->id);
@@ -704,7 +704,7 @@ class TRH_Absence extends TObjetStd {
 		$compteur->load_by_fkuser($PDOdb, $userConcerne);
 
 		$dateCloture = ($this->type=='rttcumule' || $this->type=='rttnoncumule' ) ? $compteur->date_rttCloture :  $compteur->date_congesCloture;
-		
+
 		$dureeAbsenceCourante = $this->calculDureeAbsenceParAddition($PDOdb, $dateCloture);
 
 		$conges_nm1_restants = $compteur->acquisExerciceNM1+$compteur->acquisAncienneteNM1+$compteur->acquisHorsPeriodeNM1+$compteur->reportCongesNM1-$compteur->congesPrisNM1;
@@ -828,7 +828,7 @@ class TRH_Absence extends TObjetStd {
 		return $saveReturn;
 	}
 
-	
+
 
 	/**
 	 *	Return status label of Order
@@ -840,7 +840,7 @@ class TRH_Absence extends TObjetStd {
 	{
 	    return $this->LibStatut($this->etat, $mode);
 	}
-	
+
 	/**
 	 *	Return label of status
 	 *
@@ -853,7 +853,7 @@ class TRH_Absence extends TObjetStd {
 	function LibStatut($statut,$mode)
 	{
 	    global $langs, $conf;
-	    
+
 	    if($mode == 2 || $mode == 3 || $mode == 4 || $mode == 5)
 	    {
 	        if ($statut=='Refusee') return img_picto($this->libelleEtat,'statut5').' '.$this->libelleEtat;
@@ -864,9 +864,9 @@ class TRH_Absence extends TObjetStd {
 	    {
 	        return $this->libelleEtat;
 	    }
-	    
+
 	}
-	
+
 	/*
 	 * Récupère la liste des jours fériés sur la période d'absence
 	 */
@@ -951,23 +951,23 @@ class TRH_Absence extends TObjetStd {
 		/*
 		if($this->isPresence) {
 			dol_include_once('/core/lib/date.lib.php');
-			
+
 			list($h1, $m1) = explode(':', date('H:i',$this->date_hourStart));
 			list($h2, $m2) = explode(':', date('H:i',$this->date_hourEnd));
 			list($h3, $m3) = explode(':', date('H:i',$this->date_lunchBreak));
-			
+
 			$time1 = convertTime2Seconds($h1, $m1);
 			$time2 = convertTime2Seconds($h2, $m2);
 			$time3 = convertTime2Seconds($h3, $m3);
-			
+
 			$time_total = $time2 - $time1 - $time3;
-			
+
 			if($time_total>0) {
 				var_dump($time_total, $time_total / 3600 / 2);exit;
 				return $time_total / 3600 / 2; // en heure et à la demie journée car toujours ainsi
-				
+
 			}
-			
+
 		}
 		*/
 		return $emploiTemps->getHeurePeriode($current_day,$ampm);
@@ -996,11 +996,11 @@ class TRH_Absence extends TObjetStd {
 		$typeAbs->load_by_type($PDOdb, $this->type);
 
 		while($t_current<=$t_end) {
-		    
+
 		    // il faut vérifier l'emploi du temps chaque jour à cause des palnnings dans le future
 		    $emploiTemps = new TRH_EmploiTemps;
 		    $emploiTemps->load_by_fkuser($PDOdb, $this->fk_user, !empty($t_current)?date('Y-m-d', $t_current):'');
-		    
+
 			$current_day = $TJourSemaine[(int)date('w', $t_current)];
 			if(!@in_array($current_day, $TJourNonTravailleEntreprise)) {
 
@@ -1862,7 +1862,7 @@ class TRH_Absence extends TObjetStd {
 		$user->fetch($this->fk_user);
 
 		if($user->id>0) {
-			
+
 			if (!class_exists('UserGroup')) {
 				require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 			}
@@ -2456,7 +2456,7 @@ END:VCALENDAR
 	static function getPlanning(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $filters = array()){
 		global $conf;
 		dol_include_once('/absence/class/pointeuse.class.php');
-		
+
 			$abs = new TRH_Absence;
 
 			$t_current = strtotime($date_debut);
@@ -2595,7 +2595,7 @@ END:VCALENDAR
 		global $conf;
 
 		if(!is_array($idGroupeRecherche)) $idGroupeRecherche = array($idGroupeRecherche);
-		
+
 		$date_debut = strtotime(str_replace("/","-",$date_debut));
 		$date_fin = strtotime(str_replace("/","-",$date_fin));
 
@@ -2609,15 +2609,15 @@ END:VCALENDAR
 			, 'typeAbsence' => 'Tous'
 			, 'statut' => 1
 		);
-		
+
 		if (!empty($extra_params)) $params += $extra_params;
-		
+
 		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
-			
+
 		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
-		
+
 		$TRow = $PDOdb->ExecuteAsArray($sql);
-		
+
 		// on traite la recherche pour le planning
 		$k=0;
 		$TabLogin = $TabAbsence = array();
@@ -2638,7 +2638,7 @@ END:VCALENDAR
 		}
 
 		unset($TRow);
-		
+
 		//on récupère les différents utilisateurs concernés par la recherche
 
 		if($idUserRecherche>0) {
@@ -2702,7 +2702,7 @@ END:VCALENDAR
 			}
 
 		}
-		
+
 
 //		$jourFin=strtotime(str_replace("/","-",$date_fin));
 //		$jourDebut=strtotime(str_replace("/","-",$date_debut));
@@ -2720,7 +2720,7 @@ END:VCALENDAR
 				$jourDebut=strtotime('+1day',$jourDebut);
 			}
 		}
-	
+
 		foreach ($TabLogin as $id => $username)
 		{
 			$jourDebut = $date_debut;
@@ -2729,7 +2729,7 @@ END:VCALENDAR
 				foreach ($TabAbsence[$id] as $tabAbs)
 				{
 					$jourDebut = $date_debut;
-					
+
 					//print_r($tabAbs[$k]);exit;
 					if (isset($tabAbs[0]))
 					{
@@ -2745,7 +2745,7 @@ END:VCALENDAR
 									{
 										$time_debut = strtotime($value['date_debut']);
 										$time_fin = strtotime($value['date_fin']);
-										
+
 										$moment = new TRH_absenceDay;
 										if ($time_debut <= $jourDebut && $time_fin >= $jourDebut)
 										{
@@ -2800,7 +2800,7 @@ END:VCALENDAR
 								{
 									$time_debut = strtotime($tabAbs['date_debut']);
 									$time_fin = strtotime($tabAbs['date_fin']);
-									
+
 									$moment = new TRH_absenceDay;
 									if ($time_debut <= $jourDebut && $time_fin >= $jourDebut)
 									{
@@ -2862,10 +2862,10 @@ END:VCALENDAR
 		//print_r($TRetour);
 		return $TRetour;
 	}
-	
+
 	/**
 	 * Ré-écriture de requetePlanningAbsence() qui est encore utilisé dans absence.lib.php ainsi que dans le module "report" => "report_atm.php:l741"
-	 * 
+	 *
 	 * @return array \TRH_absenceDay
 	 */
 	function requetePlanningAbsence2(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin, $extra_params=array())
@@ -2901,12 +2901,12 @@ END:VCALENDAR
 		if (!empty($extra_params)) $params = array_merge($params, $extra_params);
 
 		if (!empty($conf->global->ABSENCE_FILTER_ON_LDAP_ENTITY_LOGIN)) $params['extrafields']['ue.ldap_entity_login'] = $conf->entity;
-			
+
 		$sql = TRH_valideur_groupe::getSqlListObject('Conges', $params);
 		$sql.= ' ORDER BY r.fk_user, r.date_debut ASC, r.ddMoment DESC';
 //		echo $sql;exit;
 		$TRow = $PDOdb->ExecuteAsArray($sql);
-		
+
 		// on traite la recherche pour le planning
 		$k=0;
 		$TabLogin = $TabAbsence = array();
@@ -3008,7 +3008,7 @@ END:VCALENDAR
 				$jourDebut=strtotime('+1day',$jourDebut);
 			}
 		}
-	
+
 		foreach ($TabLogin as $id => $username)
 		{
 			$jourDebut = $date_debut;
@@ -3053,7 +3053,7 @@ END:VCALENDAR
 								else $moment->PM = true;
 							}
 						}
-						else if ($time_debut_inc == $time_debut) 
+						else if ($time_debut_inc == $time_debut)
 						{
 							if ($tabAbs['ddMoment'] == 'matin') $moment->DAM = $moment->AM = true;
 							else $moment->DPM = $moment->PM = true;
@@ -3098,13 +3098,13 @@ END:VCALENDAR
 //		var_dump($TValideur); exit;
 		return $TValideur;
 	}
-	
+
 	public function getNextTValideur(&$PDOdb)
 	{
 		global $db;
-		
+
 		if ($this->getId() <= 0) return array();
-		
+
 		$u = new User($db);
 		$u->fetch($this->fk_user);
 		$TUser = array($u);
@@ -3689,24 +3689,24 @@ class TRH_TypeAbsence extends TObjetStd {
 		return $Tab;
 
 	}
-	
+
 	/*
 	 * Return absence name coresponding to user rights
 	 */
 	function getName($user, $showUserID = 0){
 	    global $langs;
-	    
+
 	    return self::_getName($user, $this->isPresence, $this->libelleAbsence, $showUserID);
 	}
-	
+
 	static function _getName($user, $isPresence, $libelleAbsence, $showUserID = 0){
 	    global  $langs;
-	    
+
 	    if(class_exists('TRH_valideur_groupe')){
 	       $PDOdb=new TPDOdb;
 	       $TGroupValidation = TRH_valideur_groupe::getTLevelValidation($PDOdb, $user, 'Conges'); // si l'utilisateur est valideur il doit voir le type d'absence
 	    }
-	    
+
 	    if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation) || $showUserID == $user->id) {
 	        return $libelleAbsence;
 	    }
