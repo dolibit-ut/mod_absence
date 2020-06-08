@@ -356,21 +356,22 @@
 				$("#date_debut").attr('onchange', $("#date_debut").attr('onchange')+" ; comparerDates();" );
 				$("#date_fin").attr('onchange', $("#date_fin").attr('onchange')+" ; comparerDates();" );
 
-				$("#ddMoment").change(comparerDates);
-				$("#dfMoment").change(comparerDates);
+				$("#ddMoment").on('change',comparerDates);
+				$("#dfMoment").on('change',comparerDates);
 
 				$("#type").change();
+				$("#fk_user").change();
 
 				loadRecapCompteur();
 				loadRecapAbsence()
 			});
 
-		$('#fk_user').change(function(){
+		$('#fk_user').on('change',function(){
 				loadRecapCompteur();
 				loadRecapAbsence()
 		});
 
-		$("#type").change(function() {
+		$("#type").on('change',function() {
 		   var TUnsecable = [ [absenceCourante.unsecableIds;protect=no;strconv=no] ];
 
 		   $("#ddMoment,#dfMoment").prop("disabled",false);

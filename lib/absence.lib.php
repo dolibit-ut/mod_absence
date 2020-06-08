@@ -674,7 +674,7 @@ global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 }
 
 function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
-	global $db, $langs;
+	global $db, $langs, $hookmanager;
 
 	if(empty($date_debut)) return false;
 
@@ -740,8 +740,23 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 	}
 
-
 	$html .= '</table><p>&nbsp;</p>';
+
+	if (is_object($hookmanager))
+	{
+		$hookmanager->initHooks(array('absenceInterface'));
+
+		$parameters = array(
+			'html' => $html
+			,'TStatPlanning' => $TStatPlanning
+			,'idGroupeRecherche'=> $idGroupeRecherche
+		);
+
+		// Note that $action and $object may be modified by some hooks
+		$reshook = $hookmanager->executeHooks('getRecapAbsence', $parameters, $object, $action);
+		if (empty($reshook)) $html.= $hookmanager->resPrint;
+		else if ($reshook > 0) $html = $hookmanager->resPrint;
+	}
 
 	return $html;
 }
@@ -1047,6 +1062,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 			,'TPlanningUser' => $TPlanningUser
 			,'TJourTrans' => $TJourTrans
 			,'isValideur' => $isValideur
+			,'idGroupeRecherche'=> $idGroupeRecherche
 		);
 // Note that $action and $object may be modified by some hooks
 		$reshook = $hookmanager->executeHooks('getPlanningAbsence', $parameters, $object, $action);

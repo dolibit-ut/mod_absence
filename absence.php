@@ -800,7 +800,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 	$userAbsenceVisu = '';
 //	var_dump($droitsCreation);
 	if($droitsCreation==1) {
-		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,$absence->fk_user);
+		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,array($absence->fk_user));
 		else $userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 
 	}
