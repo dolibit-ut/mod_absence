@@ -700,6 +700,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 	$html .=    '<td>' . $langs->trans('RemainingBeforeShort') . '</td>
 				<td>' . $langs->trans('RemainingCurrent') . '</td>
 				<td>' . $langs->trans('acquisRecuperationShort') . '</td>
+				<td>' . $langs->trans('soldeRestant') . '</td>
 			</tr>';
 
 	foreach($TStatPlanning as $idUser=>$TStat) {
@@ -738,7 +739,9 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
         }
 		$html .= '<td>'.$congePrecReste.'</td>';
 		$html .= '<td>'.$congeCourantTotal.'</td>';
-		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td></tr>';
+		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td>';
+		$soldeRestant = price2num($congePrecReste) + price2num($congeCourantTotal) + price2num(round2Virgule($compteur->acquisRecuperation));
+		$html .= '<td>'.round2Virgule($soldeRestant).'</td></tr>';
 
 	}
 
