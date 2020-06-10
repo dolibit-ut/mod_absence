@@ -674,7 +674,7 @@ global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 }
 
 function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
-	global $db, $langs;
+	global $db, $langs, $conf;
 
 	if(empty($date_debut)) return false;
 
@@ -693,11 +693,11 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 	$html .= '<tr>
 				<td>' . $langs->trans('Name') . '</td>
 				<td>' . $langs->trans('PresenceDay') . '</td>
-				<td>' . $langs->trans('AbsenceDay') . '</td>
-				<td>' . $langs->trans('Presence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
+				<td>' . $langs->trans('AbsenceDay') . '</td>';
+	if(empty($conf->global->ABSENCE_HIDE_PUBLIC_HOLIDAY_DAY)) $html .=	'<td>' . $langs->trans('Presence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
 				<td>' . $langs->trans('Absence') . ' + ' . $langs->trans('PublicHolidayDay') . '</td>
-				<td>' . $langs->trans('PublicHolidayDay') . '</td>
-				<td>' . $langs->trans('RemainingBeforeShort') . '</td>
+				<td>' . $langs->trans('PublicHolidayDay') . '</td>';
+	$html .=    '<td>' . $langs->trans('RemainingBeforeShort') . '</td>
 				<td>' . $langs->trans('RemainingCurrent') . '</td>
 				<td>' . $langs->trans('acquisRecuperationShort') . '</td>
 			</tr>';
@@ -731,9 +731,11 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 
 		$html .= '<td>'.$stat['presence'].'</td>';
 		$html .= '<td>'.$stat['absence'].'</td>';
+        if(empty($conf->global->ABSENCE_HIDE_PUBLIC_HOLIDAY_DAY)) {
 		$html .= '<td>'.$stat['presence+ferie'].'</td>';
 		$html .= '<td>'.$stat['absence+ferie'].'</td>';
 		$html .= '<td>'.$stat['ferie'].'</td>';
+        }
 		$html .= '<td>'.$congePrecReste.'</td>';
 		$html .= '<td>'.$congeCourantTotal.'</td>';
 		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td></tr>';
