@@ -1031,6 +1031,7 @@ class TRH_Absence extends TObjetStd {
 						// comparer la date_hourEnd avec 17h00 (valeur par défaut) pour calculer la durée en heures (pouvant être négatif)
 						$testDate = strtotime(date('Y-m-d 17:00:00', $this->date_hourEnd));
 						$this->dureeHeure = ($this->date_hourEnd - $testDate)/3600;
+//						var_dump($this->dureeHeure, date("d-m-Y H:i:s", $this->date_hourEnd), date("d-m-Y H:i:s", $testDate)); exit;
 					}
 	                else
 	                {
