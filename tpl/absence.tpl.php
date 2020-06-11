@@ -19,13 +19,21 @@
 					<td>[translate.AbsenceType;strconv=no;protect=no]</td>
 					<td>[absenceCourante.comboType;strconv=no;protect=no]</td>
 				</tr>
-				<tr>
+				<tr class="date">
 					<td>[translate.StartDate;strconv=no;protect=no]</td>
 			 		<td>[absenceCourante.date_debut;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.ddMoment;strconv=no;protect=no]</td>
 				</tr>
-				<tr>
+				<tr class="date">
 					<td>[translate.EndDate;strconv=no;protect=no]</td>
 			 		<td>[absenceCourante.date_fin;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.dfMoment;strconv=no;protect=no]</td>
+				</tr>
+				<tr class="singleDate" style="display: none">
+					<td>[translate.date;strconv=no;protect=no]</td>
+					<td>[absenceCourante.date_single;strconv=no;protect=no]</td>
+				</tr>
+				<tr class="singleDate" style="display: none">
+					<td>[translate.DurationInHours;strconv=no;protect=no]</td>
+					<td>[absenceCourante.dureeSingle;strconv=no;protect=no]</td>
 				</tr>
 				[onshow;block=begin;when [view.mode]!='edit']
 					<tr>
@@ -184,6 +192,7 @@
 
 
 
+
 		<div>
 		[absenceCourante.titreDerAbsence;strconv=no;protect=no]
 		<table  class="liste formdoc noborder" style="width:100%">
@@ -212,12 +221,7 @@
 		</div>
 		<br>
 
-
-
-
-
-
-		<script type="text/javascript">
+		<script type="text/javascript" id="workflowScript">
 			function refuseAbsence() {
 
 				var caseDontSendMail = $("#dontSendMail");
@@ -371,15 +375,27 @@
 				loadRecapAbsence()
 		});
 
-		$("#type").on('change',function() {
+		$("#type").on('change', function() {
 		   var TUnsecable = [ [absenceCourante.unsecableIds;protect=no;strconv=no] ];
+		   var TPresenceHour = [ [absenceCourante.presenceHourIds;protect=no;strconv=no] ];
 
 		   $("#ddMoment,#dfMoment").prop("disabled",false);
+		   $(".date").show();
+		   $(".singleDate").hide();
 
 		   for(x in TUnsecable) {
 
 		       if($(this).val() == TUnsecable[x]) {
 		              $("#ddMoment,#dfMoment").prop("disabled",true);
+		       }
+
+		   }
+
+		   for(x in TPresenceHour) {
+
+		       if($(this).val() == TPresenceHour[x]) {
+		              $(".date").hide();
+		              $(".singleDate").show();
 		       }
 
 		   }

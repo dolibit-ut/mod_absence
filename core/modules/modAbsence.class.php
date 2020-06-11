@@ -73,10 +73,10 @@ class modAbsence extends DolibarrModules
 		// for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
 		// for specific path of parts (eg: /mymodule/core/modules/barcode)
 		// for specific css file (eg: /mymodule/css/mymodule.css.php)
-		
-		
+
+
 		$this->module_parts = array(
-			'triggers' =>1      
+			'triggers' =>1
 			,'hooks'=>array('userdao','actioncard')
 			,'css'=>array('/absence/css/absence.css')
 		);
@@ -112,8 +112,8 @@ class modAbsence extends DolibarrModules
 			,array('RH_CODEPRODUIT_TICKET_RESTO','chaine','789456', $langs->trans('ProductCode'),1)
 			,array('RH_CODECLIENT_TICKET_RESTO','chaine','123456', $langs->trans('ClientCode'),1)
 			,array('RH_ABSENCE_USE_THEORICTIME_FOR_DECLARATION','chaine','0', $langs->trans('UseTheoricTimeForDeclaration'),1)
-			
-		); 
+
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:langfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  // To add a new tab identified by code tabname1
@@ -138,7 +138,7 @@ class modAbsence extends DolibarrModules
         $this->tabs = array();/*'thirdparty:+creerTypeRessource:CréerTypeRessource:ressource@ressource:/ressource/index.php',  // To add a new tab identified by code tabname1
                              'thirdparty:+nouvelleRessource:NouvelleRessource:ressource@ressource:/ressource/index.php',
                                       );*/
-	
+
         // Dictionnaries
        // if (!isset($conf->ressource->enabled)) @$conf->ressource->enabled=0;
 		$this->dictionnaries=array();
@@ -163,7 +163,7 @@ class modAbsence extends DolibarrModules
         $this->boxes = array();			// List of boxes
         $r = 0;
         $this->boxes[$r][1] = "box_absence@absence";
-        
+
 		//$r=0;
 		// Example:
 		/*
@@ -174,49 +174,49 @@ class modAbsence extends DolibarrModules
 		*/
 
 		$langs->load('absence@absence');
-		
+
 		$this->rights[$r][0] = 7102;
 		$this->rights[$r][1] = 'ValidOrRefuseHolidayRequest';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'valideurConges';
         $r++;
-        
+
         $this->rights[$r][0] = 7103;
         $this->rights[$r][1] = 'ConsultCollabHolidayCounter';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'visualiserCompteur';
         $r++;
-		
+
 		$this->rights[$r][0] = 7104;
 		$this->rights[$r][1] = 'ModifyCollabHolidayCounter';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'modifierCompteur';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7105;
 		$this->rights[$r][1] = 'ModifyGlobalHolidayParams';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'modifierParamGlobalConges';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7106;
 		$this->rights[$r][1] = $langs->trans('ConsultCollabSchedule');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'voirTousEdt';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7118;
 		$this->rights[$r][1] = $langs->trans('ConsultSchedule');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'voirSonEdt';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7107;
 		$this->rights[$r][1] = $langs->trans('ModifyCollabSchedule');
 		$this->rights[$r][3] = 0;
@@ -230,48 +230,48 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'voirToutesAbsencesListe';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7109;
 		$this->rights[$r][1] = $langs->trans('ConsultAllCollabAbsencesPresencesOnSchedule');
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'voirToutesAbsences';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7126;
 		$this->rights[$r][1] = 'ConsultGroupCollabAbsencesPresencesOnSchedule';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'voirGroupesAbsences';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7110;
 		$this->rights[$r][1] = 'AddRulesAbsencesRequests';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'rajouterRegle';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7111;
 		$this->rights[$r][1] = $langs->trans('CreateCollabAbsencePresence');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'creerAbsenceCollaborateur';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7112;
 		$this->rights[$r][1] = $langs->trans('AddGroupCollabAbsencePresence');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'creerAbsenceCollaborateurGroupe';
 		$r++;
-		
+
 		$this->rights[$r][0] = 7113;
 		$this->rights[$r][1] = $langs->trans('UploadLinkedFilesOnRules');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'uploadFilesRegle';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7114;
 		$this->rights[$r][1] = $langs->trans('SearchOnCollabAbsencesPresences');
@@ -285,7 +285,7 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'voirPlanningUser';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7116;
 		$this->rights[$r][1] = $langs->trans('ConsultAbsencesPresencesTab');
@@ -293,58 +293,58 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'voirOngletAbsence';
 
-		
+
 		$r++;
 		$this->rights[$r][0] = 7117;
 		$this->rights[$r][1] = $langs->trans('ConsultAbsencesFiles');
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'read';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7119;
 		$this->rights[$r][1] = $langs->trans('AppointmentEntranceExit');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'pointeuse';
-		
-		
+
+
 		$r++;
 		$this->rights[$r][0] = 7120;
 		$this->rights[$r][1] = $langs->trans('ShowRefusedAbsencesOnSchedule');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'voirAbsenceRefusee';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7121;
 		$this->rights[$r][1] = $langs->trans('ManageTickets');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'gererTicketRestaurant';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7122;
 		$this->rights[$r][1] = $langs->trans('DeclarationFormTimesManag');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'declarationCadre';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7123;
 		$this->rights[$r][1] = $langs->trans('DeleteOwnAbsenceOnceReported');
-        
+
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'supprimerMonAbsence';
-		
-		
+
+
 		$r++;
 		$this->rights[$r][0] = 7124;
 		$this->rights[$r][1] = $langs->trans('AutoValidatedReportedPresence');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'presenceAutoValidate';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7125;
 		$this->rights[$r][1] = $langs->trans('CanReportAbsenceInPast');
@@ -359,14 +359,14 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'alertAllMyCoWorker';
 		*/
-		
+
 		$r++;
 		$this->rights[$r][0] = 7128;
 		$this->rights[$r][1] = $langs->trans('DeclarationFormTimesManagDelete');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'deletedeclarationCadre';
-		
+
 		$r++;
 		$this->rights[$r][0] = 7129;
 		$this->rights[$r][1] = $langs->trans('CanReportPresence');
@@ -374,44 +374,44 @@ class modAbsence extends DolibarrModules
 		$this->rights[$r][4] = 'myactions';
 		$this->rights[$r][5] = 'canreportpresence';
         $r++;
-		
+
 		$this->rights[$r][0] = 7130;
 		$this->rights[$r][1] = $langs->trans('ModifyCollabScheduleByHierarchy');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'modifierEdtByHierarchy';
-		
+
         $r++;
         $this->rights[$r][0] = 7131;
         $this->rights[$r][1] = $langs->trans('CanReportAbsenceToDay');
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'declareToDayAbsence';
-        
+
         $r++;
         $this->rights[$r][0] = 7132;
         $this->rights[$r][1] = $langs->trans('CanChangeEmploiTempsForGroup');
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'CanChangeEmploiTempsForGroup';
-        
-        
+
+
         $r++;
         $this->rights[$r][0] = 7133;
         $this->rights[$r][1] = $langs->trans('CanDeclareAbsenceForGroup');
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'CanDeclareAbsenceForGroup';
-        
-        
+
+
         $r++;
         $this->rights[$r][0] = 7134;
         $this->rights[$r][1] = 'CanAvoidSendMail';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'myactions';
         $this->rights[$r][5] = 'CanAvoidSendMail';
-		$r++;	
-		
+		$r++;
+
 		// Droit mis en commentaire car plus utilisé par le module, maintenant c'est l'attribut validate_himself sur la définition d'un groupe de validation
 //		$this->rights[$r][0] = 7135;
 //		$this->rights[$r][1] = $langs->trans('CanValidPersonalAbsencePresence');
@@ -419,42 +419,50 @@ class modAbsence extends DolibarrModules
 //		$this->rights[$r][4] = 'myactions';
 //	    $this->rights[$r][5] = 'CanValidPersonalAbsencePresence';
 		$r++; //!\ Conserver l'incrémentation car les droits suivants utilise la variable pour numéroter les droits (ça évitera de changer de valeur sur désactivation/activation pour les ldap)
-        
+
 		$this->rights[$r][0] = $this->numero.$r;
 		$this->rights[$r][1] = $langs->trans('CanDeclareAbsenceAutoValidated');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'CanDeclareAbsenceAutoValidated';
 		$r++;
-		
+
 		$this->rights[$r][0] = $this->numero.$r;
 		$this->rights[$r][1] = $langs->trans('IfAllValideurAlertedAlerteMe');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'IfAllValideurAlertedAlerteMe';
 		$r++;
-		
+
 		$this->rights[$r][0] = $this->numero.$r;
 		$this->rights[$r][1] = $langs->trans('Absence_CanUpdateDatesClotures');
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'update_date_cloture';
 	    $r++;
-	    
+
 	    $this->rights[$r][0] = $this->numero.$r;
 	    $this->rights[$r][1] = 'ViewCollabAbsenceType';
 	    $this->rights[$r][3] = 0;
 	    $this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'ViewCollabAbsenceType';
 	    $r++;
-	    
+
 	    $this->rights[$r][0] = $this->numero.$r;
 	    $this->rights[$r][1] = 'ViewCompteurAllData';
 	    $this->rights[$r][3] = 0;
 	    $this->rights[$r][4] = 'myactions';
 	    $this->rights[$r][5] = 'ViewCompteurAllData';
 	    $r++;
-		
+	    $r++;
+
+	    $this->rights[$r][0] = $this->numero.$r;
+	    $this->rights[$r][1] = 'CreateAbsencePresence';
+	    $this->rights[$r][3] = 0;
+	    $this->rights[$r][4] = 'myactions';
+	    $this->rights[$r][5] = 'creerAbsence';
+	    $r++;
+
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		// Example:
 		// $this->rights[$r][0] = 2000; 				// Permission id (must not be already used)
@@ -484,7 +492,7 @@ class modAbsence extends DolibarrModules
 								'perms'=>'$user->rights->absence->myactions->voirOngletAbsence',			                // Use 'perms'=>'$user->rights->financement->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>0);						                // 0=Menu for internal users, 1=external users, 2=both
-		
+
 		$r++;
         $this->menu[$r]=array(
 			            'fk_menu'=>'fk_mainmenu=absence',			// Put 0 if this is a top menu
@@ -515,7 +523,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -531,7 +539,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
         $r++;
         $this->menu[$r]=array(
                     'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',           // Put 0 if this is a top menu
@@ -547,7 +555,7 @@ class modAbsence extends DolibarrModules
                     'target'=> '',
                     'user'=> 2
         );
-        
+
         $r++;
         $this->menu[$r]=array(
                     'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',           // Put 0 if this is a top menu
@@ -561,10 +569,10 @@ class modAbsence extends DolibarrModules
                     'perms'=> '$user->rights->absence->myactions->CanDeclareAbsenceForGroup',           // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
         		    'user'=> 2
         );
-        
-        
-        
-        
+
+
+
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -595,9 +603,9 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
-		
-		
+
+
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -613,7 +621,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -628,7 +636,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -644,7 +652,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 			$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -660,9 +668,9 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
-		
-		
+
+
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence',			// Put 0 if this is a top menu
@@ -678,7 +686,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=admin',			// Put 0 if this is a top menu
@@ -724,8 +732,8 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
-		
+
+
 		$r++;*/
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence',			// Put 0 if this is a top menu
@@ -741,9 +749,9 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
-		
+
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence',			// Put 0 if this is a top menu
 		        	'type'=> 'left',			// This is a Top menu entry
@@ -758,9 +766,9 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
-		
+
 
 		 $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=report,fk_leftmenu=exports',			// Put 0 if this is a top menu
@@ -776,7 +784,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -792,7 +800,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=absence,fk_leftmenu=sousabsence',			// Put 0 if this is a top menu
@@ -808,7 +816,7 @@ class modAbsence extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 
 
 
@@ -840,16 +848,16 @@ class modAbsence extends DolibarrModules
 	function init($options='')
 	{
 		global $langs;
-		
+
 		$langs->load('absence@absence');
-		
+
 		$sql = array();
-		
+
 		$result=$this->load_tables();
 
 		if(!is_file( dol_buildpath("/absence/config.php" ))) {
-			 $data='<?php require(\'default.config.php\'); /* fichier de conf de base */';	
-			
+			 $data='<?php require(\'default.config.php\'); /* fichier de conf de base */';
+
 			file_put_contents( dol_buildpath("/absence/config.php" ) , $data);
 		}
 
@@ -857,46 +865,46 @@ class modAbsence extends DolibarrModules
 
         define('INC_FROM_DOLIBARR',true);
 		dol_include_once('/absence/config.php');
-        
+
         dol_include_once('/absence/script/create-maj-base.php');
         dol_include_once('/absence/script/crons/init-compteur.php');
-        
+
 		dol_include_once('/core/class/extrafields.class.php');
         $extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('ticketresto_ok', $langs->trans('HaveChooseTickets'), 'boolean', 0, '', 'user');
-		
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('number_min', $langs->trans('NumberOfMinimumPeople'), 'int', 0, 11, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('alert_email', $langs->trans('EmailAlert'), 'varchar', 0, 255, 'usergroup');
-       	
+
 		$extrafields=new ExtraFields($this->db);
 		$res =$extrafields->addExtraField("type", "Type", "select", 0, $size, "usergroup", 0, 0, '', array('options'=>array('site','Site','metier','Metier','service','Service','groupe','Groupe')));
-		
+
        	//ticket resto
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_raison_sociale', $langs->trans('TRRaisonSociale'), 'varchar', 0, 255, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_address', $langs->trans('Address'), 'varchar', 0, 255, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_zip', $langs->trans('Zip'), 'varchar', 0, 255, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_town', $langs->trans('Town'), 'varchar', 0, 255, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_point_livraison', $langs->trans('TRPointLivraison'), 'varchar', 0, 255, 'usergroup');
-       	
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('tr_code_client', $langs->trans('TRCodeClient'), 'varchar', 0, 255, 'usergroup');
-       	
+
 		// export paye
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('matricule_paye', $langs->trans('MatriculePaye'), 'varchar', 0, 255, 'user');
-		
+
 
 		return $this->_init($sql, $options);
 	}
