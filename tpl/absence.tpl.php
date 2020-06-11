@@ -382,6 +382,7 @@
 		   $("#ddMoment,#dfMoment").prop("disabled",false);
 		   $(".date").show();
 		   $(".singleDate").hide();
+		   $("#dureeSingle").attr('required', false);
 
 		   for(x in TUnsecable) {
 
@@ -396,7 +397,9 @@
 		       if($(this).val() == TPresenceHour[x]) {
 		              $(".date").hide();
 		              $(".singleDate").show();
-		       }
+		              $("#dureeSingle").attr('required', true);
+
+			   }
 
 		   }
 

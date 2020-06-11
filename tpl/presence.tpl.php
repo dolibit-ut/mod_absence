@@ -305,12 +305,14 @@
 					var TPresenceHour = [ [absenceCourante.presenceHourIds;protect=no;strconv=no] ];
 					$(".date").show();
 					$(".singleDate").hide();
+					$("#dureeSingle").attr('required', false);
 
 					for(x in TPresenceHour) {
 
 						if($(this).val() == TPresenceHour[x]) {
 							$(".date").hide();
 							$(".singleDate").show();
+							$("#dureeSingle").attr('required', true);
 						}
 
 					}

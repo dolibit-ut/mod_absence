@@ -1217,7 +1217,7 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 
 		$TDuree = explode(":",$dureeSingle);
 		$operateur = '+';
-		if (intval($TDuree[0]) < 0) $operateur = '-';
+		if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-')) $operateur = '-';
 		$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
 
 		$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourEnd)));
