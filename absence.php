@@ -796,6 +796,15 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
 
+    $TlistPresence = TRH_TypeAbsence::getList($PDOdb, true);
+	$TPresenceHourIds = array();
+	if (!empty($TlistPresence))
+	{
+		foreach ($TlistPresence as $typeAbsence)
+		{
+			if ($typeAbsence->isPresence == 1 && $typeAbsence->unite == 'heure') $TPresenceHourIds[] = $typeAbsence->typeAbsence;
+		}
+	}
 
 	$userAbsenceVisu = '';
 //	var_dump($droitsCreation);
@@ -905,6 +914,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				'id'=>$absence->getId()
 				,'commentaire'=>$form->zonetexte('','commentaire',$absence->commentaire, 30,3,'','','-')
 				,'date_debut'=> $form->doliCalendar('date_debut', $absence->date_debut)
+				,'date_single'=> $form->doliCalendar('date_single', $absence->date_debut)
 				,'ddMoment'=>$form->combo('','ddMoment',$absence->TddMoment,$absence->ddMoment)
 				,'date_fin'=> $form->doliCalendar('date_fin', $absence->date_fin)
 				,'dfMoment'=>$form->combo('','dfMoment',$absence->TdfMoment,$absence->dfMoment)
@@ -915,6 +925,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'duree'=>$form->texte('','duree',round2Virgule($absence->duree),5,10)
 				,'dureeHeure'=>$form->texte('','dureeHeure',round2Virgule($absence->dureeHeure),5,10)
 				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',round2Virgule($absence->dureeHeurePaie),5,10)
+				,'dureeSingle' => "<input class='text' type='text' id='dureeSingle' name='dureeSingle' size='5' maxlength='10' pattern='-{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>"
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
@@ -943,6 +954,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'lib_etat' => $langs->trans('State')
 
 				,'unsecableIds'=>'"'.implode('","',$TUnsecableId).'"'
+				,'presenceHourIds'=>'"'.implode('","',$TPresenceHourIds).'"'
 			)
 			,'userCourant'=>array(
 				'id'=>$userCourant->id
@@ -995,6 +1007,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'dontSendMail'=>$langs->trans('dontSendMail')
 				,'Documents'=>$langs->trans('Documents')
 				,'langs'=>$langs
+				,'date'=>$langs->trans('Date')
 			)
 			,'other' => array(
 				'dontSendMail' => (int)$user->rights->absence->myactions->CanAvoidSendMail

@@ -1026,7 +1026,15 @@ class TRH_Absence extends TObjetStd {
 	                        }
 
 	                }
-	                else {
+	                else if ($typeAbs->unite == 'heure' && $typeAbs->isPresence)
+					{
+						// comparer la date_hourEnd avec 17h00 (valeur par défaut) pour calculer la durée en heures (pouvant être négatif)
+						$testDate = strtotime(date('Y-m-d 17:00:00', $this->date_hourEnd));
+						$this->dureeHeure = ($this->date_hourEnd - $testDate)/3600;
+//						var_dump($this->dureeHeure, date("d-m-Y H:i:s", $this->date_hourEnd), date("d-m-Y H:i:s", $testDate)); exit;
+					}
+	                else
+	                {
 	                    if( ($t_current==$t_start && $this->ddMoment=='matin') || $t_current>$t_start  ) {
 	                        // si l'absence démarre aujorud'hui et qu'elle commence le matin ou bien qu'elle a déjà commencée, je test le matin
 
@@ -1090,6 +1098,7 @@ class TRH_Absence extends TObjetStd {
 		}
 
 		$this->duree = $duree; // Attention, je rajoute ça ici car semble normal, vérif pas effets de bord
+
 
 		if($emploiTemps->tempsHebdo > 35){
 			$this->dureeHeurePaie=7*$duree;
@@ -2920,10 +2929,13 @@ END:VCALENDAR
 			$TabAbsence[$row->fk_user][$k]['ddMoment']=$row->ddMoment;
 			$TabAbsence[$row->fk_user][$k]['dfMoment']=$row->dfMoment;
 			$TabAbsence[$row->fk_user][$k]['isPresence']=$row->isPresence;
+			$TabAbsence[$row->fk_user][$k]['unite']=$row->unite;
+			$TabAbsence[$row->fk_user][$k]['dureeHeure']=$row->dureeHeure;
 			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
 			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
 			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
 			$TabAbsence[$row->fk_user][$k]['etat']=$row->etat;
+
 
 			$k++;
 		}
@@ -3071,6 +3083,8 @@ END:VCALENDAR
 						$moment->typeAbs = $tabAbs['typeAbs'];
 						$moment->etat = $tabAbs['etat'];
 						$moment->date = date('Y-m-d', $time_debut_inc);
+						$moment->unite = $tabAbs['unite'];
+						$moment->dureeHeure = $tabAbs['dureeHeure'];
 
 						$moment->idAbsence = $tabAbs['idAbsence'];
 

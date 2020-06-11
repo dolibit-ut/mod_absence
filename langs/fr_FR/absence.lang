@@ -143,6 +143,7 @@ CounterNonCumulatedDayOff=Compteur de RTT non cumulés
 CounterOf=Compteur de
 CountersAdministration=Administration compteurs
 CreateCollabAbsencePresence=Créer une absence ou présence pour un collaborateur (Droit d'admin présence)
+CreateAbsencePresence=Créer une absence ou présence pour soi-même
 CreatedThe=Créée le
 CreationError=Erreur de création
 CumulatedDayOffAcquired=Jours RTT cumulés acquis

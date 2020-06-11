@@ -701,6 +701,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 				<td>' . $langs->trans('RemainingCurrent') . '</td>
 				<td>' . $langs->trans('acquisRecuperationShort') . '</td>
 				<td>' . $langs->trans('soldeRestant') . '</td>
+				<td>' . $langs->trans('HeuresPresence') . '</td>
 			</tr>';
 
 	foreach($TStatPlanning as $idUser=>$TStat) {
@@ -714,6 +715,7 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$congePrecReste=round2Virgule($congePrecTotal-$compteur->congesPrisNM1);
 
 		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN - $compteur->congesPrisN);
+		$stat['Heurepresence'] = 0;
 
 		$stat=array();
 
@@ -724,6 +726,17 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 			@$stat['presence+ferie']+=$row['nb_jour_presence'] + $row['nb_jour_ferie'];
 			@$stat['absence+ferie']+=$row['nb_jour_absence'] + $row['nb_jour_ferie'] ;
 			@$stat['ferie']+=$row['nb_jour_ferie'] ;
+			if (!empty($row['typeAbsence']))
+			{
+				foreach ($row['typeAbsence'] as $rowtype)
+				{
+					if ($rowtype->isPresence && $rowtype->unite == 'heure')
+					{
+						@$stat['Heurepresence']+= $rowtype->dureeHeure;
+					}
+				}
+			}
+
 		}
 
 		if(empty($u->lastname)) $u->lastname = $u->login;
@@ -741,7 +754,9 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$html .= '<td>'.$congeCourantTotal.'</td>';
 		$html .= '<td>'.round2Virgule($compteur->acquisRecuperation).'</td>';
 		$soldeRestant = price2num($congePrecReste) + price2num($congeCourantTotal) + price2num(round2Virgule($compteur->acquisRecuperation));
-		$html .= '<td>'.round2Virgule($soldeRestant).'</td></tr>';
+		$html .= '<td>'.round2Virgule($soldeRestant).'</td>';
+		$html .= '<td>'.$stat['Heurepresence'].'</td>';
+		$html .= '</tr>';
 
 	}
 
@@ -916,6 +931,8 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 			{
 				if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) ) {
 					$linkPop='&nbsp;';
+					if ($user->rights->absence->myactions->creerAbsence && $user->id == $idUser)
+						$linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
 				} else {
 					$linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
 				}
@@ -944,6 +961,12 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 					if( isset($_REQUEST['no-link']) || (!$user->rights->absence->myactions->creerAbsenceCollaborateur && !$isValideur) )
 					{
 						$linkPop='&nbsp;';
+						if ($user->rights->absence->myactions->creerAbsence && $user->id == $idUser && !$_REQUEST['no-link'])
+						{
+							if($ouinon->idAbsence>0 && !$ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/absence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">a</a>'; }
+							else if($ouinon->idAbsence>0 && $ouinon->isPresence) { $linkPop = '<a title="'.$langs->trans('Show').'" href="'.dol_buildpath('/absence/presence.php?id='.$ouinon->idAbsence.'&action=view',1).'" class="no-print">p</a>'; }
+							else $linkPop = '<a title="'.$langs->trans('addAbsenceUser').'" href="javascript:popAddAbsence(\''.$std->get_date('date_jour','Y-m-d').'\', '.$idUser.');" class="no-print">'.$labelJour.'</a>';
+						}
 					}
 					else
 					{
@@ -1182,6 +1205,27 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 	$absence->set_date('date_debut', GETPOST('date_debutday').'/'.GETPOST('date_debutmonth').'/'.GETPOST('date_debutyear'));
 	$absence->set_date('date_fin', GETPOST('date_finday').'/'.GETPOST('date_finmonth').'/'.GETPOST('date_finyear'));
 
+	// prise en charge des présences d'unité "heure"
+	$ta = new TRH_TypeAbsence;
+	$ta->load_by_type($PDOdb, $absence->type);
+
+	if ($ta->unite == 'heure' && $ta->isPresence)
+	{
+		require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+
+		$dureeSingle = GETPOST('dureeSingle');
+
+		$TDuree = explode(":",$dureeSingle);
+		$operateur = '+';
+		if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-')) $operateur = '-';
+		$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
+
+		$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourEnd)));
+
+		//var_dump($operateur.$dureeSingle, date("Y-m-d H:i", $absence->date_hourEnd)); return false;
+	}
+
+
 	$absence->niveauValidation = 1;
 	$existeDeja = $absence->testExisteDeja($PDOdb, $absence);
 
@@ -1217,9 +1261,7 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 		$absence->error = implode('<br />', $absence->errors);
 		return false;
 	}
-
 	$absence->load($PDOdb, $_REQUEST['id']);
-
 	// Submit file
 	$TPieceJointe = array();
 	if (! empty($_FILES['userfile']['name']))

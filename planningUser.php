@@ -298,7 +298,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
             , success: function(data)
             {
                 $(data).find(selector).first().appendTo('#popAbsence');
-                $(data).find('#workflowScripts').first().appendTo('#popAbsence');
+                $(data).find('#workflowScript').first().appendTo('#popAbsence');
 
                 $('#popAbsence form').submit(function() {
                     $.ajax({
