@@ -356,7 +356,7 @@ class TRH_Compteur extends TObjetStd {
 	}
 
 	function add(&$PDOdb, $type, $duree, $motif) {
-
+        global $langs, $conf;
 		if($type=='rttcumule'){
 			list($congesPrisNM1, $congesPrisN) = $duree;
 
@@ -384,11 +384,16 @@ class TRH_Compteur extends TObjetStd {
 			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisNM1, $motif. ' N');
 			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $congesPrisN, $motif. ' N1');
 		}
-		else if($type=='recup') {
-			$this->acquisRecuperation -= $duree;
-			$this->save($PDOdb);
+		else if($type=='recup' ) {
+		    if((!empty($conf->global->ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW) && $this->acquisRecuperation >= $duree) || empty($conf->global->ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW)) {
 
-			TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
+                $this->acquisRecuperation -= $duree;
+                $this->save($PDOdb);
+
+                TRH_CompteurLog::log($PDOdb, $this->getId(), $type, $duree, $motif);
+            } else {
+		        return false;
+            }
 		}
 		else if($type=="conges"||$type=="cppartiel"){	//autre que RTT : décompte les congés
 
@@ -404,7 +409,7 @@ class TRH_Compteur extends TObjetStd {
 
 
 		}
-
+		return true;
 	}
 
 	function getNomUrl($picto=  1) {
@@ -735,7 +740,8 @@ class TRH_Absence extends TObjetStd {
 		}
 		else if($this->type=="recup"){
 
-			$compteur->add($PDOdb, $this->type, $dureeAbsenceCourante, 'Prise de jour de récupération');
+			$ret = $compteur->add($PDOdb, $this->type, $dureeAbsenceCourante, 'Prise de jour de récupération');
+			if($ret === false) $dureeAbsenceRecevable = 0;
 
 		}
 		else if($this->type=="conges"||$this->type=="cppartiel"){	//autre que RTT : décompte les congés

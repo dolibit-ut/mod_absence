@@ -581,3 +581,6 @@ totalHolidaysTakenN = Total congés posés
 RemainingBeforeN = Reste à prendre
 soldeRestant=Solde restant
 HeuresPresence=Heures Présence
+Legend=Légende
+tovalid=à valider
+ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW=Bloquer la pose d'absence de récupération si le compteur ne contient pas assez de jours par rapport à la durée de l'absence

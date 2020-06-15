@@ -857,7 +857,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	global $langs,$user,$db, $hookmanager;
 
 	dol_include_once('/valideur/class/valideur.class.php');
-
+    $TColor = array();
 //on va obtenir la requête correspondant à la recherche désirée
 	// Test si somme des trois groupes = (99999 * 3) Tous les select sur Aucun alors recherche vide
 	if(array_sum($idGroupeRecherche) == 299997)$idGroupeRecherche = array(); //TODO mais c'est quoi cette merde ?!
@@ -878,6 +878,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 	);
 	$html='';
 	$tabUserMisEnForme=array();
+    $html .= '<div style="display: flex; width: 100%;">';
 	$html .= '<table class="planning" border="0">';
 	$html .= "<tr class=\"entete\">";
 	$html .= "<td ></td>";
@@ -989,6 +990,7 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 					}
 					else if($ouinon->colorId > 0) $subclass.= ' persocolor'.$ouinon->colorId;
 					else $subclass .= ' rouge';
+					$TColor[$ouinon->label] = $subclass;
 					if($ouinon->etat == 'Avalider'){
 					    $subclass .= ' lighter';
                     }
@@ -1070,7 +1072,6 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 				}
 			}
 		}
-
 		$html .=  "</tr>";
 	}
 
@@ -1079,7 +1080,25 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 		$html .=  '<td align="center" colspan="2">'.$nb.'</td>';
 	}
 
-	$html .=  '</tr></table><p>&nbsp;</p>';
+	$html .=  '</tr></table>';
+    if(! empty($TColor)) {
+        $html .= '&nbsp;<fieldset style="width: 300px; height: max-content;">';
+        $html .= '<legend>'.$langs->trans('Legend').'</legend>';
+
+        foreach($TColor as $label => $colorClass) {
+            $html .= '<span class="'.$colorClass.'" style="height: 15px;width: 15px;border-radius: 50%;display: inline-block;"></span>';
+            $html .= '&nbsp;'.$label.'<br/>';
+            $html .= '<span class="'.$colorClass.' lighter" style="height: 15px;width: 15px;border-radius: 50%;display: inline-block;"></span>';
+            $html .= '&nbsp;'.$label.'&nbsp;'.$langs->trans('tovalid').'<br/>';
+        }
+        $html .= '<span class="jourTravailleNON" style="height: 15px;width: 15px;border-radius: 50%;display: inline-block;"></span>';
+        $html .= '&nbsp;'.$langs->trans('NoWorkedDays').'<br/>';
+        $html .= '<span class="jourFerie" style="height: 15px;width: 15px;border-radius: 50%;display: inline-block;"></span>';
+        $html .= '&nbsp;'.$langs->trans('PublicHoliday');
+        $html .= '</fieldset>';
+    }
+    $html .= '</div>';
+	$html .= '<p>&nbsp;</p>';
 
 	if (is_object($hookmanager))
 	{

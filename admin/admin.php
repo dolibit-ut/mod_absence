@@ -202,6 +202,15 @@ function showParameters(&$form, &$doliform) {
         print ajax_constantonoff('PLANNING_DISPLAY_DRAFT_ABSENCE');
         print '</td>';
         print '</tr>';
+
+        print '<tr>';
+        print '<td>';
+        print $langs->trans('ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW');
+        print '</td>';
+        print '<td>';
+        print ajax_constantonoff('ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW');
+        print '</td>';
+        print '</tr>';
 		
 		print '<tr>';
 		print '<td>';
