@@ -46,7 +46,6 @@
 				}
 
 				$existeDeja=$absence->testExisteDeja($ATMdb, $absence);
-//				var_dump($dureeSingle, date('Y-m-d',$absence->date_hourEnd), $existeDeja); exit;
 				if($existeDeja===false){
 
 						if($user->rights->absence->myactions->presenceAutoValidate)$absence->etat='Validee';

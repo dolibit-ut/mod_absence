@@ -318,6 +318,13 @@
 					}
 				});
 
+				$('#date_single').on('change', function (e) {
+					$('#date_debut').val($(this).val());
+					$('#date_debut').change();
+					$('#date_fin').val($(this).val());
+					$('#date_fin').change();
+				});
+
 				loadRecapCompteur();
 				loadRecapAbsence();
 
