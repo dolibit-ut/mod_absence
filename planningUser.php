@@ -243,7 +243,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 
 	table.planning tr td.vert{
 		/*	background:url("./img/fond_hachure_01.png");*/
-			background-color:#86ce86 !important;
+			background-color:#248f39 !important;
 	}
 	table.planning tr td.rougeRTT {
 			background-color:#d87a00 !important;
