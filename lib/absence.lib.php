@@ -715,11 +715,11 @@ function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, 
 		$congePrecReste=round2Virgule($congePrecTotal-$compteur->congesPrisNM1);
 
 		$congeCourantTotal=round2Virgule($compteur->acquisExerciceN+$compteur->acquisAncienneteN	+$compteur->acquisHorsPeriodeN - $compteur->congesPrisN);
-		$stat['Heurepresence'] = 0;
 
 		$stat=array();
+        $stat['Heurepresence'] = 0;
 
-		foreach($TStat as $date=>$row) {
+        foreach($TStat as $date=>$row) {
 
 			@$stat['presence']+=$row['nb_jour_presence'];
 			@$stat['absence']+=$row['nb_jour_absence'];
@@ -983,9 +983,11 @@ function _planning(&$PDOdb, &$absence, $idGroupeRecherche, $idUserRecherche, $da
 					if(strpos($toString, 'RTT')!==false) $subclass .= ' rougeRTT';
 					else if($ouinon->isPresence)
 					{
-						$subclass .= ' vert';
+                        if($ouinon->colorId > 0) $subclass.= ' persocolor'.$ouinon->colorId;
+						else $subclass .= ' vert';
 						$TTotal[$dateJour]+=1;
 					}
+					else if($ouinon->colorId > 0) $subclass.= ' persocolor'.$ouinon->colorId;
 					else $subclass .= ' rouge';
 					if($ouinon->etat == 'Avalider'){
 					    $subclass .= ' lighter';
