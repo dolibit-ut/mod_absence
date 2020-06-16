@@ -298,7 +298,6 @@
 				$("#ddMoment").change(comparerDates);
 				$("#dfMoment").change(comparerDates);
 
-
 				$('#type').on('change', function() {
 					loadDefaultTimes();
 
@@ -329,6 +328,14 @@
 				loadRecapAbsence();
 
 				loadDefaultTimes();
+
+				var TPresenceHour = [ [absenceCourante.presenceHourIds;protect=no;strconv=no] ];
+                                if (TPresenceHour.includes($('#type>option:first').val()))
+                                {
+                                        $('#type').val($('#type>option:first').val());
+                                        $('#type').change();
+                                }
+
 
 			});
 
