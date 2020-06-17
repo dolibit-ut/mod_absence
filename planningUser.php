@@ -424,9 +424,11 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 				.done(function (response) {
 					$('#planning_html').html( response ); // server response
 
-					$("table.planning td.rouge, table.planning td.vert").each(function() {
-
-						$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
+					$("table.planning td").each(function() {
+						if ($(this).attr("title") != undefined)
+						{
+							$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
+						}
 
 					});
 
