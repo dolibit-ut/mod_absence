@@ -213,7 +213,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 
 	<style type="text/css">
 
-	table.planning tr td.jourTravailleNON,table.planning tr td[rel=pm].jourTravailleAM,table.planning tr td[rel=am].jourTravaillePM  {
+	table.planning tr td.jourTravailleNON,table.planning tr td[rel=pm].jourTravailleAM,table.planning tr td[rel=am].jourTravaillePM, span.jourTravailleNON  {
 
 			background-color:#858585;
 	}
@@ -233,23 +233,22 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		background: #fff;
 	}
 
-	table.planning tr td.rouge{
+	table.planning tr td.rouge, span.rouge{
 			background-color:#C03000 !important;
 	}
-	table.planning tr td.lighter{
+	table.planning tr td.lighter, span.lighter{
 		background:url("./img/fond_hachure_01.png");
         box-shadow: inset 0em 0em 0em 10em rgba(255, 255, 255, 0.3);
     }
 
-	table.planning tr td.vert{
+	table.planning tr td.vert, span.vert{
 		/*	background:url("./img/fond_hachure_01.png");*/
 			background-color:#248f39 !important;
 	}
-	table.planning tr td.rougeRTT {
+	table.planning tr td.rougeRTT, span.rougeRTT {
 			background-color:#d87a00 !important;
 	}
-	table.planning tr td.jourFerie {
-			background:none;
+	table.planning tr td.jourFerie, span.jourFerie {
 			background-color:#666;
 	}
 
