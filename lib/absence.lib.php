@@ -826,7 +826,7 @@ global $conf,$db,$user;
 			$t_current=strtotime('+1 month', $t_current);
 		}
 
-		if($user->rights->absence->myactions->creerAbsenceCollaborateur) $html.= _recap_abs($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
+		$html.= _recap_abs($PDOdb, $idGroupeRecherche, $idUserRecherche, date('d/m/Y',$absence->date_debut_planning), date('d/m/Y',$absence->date_fin_planning));
 
 		return $html;
 
