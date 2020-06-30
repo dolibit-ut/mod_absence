@@ -674,13 +674,17 @@ global $compteurCongeResteCurrentUser,$PDOdb_getHistoryCompteurForUser;
 }
 
 function _recap_abs(&$PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin) {
-	global $db, $langs, $conf, $hookmanager;
+	global $db, $langs, $conf, $hookmanager, $user;
 
 	if(empty($date_debut)) return false;
 
 	$date_debut = date('Y-m-d', Tools::get_time($date_debut));
 	$date_fin = date('Y-m-d', Tools::get_time($date_fin));
 
+	if(!$user->rights->absence->myactions->creerAbsenceCollaborateur) { //Dans ce cas l'utilisateur ne doit pouvoir voir que SES compteurs.
+		$idGroupeRecherche = 0;
+		$idUserRecherche = $user->id;
+	}
 	$TStatPlanning = TRH_Absence::getPlanning($PDOdb, $idGroupeRecherche, $idUserRecherche, $date_debut, $date_fin);
 //var_dump($TStatPlanning);
 	$first=true;
