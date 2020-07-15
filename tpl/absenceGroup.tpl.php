@@ -40,7 +40,7 @@
 					</tr>
 				<tr>
 					<td>[translate.langs.transnoentities(dontSendMail);strconv=no;protect=no]</td>
-					<td id="dont_send_mail"><input type="checkbox" name="dont_send_mail" id="dont_send_mail" value="1" checked="checked" /></td>
+					<td id="dontSendMail"><input type="checkbox" name="dontSendMail" id="dontSendMail" value="1" checked="checked" /></td>
 				</tr>
 				
 				<tr>

@@ -41,20 +41,20 @@ if ($user->societe_id > 0)
 $action=__get('action','');
 
 if($action=='save') {
-	
+
 	foreach($_REQUEST['TConst'] as $name=>$param) {
-		
+
 		dolibarr_set_const($db, $name, $param, 'chaine', 0, '', $conf->entity);
-		
+
 		// Traitement supplémentaire sue enregistrement de cette conf à "oui"
 		if($name == 'RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE' && $param == 1) {
 			$resql = $db->query('SELECT MAX(id) as max_rowid FROM '.MAIN_DB_PREFIX.'c_actioncomm');
 			$res = $db->fetch_object($resql);
 			$db->query('INSERT INTO '.MAIN_DB_PREFIX.'c_actioncomm(id, code, type, libelle, active) VALUES('.($res->max_rowid + 1).', "AC_ABSENCE", "user", "Absence/Présence", 1)');
 		}
-		
+
 	}
-	
+
 }
 
 
@@ -78,27 +78,26 @@ showParameters($form, $doliform);
 
 function showParameters(&$form, &$doliform) {
 	global $db,$conf,$langs;
-	
-	
+
+
 	$form=new TFormCore;
 	$TConst=array(
-			'RH_DOL_ADMIN_USER'
-			,'RH_USER_MAIL_SENDER'
-			,'RH_DATE_RTT_CLOTURE'
-			,'RH_DATE_CONGES_CLOTURE'
-			,'RH_JOURS_NON_TRAVAILLE'
-			,'RH_MONTANT_TICKET_RESTO'
-			,'RH_PART_PATRON_TICKET_RESTO'
-			,'RH_NDF_TICKET_RESTO'
-			,'RH_CODEPRODUIT_TICKET_RESTO'
-			,'RH_CODECLIENT_TICKET_RESTO'
-			,'TIMESHEET_WORKING_HOUR_PER_DAY'
-			,'RH_USER_MAIL_OVERWRITE'
-	        ,'RH_NMOIN1_LABEL'
-	        ,'RH_N_LABEL'
-	    
+		'RH_DOL_ADMIN_USER'
+		,'RH_USER_MAIL_SENDER'
+		,'RH_DATE_RTT_CLOTURE'
+		,'RH_DATE_CONGES_CLOTURE'
+		,'RH_JOURS_NON_TRAVAILLE'
+		,'RH_MONTANT_TICKET_RESTO'
+		,'RH_PART_PATRON_TICKET_RESTO'
+		,'RH_NDF_TICKET_RESTO'
+		,'RH_CODEPRODUIT_TICKET_RESTO'
+		,'RH_CODECLIENT_TICKET_RESTO'
+		,'TIMESHEET_WORKING_HOUR_PER_DAY'
+		,'RH_USER_MAIL_OVERWRITE'
+		,'RH_NMOIN1_LABEL'
+		,'RH_N_LABEL'
 	);
-	
+
 	?><form action="<?php echo $_SERVER['PHP_SELF'] ?>" name="load-<?php echo $typeDoc ?>" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="action" value="save" />
 	<table width="100%" class="noborder" style="background-color: #fff;">
@@ -106,13 +105,13 @@ function showParameters(&$form, &$doliform) {
 			<td colspan="2"><?php echo $langs->trans('Parameters') ?></td>
 		</tr>
 		<?php
-		
+
 		foreach($TConst as $key) {
-			
+
 		?><tr>
-			<td><?php echo $langs->trans($key) ?></td><td><?php echo $form->texte('', 'TConst['.$key.']', $conf->global->$key,50,255)  ?></td>				
+			<td><?php echo $langs->trans($key) ?></td><td><?php echo $form->texte('', 'TConst['.$key.']', $conf->global->$key,50,255)  ?></td>
 		</tr><?php
-		
+
 		}
 		print '<tr>';
 		print '<td>';
@@ -132,7 +131,7 @@ function showParameters(&$form, &$doliform) {
 		print ajax_constantonoff('ABSENCE_TICKETSRESTO_COUNT_ABSENCE_AVALIDER');
 		print '</td>';
 		print '</tr>';
-		
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceGreaterThanCongesRestantsForbidden');
@@ -141,8 +140,8 @@ function showParameters(&$form, &$doliform) {
 		print ajax_constantonoff('ABSENCE_GREATER_THAN_CONGES_RESTANTS_FORBIDDEN');
 		print '</td>';
 		print '</tr>';
-		
-		
+
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('ABSENCE_ALERT_OTHER_VALIDEUR');
@@ -151,7 +150,7 @@ function showParameters(&$form, &$doliform) {
 		print ajax_constantonoff('ABSENCE_ALERT_OTHER_VALIDEUR');
 		print '</td>';
 		print '</tr>';
-		
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceAddInvitationToAcceptNofication');
@@ -160,7 +159,7 @@ function showParameters(&$form, &$doliform) {
 		print ajax_constantonoff('ABSENCE_ADD_INVITATION_TO_ACCEPT_MAIL');
 		print '</td>';
 		print '</tr>';
-		
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceAddActionComm');
@@ -170,8 +169,8 @@ function showParameters(&$form, &$doliform) {
 		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		print '</td>';
 		print '</tr>';
-		
-		
+
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('ABSENCE_REPORT_CONGE');
@@ -181,7 +180,7 @@ function showParameters(&$form, &$doliform) {
 		//print ajax_constantonoff('RH_ADD_ACTIONCOMM_ON_ABSENCE_VALIDATE');
 		print '</td>';
 		print '</tr>';
-		
+
 		if(!empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)) {
 			print '<tr>';
 			print '<td>';
@@ -193,7 +192,25 @@ function showParameters(&$form, &$doliform) {
 			print '</td>';
 			print '</tr>';
 		}
-		
+
+        print '<tr>';
+        print '<td>';
+        print $langs->trans('PLANNING_DISPLAY_DRAFT_ABSENCE');
+        print '</td>';
+        print '<td>';
+        print ajax_constantonoff('PLANNING_DISPLAY_DRAFT_ABSENCE');
+        print '</td>';
+        print '</tr>';
+
+        print '<tr>';
+        print '<td>';
+        print $langs->trans('ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW');
+        print '</td>';
+        print '<td>';
+        print ajax_constantonoff('ABSENCE_BLOCK_RECUP_IF_COMPTEUR_TOO_LOW');
+        print '</td>';
+        print '</tr>';
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceExportDecoupeAbsenceMappingUsed')
@@ -207,7 +224,7 @@ function showParameters(&$form, &$doliform) {
 		}
 		print '</td>';
 		print '</tr>';
-		
+
 		print '<tr>';
 		print '<td>';
 		print $langs->trans('absenceRecupAcuisitionRules');
@@ -216,17 +233,26 @@ function showParameters(&$form, &$doliform) {
 		print $doliform->selectarray('TConst[RH_RECUP_RULES]', array(''=>$langs->trans('None'), 'DECLARE'=>$langs->trans('recupRulesDeclare'), 'AUTO'=>$langs->trans('recupRulesAuto')), $conf->global->RH_RECUP_RULES);
 		print '</td>';
 		print '</tr>';
-	?>	
+
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('ABSENCE_TOTAL_CONGES_PRIS_POSES_NOT_EDITABLE');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_TOTAL_CONGES_PRIS_POSES_NOT_EDITABLE');
+		print '</td>';
+		print '</tr>';
+	?>
 	</table>
 	<p align="right">
-		
-		<input type="submit" name="bt_save" value="<?php echo $langs->trans('Save') ?>" /> 
-		
+
+		<input type="submit" name="bt_save" value="<?php echo $langs->trans('Save') ?>" />
+
 	</p>
-	
+
 	</form>
-	
-	
+
+
 	<br /><br />
 	<?php
 }

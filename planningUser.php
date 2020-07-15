@@ -2,17 +2,17 @@
 	require('config.php');
 	require('./class/absence.class.php');
 	require('./lib/absence.lib.php');
-	
+
 	$langs->load('absence@absence');
-	
+
 	$ATMdb=new TPDOdb;
 	$absence=new TRH_Absence;
 
 	_planningResult($ATMdb,$absence, 'edit');
-	
+
 	$ATMdb->close();
-	
-	
+
+
 function _planningResult(&$ATMdb, &$absence, $mode) {
 	global $langs, $conf, $db, $user;
 	/*echo $form->hidden('fk_user', $user->id);
@@ -24,14 +24,14 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	$idUserRecherche = (GETPOST('mode')=='auto') ? $user->id : 0;
 
 	if(!isset($_GET['action_search'])) {
-		
+
 		if(!empty($_COOKIE['TRHPlanning']) ){
-				
+
 			$idGroupeRecherche=$_COOKIE['TRHPlanning']['groupe'];
 			$idGroupeRecherche2=$_COOKIE['TRHPlanning']['groupe2'];
 			$idGroupeRecherche3=$_COOKIE['TRHPlanning']['groupe3'];
 			$idUserRecherche = $_COOKIE['TRHPlanning']['fk_user'];
-			
+
 			if(!empty($_COOKIE['TRHPlanning']['date_debut_search'])) {
 				$date_debut=$_COOKIE['TRHPlanning']['date_debut_search'];
 				$date_debut_time= str_replace('/', '-', $date_debut);
@@ -50,18 +50,18 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 				}
 				$date_fin_recherche = $date_fin;
 			}
-		} 
-		
+		}
+
 	}
 	else{
-		
-	
+
+
 		if(isset($_REQUEST['groupe'])) {
 			$idGroupeRecherche=$_REQUEST['groupe'];
 			setcookie('TRHPlanning[groupe]', $idGroupeRecherche,strtotime( '+30 days' ),'/');
-			
+
 		}
-		
+
 		if(isset($_REQUEST['groupe2'])) {
 			$idGroupeRecherche2=$_REQUEST['groupe2'];
 			setcookie('TRHPlanning[groupe2]', $idGroupeRecherche2,strtotime( '+30 days' ),'/');
@@ -70,7 +70,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			$idGroupeRecherche3=$_REQUEST['groupe3'];
 			setcookie('TRHPlanning[groupe3]', $idGroupeRecherche3,strtotime( '+30 days' ),'/');
 		}
-		
+
 		if(isset($_REQUEST['date_debut_search'])) {
 			 $date_debut=$_REQUEST['date_debut_search'];
 			 $date_debut_recherche = $date_debut;
@@ -85,11 +85,11 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			 $idUserRecherche=$_REQUEST['fk_user'];
 			 setcookie('TRHPlanning[fk_user]', $idUserRecherche,strtotime( '+30 days' ),'/');
 		}
-	
+
 	}
-	
-	
-	
+
+
+
 	//TODO object USerGroup !
 	if($idGroupeRecherche!=0){	//	on recherche le nom du groupe
 		$sql="SELECT nom FROM ".MAIN_DB_PREFIX."usergroup
@@ -113,23 +113,23 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		while($ATMdb->Get_line()) {
 			$TGroupe[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
 		}
-		
+
 		$TUser=array($langs->trans('AllThis'));
-		$sql=" SELECT DISTINCT u.rowid, u.lastname, u.firstname 
+		$sql=" SELECT DISTINCT u.rowid, u.lastname, u.firstname
 				FROM ".MAIN_DB_PREFIX."user as u LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (u.rowid=ug.fk_user)
 				";
-	
+
 		if($idGroupeRecherche>0) {
 			$sql.=" WHERE ug.fk_usergroup=".$idGroupeRecherche;
 		}
-		
+
 		$sql.=" ORDER BY u.lastname, u.firstname";
 	}
 	// ConsultGroupCollabAbsencesPresencesOnSchedule = Voir les absences ou présences des collaborateurs de mes groupes sur le calendrier
 	elseif($user->rights->absence->myactions->voirGroupesAbsences)  {
-		
+
 		$TGroupe[99999]  = $langs->trans('None');
-		
+
 		$sqlReq="SELECT g.rowid, g.nom FROM ".MAIN_DB_PREFIX."usergroup g
 			LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ug ON (g.rowid=ug.fk_usergroup)
 		WHERE g.entity IN (0,".$conf->entity.")
@@ -141,14 +141,14 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 		while($ATMdb->Get_line()) {
 			$TGroupe[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('nom');
 		}
-		
+
 		$TUser[0] = $langs->trans('AllThis');
 		$TUser[$user->id] = $user->firstname.' '.$user->lastname;
 	}
 	else{
 		$TUser[$user->id] = $user->firstname.' '.$user->lastname;
 	}
-	
+
 
 	if (!empty($sql))
 	{
@@ -158,18 +158,18 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			$TUser[$ATMdb->Get_field('rowid')]=$ATMdb->Get_field('lastname')." ".$ATMdb->Get_field('firstname');
 		}
 	}
-	
+
 	llxHeader('', $langs->trans('Summary'));
 	print dol_get_fiche_head(adminRecherchePrepareHead($absence, '')  , '', $langs->trans('Planning'));
 
-	
+
 	$form=new TFormCore($_SERVER['PHP_SELF'],'formPlanning','GET');
 	echo $form->hidden('jsonp', 1);
 	echo $form->hidden('action_search', 1);
 	$form->Set_typeaff($mode);
-	
+
 	$TStatPlanning=array();
-	
+
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/planningUser.tpl.php'
 		,array(
@@ -179,7 +179,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 				'TGroupe'=> (empty($TGroupe) ? "Vous n'avez pas les droits pour faire une sélection de groupe" : $form->combo('','groupe',$TGroupe,$idGroupeRecherche).$form->combo('','groupe2',$TGroupe,$idGroupeRecherche2).$form->combo('','groupe3',$TGroupe,$idGroupeRecherche3))
 				,'btValider'=>$form->btsubmit($langs->trans('Submit'), 'valider')
 				,'TUser'=>$form->combo('','fk_user',$TUser,$idUserRecherche)
-				
+
 				,'date_debut'=> $form->calendrier('', 'date_debut_search', $date_debut, 12)
 				,'date_fin'=> $form->calendrier('', 'date_fin_search', $date_fin, 12)
 				,'titreRecherche'=>load_fiche_titre($langs->trans('SearchSummary'),'', 'title.png', 0, '')
@@ -203,51 +203,55 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 				'Or' => $langs->trans('Or'),
 				'User' => $langs->trans('User')
 			)
-		)	
+		)
 	);
-	
-	
-	
+
+
+
 	?>
 	<div id="plannings" style="background-color:#fff">
-		
+
 	<style type="text/css">
 
-	table.planning tr td.jourTravailleNON,table.planning tr td[rel=pm].jourTravailleAM,table.planning tr td[rel=am].jourTravaillePM  {
-			background:url("./img/fond_hachure_01.png");
-			background-color:#858585; 
+	table.planning tr td.jourTravailleNON,table.planning tr td[rel=pm].jourTravailleAM,table.planning tr td[rel=am].jourTravaillePM, span.jourTravailleNON  {
+
+			background-color:#858585;
 	}
 
 	table.planning {
 		border-collapse:collapse; border:1px solid #ccc; font-size:9px;
-	}		
+	}
 	table.planning td {
 		border:1px solid #ccc;
 		text-align: center;
-	}	
-	
+	}
+
 	table.planning tr:nth-child(even) {
 		background: #ddd;
 	}
 	table.planning tr:nth-child(odd) {
 		background: #fff;
 	}
-	
-	table.planning tr td.rouge{
-			background-color:#C03000;
+
+	table.planning tr td.rouge, span.rouge{
+			background-color:#C03000 !important;
 	}
-	table.planning tr td.vert{
+	table.planning tr td.lighter, span.lighter{
+		background:url("./img/fond_hachure_01.png");
+        box-shadow: inset 0em 0em 0em 10em rgba(255, 255, 255, 0.3);
+    }
+
+	table.planning tr td.vert, span.vert{
 		/*	background:url("./img/fond_hachure_01.png");*/
-			background-color:#86ce86;
+			background-color:#248f39 !important;
 	}
-	table.planning tr td.rougeRTT {
-			background-color:#d87a00;
+	table.planning tr td.rougeRTT, span.rougeRTT {
+			background-color:#d87a00 !important;
 	}
-	table.planning tr td.jourFerie {
-			background:none;
+	table.planning tr td.jourFerie, span.jourFerie {
 			background-color:#666;
 	}
-	
+
 	table.planning tr.footer {
 			font-weight:bold;
 			background-color:#eee;
@@ -255,7 +259,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 	.just-print {
   			display:none;
   	}
-  	
+
 	div.bodyline {
 		z-index:1050;
 	}
@@ -264,22 +268,22 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
     for($i=1;$i<=15;$i++) {
     	print ' .persocolor'.$i.' { background-color:'.TRH_TypeAbsence::getColor($i).' !important;  }';
     }
-    
+
     ?>
 	@media print {
-  	
+
   		.no-print, #id-left,#tmenu_tooltip,.login_block  {
   			display:none;
   		}
   		.just-print {
   			display:block;
   		}
-	}		
+	}
 	</style>
-	
-		
+
+
 	<script type="text/javascript">
-	
+
 	function popAddAbsence(date, fk_user) {
 		$('#popAbsence').remove();
 		$('body').append('<div id="popAbsence"></div>');
@@ -293,6 +297,7 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
             , success: function(data)
             {
                 $(data).find(selector).first().appendTo('#popAbsence');
+                $(data).find('#workflowScript').first().appendTo('#popAbsence');
 
                 $('#popAbsence form').submit(function() {
                     $.ajax({
@@ -332,47 +337,47 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
                 });
             }
         });
-	}	
+	}
 
 	</script>
 	<?php
-	
+
 	if(!empty( $_GET['action_search'] ) || GETPOST('mode')=='auto' || $idUserRecherche>0) {
-		
+
 		if($idUserRecherche>0 && empty( $date_debut_recherche )) {
-			
+
 			if(GETPOST('mode')=='auto') {
 				$absence->date_debut_planning = $date_debut;
 				$absence->date_fin_planning = $date_fin;
-						
+
 			}
 			else{
 				$absence->date_debut_planning = strtotime( date('Y-m-01', strtotime('-1 month') ) );
 				$absence->date_fin_planning = strtotime( date('Y-m-t', strtotime('+3 month') ) );
-				
+
 			}
-	
+
 		}
 		else {
-			$absence->set_date('date_debut_planning', $date_debut_recherche); 
-			$absence->set_date('date_fin_planning',$date_fin_recherche); 
+			$absence->set_date('date_debut_planning', $date_debut_recherche);
+			$absence->set_date('date_fin_planning',$date_fin_recherche);
 		}
-		
+
 		if(GETPOST('jsonp') == 1) {
-			
+
 			?><script type="text/javascript">
-				
+
 				$(document).ready(function() {
 					refreshPlanning()
-					
-				});	
-				
+
+				});
+
 			</script>
 			<div id="planning_html">
 					<img src="img/Loading.gif" width="100%" />
 			</div>
 			<?php
-			
+
 		}
 		else{
 			$TGroupes = array();
@@ -382,21 +387,21 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 			if(! empty($idGroupeRecherche3)) $TGroupes[] = $idGroupeRecherche3;
 
 			echo getPlanningAbsence($ATMdb, $absence, $TGroupes, $idUserRecherche);
-			
+
 		}
-		
+
 
 	}
-	
-	
+
+
 	echo $form->end_form();
-	
+
 	?></div>
 	<script type="text/javascript">
 	function refreshPlanning() {
-				
+
 				$('#planning_html').prepend('<div>Rafraîchissement en cours...</div>');
-				
+
 				$.ajax({
 					url: "script/interface.php"
 					,dataType: "jsonp"
@@ -413,29 +418,31 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
 						,jsonp : 1
 						,inc:'main'
 					}
-					
+
 				})
 				.done(function (response) {
 					$('#planning_html').html( response ); // server response
-					
-					$("table.planning td.rouge, table.planning td.vert").each(function() {
-			
-						$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
-						
+
+					$("table.planning td").each(function() {
+						if ($(this).attr("title") != undefined)
+						{
+							$(this).append("<span class=\"just-print\">"+ $(this).attr("title")+"</span>" );
+						}
+
 					});
-					
+
 					if ($.tipTip) $(".classfortooltip").tipTip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
 					else $(".classfortooltip").tooltip({maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});
 				});
 			}
-	
+
 	</script>
 	<?php
-	
+
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
-	
-	
-}	
+
+
+}
 

@@ -94,20 +94,20 @@
 				_ficheCommentaire($PDOdb, $absence,'edit');
 				break;
 
-			case 'niveausuperieur':
-				$absence->load($PDOdb, $_REQUEST['id']);
-				$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence`
-					SET niveauValidation=niveauValidation+1 WHERE rowid=".$absence->getId();
-				$PDOdb->Execute($sqlEtat);
-				$absence->load($PDOdb, $_REQUEST['id']);
-				mailConges($absence);
-				mailCongesValideur($PDOdb,$absence);
-
-				$mesg = $langs->trans('AbsenceRequestSentToSuperior');
-				setEventMessage($mesg);
-
-				_fiche($PDOdb, $absence,'view');
-				break;
+//			case 'niveausuperieur':
+//				$absence->load($PDOdb, $_REQUEST['id']);
+//				$sqlEtat="UPDATE `".MAIN_DB_PREFIX."rh_absence`
+//					SET niveauValidation=niveauValidation+1 WHERE rowid=".$absence->getId();
+//				$PDOdb->Execute($sqlEtat);
+//				$absence->load($PDOdb, $_REQUEST['id']);
+//				mailConges($absence);
+//				mailCongesValideur($PDOdb,$absence);
+//
+//				$mesg = $langs->trans('AbsenceRequestSentToSuperior');
+//				setEventMessage($mesg);
+//
+//				_fiche($PDOdb, $absence,'view');
+//				break;
 
 			case 'refuse':
 				$absence->load($PDOdb, $_REQUEST['id']);
@@ -279,7 +279,7 @@ function _liste(&$PDOdb, &$absence) {
 			'lastname'=>'ucwords(strtolower("@val@"))'
 			,'etat'=>'_setColorEtat("@val@")'
 			,'Compteur'=>'_historyCompteurInForm(getHistoryCompteurForUser(@fk_user@,@ID@,@duree@,"@type@","@etat@"))'
-			
+
 		)
 		,'orderBy'=>$TOrder
 
@@ -294,14 +294,14 @@ function _liste(&$PDOdb, &$absence) {
 }
 function _historyCompteurInForm($duree) {
 
-	if($duree>0) return '<div align="right">'.number_format($duree,2,',',' ').'</div>';
+	if(is_numeric($duree)) return '<div align="right">'.number_format($duree,2,',',' ').'</div>';
 	else return '';
 
 }
 
 function _typeAbsence($isPresence = 0,$libelleAbsence = '', $showUserID = 0){
     global $user, $langs;
-    
+
     return TRH_TypeAbsence::_getName($user, $isPresence, $libelleAbsence, $showUserID);
 
 }
@@ -418,11 +418,11 @@ function _listeAdmin(&$PDOdb, &$absence) {
         ),
         'orderBy' => $TOrder
     );
-    
+
     if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation)){
         $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
     }
-	
+
     $r->liste($PDOdb, $sql, $listParam);
 	?><div class="tabsAction" >
 		<?php
@@ -495,7 +495,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 			$THide[] = 'action';
 		}
 
-		
+
 		$listParam = array(
 		    'limit'=>array(
 		        'page'=>$page
@@ -518,7 +518,7 @@ function _listeValidation(&$PDOdb, &$absence) {
 		        ,'messageNothing'=> $langs->trans('MessageNothingAbsence')
 		        ,'order_down'=>img_picto('','1downarrow.png', '', 0)
 		        ,'order_up'=>img_picto('','1uparrow.png', '', 0)
-		        
+
 		        /*,'picto_search'=>'<img src="../../theme/rh/img/search.png">'*/
 		    )
 		    ,'title'=>array(
@@ -544,16 +544,16 @@ function _listeValidation(&$PDOdb, &$absence) {
 		        ,'action'=>'_getCheckbox(@ID@,"@etat@")'
 		        ,'libelle' => '_typeAbsence("@isPresence@","@libelle@", "@fk_user@")'
 		    )
-		    
+
 		    ,'orderBy'=>$TOrder
-		    
+
 		);
-		
-		
+
+
 		if(!empty($user->rights->absence->myactions->ViewCollabAbsenceType) || !empty($TGroupValidation)){
 		    $listParam['search']['typeAbsence'] = $absence->TTypeAbsenceAdmin;
 		}
-		
+
 		//print $page;
 		$r->liste($PDOdb, $sql, $listParam);
 	?><div class="tabsAction" >
@@ -615,7 +615,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		$congeCourant['annee']=$PDOdb->Get_field('anneeN');
 		$congeCourant['fk_user']=$PDOdb->Get_field('fk_user');
 		$congeCourant['recup']=$PDOdb->Get_field('acquisRecuperation');
-        $congeCourant['congesPris']=$PDOdb->Get_field('congesPris');
+        $congeCourant['congesPrisN']=$PDOdb->Get_field('congesPrisN');
 
 
 		$rttCourant['id']=$PDOdb->Get_field('rowid');
@@ -623,9 +623,11 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 		/*$rttCourant['cumuleReste']=round2Virgule($PDOdb->Get_field('rttCumuleTotal'));
 		$rttCourant['nonCumuleReste']=round2Virgule($PDOdb->Get_field('rttNonCumuleTotal'));
 		*/
-		$rttCourant['cumuleReste']=round2Virgule($PDOdb->Get_field('cumuleAcquis')+$PDOdb->Get_field('cumuleReport')-$PDOdb->Get_field('cumulePris'));
+		$rttCourant['cumuleReste']=round2Virgule($PDOdb->Get_field('rttCumuleAcquis')+$PDOdb->Get_field('rttCumuleReport')-$PDOdb->Get_field('rttCumulePris'));
+		$rttCourant['cumuleN1']=round2Virgule($PDOdb->Get_field('rttCumulePrisN1'));
 
-		$rttCourant['nonCumuleReste']=round2Virgule($PDOdb->Get_field('nonCumuleAcquis')+$PDOdb->Get_field('nonCumuleReport')-$PDOdb->Get_field('nonCumulePris'));
+		$rttCourant['nonCumuleReste']=round2Virgule($PDOdb->Get_field('rttNonCumuleAcquis')+$PDOdb->Get_field('rttNonCumuleReportNM1')-$PDOdb->Get_field('rttNonCumulePris'));
+		$rttCourant['nonCumulePrisN1']=round2Virgule($PDOdb->Get_field('rttNonCumulePrisN1'));
 
 		$rttCourant['fk_user']=$PDOdb->Get_field('fk_user');
 
@@ -637,7 +639,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     $congePrecReste=$congePrecTotal-$congePrec['congesPris'];
 
     $congeCourantTotal=$congeCourant['acquisEx']+$congeCourant['acquisAnc']+$congeCourant['acquisHorsPer']+$congeCourant['reportConges'];
-    $congeCourantReste=$congePrecTotal-$congeCourant['congesPris'];
+    $congeCourantReste=$congeCourantTotal-$congeCourant['congesPrisN'];
 
 	$userCourant=new User($db);
 	if($absence->fk_user!=0){
@@ -794,11 +796,20 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
 
+    $TlistPresence = TRH_TypeAbsence::getList($PDOdb, true);
+	$TPresenceHourIds = array();
+	if (!empty($TlistPresence))
+	{
+		foreach ($TlistPresence as $typeAbsence)
+		{
+			if ($typeAbsence->isPresence == 1 && $typeAbsence->unite == 'heure') $TPresenceHourIds[] = $typeAbsence->typeAbsence;
+		}
+	}
 
 	$userAbsenceVisu = '';
 //	var_dump($droitsCreation);
 	if($droitsCreation==1) {
-		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,$absence->fk_user);
+		if($form->type_aff == 'edit') $userAbsenceVisu = $form->combo('','fk_user',$TUser,array($absence->fk_user));
 		else $userAbsenceVisu = $userCourant->getNomUrl(1).$form->hidden('fk_user', $absence->getId()> 0 ? $absence->fk_user : $user->id);
 
 	}
@@ -830,9 +841,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
     $input_doc = '<input class="flat minwidth400" type="file"'.((! empty($conf->global->MAIN_DISABLE_MULTIPLE_FILEUPLOAD) || $conf->browser->layout != 'classic')?' name="userfile"':' name="userfile[]" multiple').
                  (empty($conf->global->MAIN_UPLOAD_DOC) ?' disabled':'').' />';
 
-     
+
      print dol_get_fiche_head(absencePrepareHead($absence, $mode!='edit'? 'absence' : 'absenceCreation')  , 'fiche', $langs->trans('Absence'));
-     
+
 
      if($mode!="edit")
      {
@@ -881,7 +892,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'anneeCourante'=>$form->texte('','anneeN',$anneeCourante,10,50)
 				,'recup'=>$congeCourant['recup']
 				,'idUser'=>$_REQUEST['id']
-
+				,'reste'=>round2Virgule($congeCourantReste)
 
 			)
 			,'rttCourant'=>array(
@@ -890,7 +901,9 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'rowid'=>$form->texte('','rowid',$rttCourant['id'],10,50,'')
 				//,'id'=>$form->texte('','fk_user',$_REQUEST['id'],10,50,'',$class="text", $default='')
 				,'cumuleReste'=>round2Virgule($rttCourant['cumuleReste'])
+				,'cumuleN1'=>round2Virgule($rttCourant['cumuleN1'])
 				,'nonCumuleReste'=>round2Virgule($rttCourant['nonCumuleReste'])
+				,'nonCumulePrisN1'=>round2Virgule($rttCourant['nonCumulePrisN1'])
 				,'idNum'=>$idRttCourant
 			)
 			,'listUserAlreadyAccepted'=>array(
@@ -901,6 +914,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				'id'=>$absence->getId()
 				,'commentaire'=>$form->zonetexte('','commentaire',$absence->commentaire, 30,3,'','','-')
 				,'date_debut'=> $form->doliCalendar('date_debut', $absence->date_debut)
+				,'date_single'=> $form->doliCalendar('date_single', $absence->date_debut)
 				,'ddMoment'=>$form->combo('','ddMoment',$absence->TddMoment,$absence->ddMoment)
 				,'date_fin'=> $form->doliCalendar('date_fin', $absence->date_fin)
 				,'dfMoment'=>$form->combo('','dfMoment',$absence->TdfMoment,$absence->dfMoment)
@@ -911,13 +925,14 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'duree'=>$form->texte('','duree',round2Virgule($absence->duree),5,10)
 				,'dureeHeure'=>$form->texte('','dureeHeure',round2Virgule($absence->dureeHeure),5,10)
 				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',round2Virgule($absence->dureeHeurePaie),5,10)
+				,'dureeSingle' => "<input class='text' type='text' id='dureeSingle' name='dureeSingle' size='5' maxlength='10' pattern='-{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>"
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
 				,'documents'=>$input_doc
 
 				,'fk_user_absence'=>$form->hidden('fk_user_absence', $absence->fk_user)
-				,'niveauValidation'=>$absence->niveauValidation
+				,'niveauValidation'=>$absence->level
 				,'commentaireValideur'=>$absence->commentaireValideur
 				,'dt_cre'=>$absence->get_dtcre()
 				,'time_validation'=>$absence->date_validation
@@ -939,6 +954,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'lib_etat' => $langs->trans('State')
 
 				,'unsecableIds'=>'"'.implode('","',$TUnsecableId).'"'
+				,'presenceHourIds'=>'"'.implode('","',$TPresenceHourIds).'"'
 			)
 			,'userCourant'=>array(
 				'id'=>$userCourant->id
@@ -991,6 +1007,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'dontSendMail'=>$langs->trans('dontSendMail')
 				,'Documents'=>$langs->trans('Documents')
 				,'langs'=>$langs
+				,'date'=>$langs->trans('Date')
 			)
 			,'other' => array(
 				'dontSendMail' => (int)$user->rights->absence->myactions->CanAvoidSendMail

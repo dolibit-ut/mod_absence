@@ -48,15 +48,7 @@
                     $abs->fk_user = $fk_user;
                     $existeDeja=$abs->testExisteDeja($PDOdb, $abs);
                     
-                    if($existeDeja === false) {
-                        
-                        $abs->calculDureeAbsenceParAddition($PDOdb);
-                        
-                        $abs->save($PDOdb, false);
-                        
-                        $abs->setAcceptee($PDOdb, $user->id);
-                    }
-                    
+                    if($existeDeja === false) saveAbsence($PDOdb, $abs);
                 }
                 
                 setEventMessage('GroupAbsCreated');
