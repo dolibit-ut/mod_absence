@@ -764,7 +764,7 @@ class TRH_Absence extends TObjetStd {
 		$this->etat='Refusee';
 		$this->libelleEtat = $langs->trans('DeniedRequest');
 		$this->save($PDOdb);
-		mailConges($this,$isPresence);
+		mailConges($this);
 	}
 
 	function setAcceptee(&$PDOdb, $fk_valideur,$isPresence=false, $TPieceJointe = array()) {
@@ -785,7 +785,7 @@ class TRH_Absence extends TObjetStd {
 		$result = $interface->run_triggers('ABSENCE_BEFOREVALIDATE',$this,$user,$langs,$conf);
 
 		if ($result < 0) {
-			$error++; $this->errors=$interface->errors;
+			$this->errors=$interface->errors;
 			return false;
 		}
 		else {
@@ -1973,7 +1973,9 @@ class TRH_Absence extends TObjetStd {
 			if(!empty($abs->TDureeAbsenceUser)) {
 				foreach($abs->TDureeAbsenceUser as $annee => $tabMonth) {
 					foreach($tabMonth as $month => $duree) {
-						@$this->TDureeAllAbsenceUser[$annee][$month] += $duree;
+					}
+					if (is_array($this->TDureeAllAbsenceUser) && array_key_exists($annee,$this->TDureeAllAbsenceUser) && array_key_exists($month,$this->TDureeAllAbsenceUser[$annee])) {
+						$this->TDureeAllAbsenceUser[$annee][$month] += $duree;
 					}
 				}
 
