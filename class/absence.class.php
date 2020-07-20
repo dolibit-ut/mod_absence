@@ -1973,9 +1973,9 @@ class TRH_Absence extends TObjetStd {
 			if(!empty($abs->TDureeAbsenceUser)) {
 				foreach($abs->TDureeAbsenceUser as $annee => $tabMonth) {
 					foreach($tabMonth as $month => $duree) {
-					}
-					if (is_array($this->TDureeAllAbsenceUser) && array_key_exists($annee,$this->TDureeAllAbsenceUser) && array_key_exists($month,$this->TDureeAllAbsenceUser[$annee])) {
-						$this->TDureeAllAbsenceUser[$annee][$month] += $duree;
+						if (is_array($this->TDureeAllAbsenceUser) && array_key_exists($annee, $this->TDureeAllAbsenceUser) && array_key_exists($month, $this->TDureeAllAbsenceUser[$annee])) {
+							$this->TDureeAllAbsenceUser[$annee][$month] += $duree;
+						}
 					}
 				}
 
