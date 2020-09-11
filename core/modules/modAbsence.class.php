@@ -105,7 +105,6 @@ class modAbsence extends DolibarrModules
 			,array('RH_USER_MAIL_SENDER','chaine','webmaster@atm-consulting.fr', $langs->trans('ConstAddedByRH'),1)
 			,array('RH_DATE_RTT_CLOTURE','chaine','28-02-2014', $langs->trans('ConstAddedByRH'),1)
 			,array('RH_DATE_CONGES_CLOTURE','chaine','31-05-2014', $langs->trans('ConstAddedByRH'),1)
-			,array('RH_JOURS_NON_TRAVAILLE','chaine','samedi,dimanche', $langs->trans('ConstAddedByRH'),1)
 			,array('RH_MONTANT_TICKET_RESTO','chaine','7', $langs->trans('ConstValueBaseTicketsInCents'),1)
 			,array('RH_PART_PATRON_TICKET_RESTO','chaine','50', $langs->trans('ConstEmployerContributionTickets'),1)
 			,array('RH_NDF_TICKET_RESTO','chaine','30', $langs->trans('ConstIdSpendingNoTickets'),1)
