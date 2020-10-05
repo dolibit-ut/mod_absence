@@ -242,6 +242,15 @@ function showParameters(&$form, &$doliform) {
 		print ajax_constantonoff('ABSENCE_TOTAL_CONGES_PRIS_POSES_NOT_EDITABLE');
 		print '</td>';
 		print '</tr>';
+
+		print '<tr>';
+		print '<td>';
+		print $langs->trans('ABSENCE_SHOW_PRESENCE_BY_PERIOD');
+		print '</td>';
+		print '<td>';
+		print ajax_constantonoff('ABSENCE_SHOW_PRESENCE_BY_PERIOD');
+		print '</td>';
+		print '</tr>';
 	?>
 	</table>
 	<p align="right">

@@ -21,11 +21,11 @@
 				</tr>
 				<tr class="date">
 					<td>[translate.StartDate;strconv=no;protect=no]</td>
-			 		<td>[absenceCourante.date_debut;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.ddMoment;strconv=no;protect=no]</td>
+			 		<td>[absenceCourante.date_debut;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.ddMoment;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.hourStartMorning;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.hourEndMorning;strconv=no;protect=no]</td>
 				</tr>
 				<tr class="date">
 					<td>[translate.EndDate;strconv=no;protect=no]</td>
-			 		<td>[absenceCourante.date_fin;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.dfMoment;strconv=no;protect=no]</td>
+			 		<td>[absenceCourante.date_fin;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.dfMoment;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.hourStartAfternoon;strconv=no;protect=no]  &nbsp; &nbsp;[absenceCourante.hourEndAfternoon;strconv=no;protect=no]</td>
 				</tr>
 				<tr class="singleDate" style="display: none">
 					<td>[translate.date;strconv=no;protect=no]</td>
@@ -378,10 +378,12 @@
 		$("#type").on('change', function() {
 		   var TUnsecable = [ [absenceCourante.unsecableIds;protect=no;strconv=no] ];
 		   var TPresenceHour = [ [absenceCourante.presenceHourIds;protect=no;strconv=no] ];
+		   var TPresenceDays = [ [absenceCourante.presenceDayIds;protect=no;strconv=no] ];
 
 		   $("#ddMoment,#dfMoment").prop("disabled",false);
 		   $(".date").show();
 		   $(".singleDate").hide();
+		   $(".periodPresenceHour").hide();
 		   $("#dureeSingle").attr('required', false);
 
 		   for(x in TUnsecable) {
@@ -402,6 +404,14 @@
 			   }
 
 		   }
+
+			for(x in TPresenceDays) {
+
+				if($(this).val() == TPresenceDays[x]) {
+					$(".periodPresenceHour").show();
+				}
+
+			}
 
 		});
 

@@ -1233,22 +1233,32 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 	// prise en charge des présences d'unité "heure"
 	$ta = new TRH_TypeAbsence;
 	$ta->load_by_type($PDOdb, $absence->type);
+	if($ta->isPresence) {
+		if($ta->unite == 'heure') {
+			require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 
-	if ($ta->unite == 'heure' && $ta->isPresence)
-	{
-		require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+			$dureeSingle = GETPOST('dureeSingle');
 
-		$dureeSingle = GETPOST('dureeSingle');
+			$TDuree = explode(":", $dureeSingle);
+			$operateur = '+';
+			if(intval($TDuree[0]) < 0 || strpos($TDuree[0], '-') !== false) $operateur = '-';
+			$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])), intval($TDuree[1]), 0) / 60;
 
-		$TDuree = explode(":",$dureeSingle);
-		$operateur = '+';
-		if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-') !== false) $operateur = '-';
-		$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
-
-		$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourStart)));
-
+			$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourStart)));
 //		var_dump($operateur.$dureeSingle, date("Y-m-d H:i", $absence->date_hourStart), date("Y-m-d H:i", $absence->date_hourEnd)); return false;
+		}
+		else if(!empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD)) {
+			$hourMorningStart = GETPOST('hourStartMorning');
+			$hourMorningEnd = GETPOST('hourEndMorning');
+			$hourAfternoonStart = GETPOST('hourStartAfternoon');
+			$hourAfternoonEnd = GETPOST('hourEndAfternoon');
+			if(!empty($hourMorningStart)) $absence->set_date('date_hourStart', date('Y-m-d '.$hourMorningStart.':s', $absence->date_hourStart));
+			if(!empty($hourMorningEnd)) $absence->set_date('date_hourMorningEnd', date('Y-m-d '.$hourMorningEnd.':s', $absence->date_hourStart));
+			if(!empty($hourAfternoonStart)) $absence->set_date('date_hourAfternoonStart', date('Y-m-d '.$hourAfternoonStart.':s', $absence->date_hourEnd));
+			if(!empty($hourAfternoonEnd)) $absence->set_date('date_hourEnd', date('Y-m-d '.$hourAfternoonEnd.':s', $absence->date_hourEnd));
+		}
 	}
+
 
 
 	$absence->niveauValidation = 1;

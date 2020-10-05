@@ -798,11 +798,13 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TlistPresence = TRH_TypeAbsence::getList($PDOdb, true);
 	$TPresenceHourIds = array();
+	$TPresenceDayIds = array();
 	if (!empty($TlistPresence))
 	{
 		foreach ($TlistPresence as $typeAbsence)
 		{
 			if ($typeAbsence->isPresence == 1 && $typeAbsence->unite == 'heure') $TPresenceHourIds[] = $typeAbsence->typeAbsence;
+			else if ($typeAbsence->isPresence == 1) $TPresenceDayIds[] = $typeAbsence->typeAbsence;
 		}
 	}
 
@@ -926,6 +928,10 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 				,'dureeHeure'=>$form->texte('','dureeHeure',round2Virgule($absence->dureeHeure),5,10)
 				,'dureeHeurePaie'=>$form->texte('','dureeHeurePaie',round2Virgule($absence->dureeHeurePaie),5,10)
 				,'dureeSingle' => "<input class='text' type='text' id='dureeSingle' name='dureeSingle' size='5' maxlength='10' pattern='-{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>"
+				,'hourStartMorning' => !empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ? "<input class='text periodPresenceHour' type='text' id='hourStartMorning' name='hourStartMorning' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>" : ""
+				,'hourEndMorning' => !empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ? "<input class='text periodPresenceHour' type='text' id='hourEndMorning' name='hourEndMorning' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>" : ""
+				,'hourStartAfternoon' => !empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ? "<input class='text periodPresenceHour' type='text' id='hourStartAfternoon' name='hourStartAfternoon' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>" : ""
+				,'hourEndAfternoon' => !empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ? "<input class='text periodPresenceHour' type='text' id='hourEndAfternoon' name='hourEndAfternoon' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>" : ""
 				,'avertissement'=>$absence->avertissement==1?'<img src="./img/warning.png" />' . $langs->trans('DoNotRespectRules') . ' : '.$absence->avertissementInfo: $langs->trans('None')
 				,'fk_user'=>$absence->fk_user
 				,'userAbsence'=>$userAbsenceVisu
@@ -955,6 +961,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
 				,'unsecableIds'=>'"'.implode('","',$TUnsecableId).'"'
 				,'presenceHourIds'=>'"'.implode('","',$TPresenceHourIds).'"'
+				,'presenceDayIds'=>'"'.implode('","',$TPresenceDayIds).'"'
 			)
 			,'userCourant'=>array(
 				'id'=>$userCourant->id

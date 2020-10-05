@@ -302,8 +302,11 @@
 					loadDefaultTimes();
 
 					var TPresenceHour = [ [absenceCourante.presenceHourIds;protect=no;strconv=no] ];
+					var TPresenceDays = [ [absenceCourante.presenceDayIds;protect=no;strconv=no] ];
+
 					$(".date").show();
 					$(".singleDate").hide();
+					$(".periodPresenceHour").hide();
 					$("#dureeSingle").attr('required', false);
 
 					for(x in TPresenceHour) {
@@ -312,6 +315,13 @@
 							$(".date").hide();
 							$(".singleDate").show();
 							$("#dureeSingle").attr('required', true);
+						}
+
+					}
+					for(x in TPresenceDays) {
+
+						if($(this).val() == TPresenceDays[x]) {
+							$(".periodPresenceHour").show();
 						}
 
 					}
