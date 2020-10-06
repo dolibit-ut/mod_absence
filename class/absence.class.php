@@ -2955,6 +2955,10 @@ END:VCALENDAR
 			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
 			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
 			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
+			$TabAbsence[$row->fk_user][$k]['date_hourStart']=$row->date_hourStart;
+			$TabAbsence[$row->fk_user][$k]['date_hourMorningEnd']=$row->date_hourMorningEnd;
+			$TabAbsence[$row->fk_user][$k]['date_hourAfternoonStart']=$row->date_hourAfternoonStart;
+			$TabAbsence[$row->fk_user][$k]['date_hourEnd']=$row->date_hourEnd;
 			$TabAbsence[$row->fk_user][$k]['etat']=$row->etat;
 
 
@@ -3108,6 +3112,10 @@ END:VCALENDAR
 						$moment->dureeHeure = $tabAbs['dureeHeure'];
 
 						$moment->idAbsence = $tabAbs['idAbsence'];
+						$moment->date_hourStart = $tabAbs['date_hourStart'];
+						$moment->date_hourMorningEnd = $tabAbs['date_hourMorningEnd'];
+						$moment->date_hourAfternoonStart = $tabAbs['date_hourAfternoonStart'];
+						$moment->date_hourEnd = $tabAbs['date_hourEnd'];
 
 						$TRetour[$time_debut_inc][$id][] = $moment;
 						$time_debut_inc = strtotime('+1day', $time_debut_inc);
