@@ -1252,10 +1252,15 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 			$hourMorningEnd = GETPOST('hourEndMorning');
 			$hourAfternoonStart = GETPOST('hourStartAfternoon');
 			$hourAfternoonEnd = GETPOST('hourEndAfternoon');
-			if(!empty($hourMorningStart)) $absence->set_date('date_hourStart', date('Y-m-d '.$hourMorningStart.':s', $absence->date_hourStart));
-			if(!empty($hourMorningEnd)) $absence->set_date('date_hourMorningEnd', date('Y-m-d '.$hourMorningEnd.':s', $absence->date_hourStart));
-			if(!empty($hourAfternoonStart)) $absence->set_date('date_hourAfternoonStart', date('Y-m-d '.$hourAfternoonStart.':s', $absence->date_hourEnd));
-			if(!empty($hourAfternoonEnd)) $absence->set_date('date_hourEnd', date('Y-m-d '.$hourAfternoonEnd.':s', $absence->date_hourEnd));
+			if(! empty($hourMorningStart)) $absence->set_date('date_hourStart', date('Y-m-d '.$hourMorningStart.':s', $absence->date_hourStart));
+			else  $absence->set_date('date_hourStart', date('Y-m-d 00:00:s', $absence->date_hourStart));
+			if(! empty($hourMorningEnd)) $absence->set_date('date_hourMorningEnd', date('Y-m-d '.$hourMorningEnd.':s', $absence->date_hourStart));
+			else $absence->set_date('date_hourMorningEnd', date('Y-m-d 00:00:s', $absence->date_hourStart));
+			if(! empty($hourAfternoonStart)) $absence->set_date('date_hourAfternoonStart', date('Y-m-d '.$hourAfternoonStart.':s', $absence->date_hourEnd));
+			else $absence->set_date('date_hourAfternoonStart', date('Y-m-d 00:00:s', $absence->date_hourEnd));
+			if(! empty($hourAfternoonEnd)) $absence->set_date('date_hourEnd', date('Y-m-d '.$hourAfternoonEnd.':s', $absence->date_hourEnd));
+			else $absence->set_date('date_hourEnd', date('Y-m-d 00:00:s', $absence->date_hourEnd));
+
 		}
 	}
 
