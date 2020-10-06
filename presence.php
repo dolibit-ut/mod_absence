@@ -691,7 +691,7 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 		$absence->duree = $absence->calculDureeAbsenceParAddition($ATMdb);
 	}
 
-	$TlistPresence = TRH_TypeAbsence::getList($ATMdb, true);
+	$TlistPresence = TRH_TypeAbsence::getList($ATMdb, true, 1);
 	$TPresenceHourIds = array();
 	$TPresenceDayIds = array();
 	$isPresenceHour = false;
