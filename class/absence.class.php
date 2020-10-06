@@ -3656,11 +3656,11 @@ class TRH_TypeAbsence extends TObjetStd {
 
 	}
 
-	static function getList(&$PDOdb, $isPresence=false, $forceEntityOne = 0) {
+	static function getList(&$PDOdb, $isPresence=false) {
 		global $conf;
 
 		$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_type_absence
-		WHERE entity IN (0,".((! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)) || !empty($forceEntityOne) ?"1,":"").$conf->entity.")
+		WHERE entity IN (0,".((! empty($conf->multicompany->enabled) && (! empty($conf->multicompany->transverse_mode) || ! empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE))) ? "1," : "").$conf->entity.")
 		AND isPresence=".(int)$isPresence."
 		ORDER BY typeAbsence";
 
