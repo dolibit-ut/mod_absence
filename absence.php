@@ -796,7 +796,7 @@ function _fiche(&$PDOdb, &$absence, $mode) {
 
     $TUnsecableId = TRH_TypeAbsence::getUnsecable($PDOdb);
 
-    $TlistPresence = TRH_TypeAbsence::getList($PDOdb, true, 1);
+    $TlistPresence = TRH_TypeAbsence::getList($PDOdb, true);
 	$TPresenceHourIds = array();
 	$TPresenceDayIds = array();
 	if (!empty($TlistPresence))
