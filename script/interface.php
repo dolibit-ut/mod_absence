@@ -4,7 +4,7 @@ if(isset($_REQUEST['inc']) && $_REQUEST['inc']=='main') {
 	null;
 }
 else{
-	define('INC_FROM_CRON_SCRIPT', true);	
+	define('INC_FROM_CRON_SCRIPT', true);
 }
 
 
@@ -25,16 +25,16 @@ function _get(&$ATMdb, $case) {
     global $langs;
 	switch ($case) {
 		case 'jour_anciennete':
-			__out(_jourAnciennete($ATMdb, $_REQUEST['fk_user']));	
+			__out(_jourAnciennete($ATMdb, $_REQUEST['fk_user']));
 			break;
 		case 'maladie_maintenue':
-			__out(_dureeMaladieMaintenue($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));	
+			__out(_dureeMaladieMaintenue($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));
 			break;
 		case 'maladie_non_maintenue':
-			__out(_dureeMaladieNonMaintenue($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));	
+			__out(_dureeMaladieNonMaintenue($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));
 			break;
 		case 'conges':
-			__out(_conges($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));	
+			__out(_conges($ATMdb, $_REQUEST['fk_user'], $_REQUEST['date_debut'], $_REQUEST['date_fin']));
 			break;
 		case 'typeAbsence_hour':
 			$typeAbsence=new TRH_TypeAbsence;
@@ -44,10 +44,10 @@ function _get(&$ATMdb, $case) {
 				,'end'=>$typeAbsence->get_date('date_hourEnd','H:i')
 			));
 			break;
-			
+
 		case 'planning':
-			
-		    
+
+
 		    $ATMdb=new TPDOdb;
 		    $absence=new TRH_Absence;
 
@@ -63,53 +63,53 @@ function _get(&$ATMdb, $case) {
 
 		    $absence->date_debut_planning = strtotime('-3month');
 		    $absence->date_fin_planning = strtotime('+1month');
-		    
+
 		    if(isset($_REQUEST['date_debut_search'])) $absence->set_date('date_debut_planning', $_REQUEST['date_debut_search']);
 		    if(isset($_REQUEST['date_fin_search'])) $absence->set_date('date_fin_planning', $_REQUEST['date_fin_search']);
 		    if(isset($_REQUEST['date_debut_search']) && is_numeric($_REQUEST['date_debut_search'])) $absence->date_debut_planning = intval($_REQUEST['date_debut_search']);
-		    if(isset($_REQUEST['date_fin_search']) && is_numeric($_REQUEST['date_fin_search'])) $absence->date_fin_planning = intval($_REQUEST['date_fin_search']); 
+		    if(isset($_REQUEST['date_fin_search']) && is_numeric($_REQUEST['date_fin_search'])) $absence->date_fin_planning = intval($_REQUEST['date_fin_search']);
 		    $html = getPlanningAbsence($ATMdb, $absence, $TGroupes, GETPOST('fk_user'));
 		    __out($html);
-		    
+
 		    break;
-		    
+
 		case 'checkPlanningOverride':  // Check if a planning allready exist in date range
-		    
+
 		    $langs->load('absence@absence');
 		    $date_debut = 0;
 		    $date_fin = time();
 		    $result = array(
 		        'count' => 0
 		    );
-		    
+
 		    $fk_user = GETPOST('fk_user', 'int');
 		    if(empty($fk_user)){
 		        $result['errors'][] = $langs->trans('fk_user_empty');
 		    }
 		    else{
-		        
+
 		        if(isset($_REQUEST['date_debut_search'])) $date_debut = strtotime($_REQUEST['date_debut_search']);
 		        if(isset($_REQUEST['date_fin_search']))   $date_fin   = strtotime($_REQUEST['date_fin_search']);
-		        
-		        
+
+
 		        if($date_fin < $date_debut){
 		            $result['errors'][] = $langs->trans('invalidDatesRange');
 		        }
-		        
+
 		        if(empty($result['errors']))
 		        {
 		            $sql = "SELECT COUNT(*) as count FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps  WHERE fk_user=".(int)$fk_user."  AND is_archive=1 AND date_debut < '".date('Y-m-d 00:00:00',$date_fin)."' AND date_fin > '".date('Y-m-d 00:00:00',$date_debut)."'";
 		            $ATMdb->Execute($sql);
 		            // $result['sql'] = $sql;
-		            
-		            
+
+
 		            $row = $ATMdb->Get_line();
 		            if($row) {
 		                $result['count'] = $row->count;
 		            }
 		        }
 		    }
-		    
+
 		    print json_encode($result); exit();
 		    break;
 	}
@@ -135,92 +135,92 @@ function _post(&$PDOdb, $case)
 
 function _jourAnciennete(&$ATMdb, $userId){
 	global $user, $conf;
-	
+
 	$TabRecapConges=array();
-	
-	$sql="SELECT a.acquisAncienneteNM1 
-	FROM ".MAIN_DB_PREFIX."rh_compteur as a 
+
+	$sql="SELECT a.acquisAncienneteNM1
+	FROM ".MAIN_DB_PREFIX."rh_compteur as a
 	WHERE a.entity IN (0,".$conf->entity.")
 	AND a.fk_user=".$userId;
-	
+
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
 		$TabRecapConges[$userId]=$ATMdb->Get_field('acquisAncienneteNM1');
 	}
-	
+
 	return $TabRecapConges;
 }
 
 function _dureeMaladieMaintenue(&$ATMdb, $userId, $date_debut, $date_fin){
 	global $user, $conf;
-	
+
 	$TabRecapMaladie=array();
-		
-	$sql="SELECT u.lastname, u.firstname, a.type, a.date_debut, a.date_fin, a.duree 
-	FROM ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."rh_absence as a 
-	WHERE u.rowid=a.fk_user 
+
+	$sql="SELECT u.lastname, u.firstname, a.type, a.date_debut, a.date_fin, a.duree
+	FROM ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."rh_absence as a
+	WHERE u.rowid=a.fk_user
 	AND a.type LIKE 'maladiemaintenue'
 	AND a.entity IN (0,".$conf->entity.")
 	AND a.fk_user=".$userId."
 	AND (a.date_debut>'".$date_debut."' AND a.date_fin<'".$date_fin."')";
-	
+
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
 		$TabRecapMaladie[$userId]['maladiemaintenue']=$TabRecapMaladie[$user]['maladiemaintenue']+$ATMdb->Get_field('duree');
 	}
-	
+
 	return $TabRecapMaladie;
 }
 
 function _dureeMaladieNonMaintenue(&$ATMdb, $userId, $date_debut, $date_fin){
 	global $user, $conf;
-	
+
 	$TabRecapMaladie=array();
-		
-	$sql="SELECT u.lastname, u.firstname, a.type, a.date_debut, a.date_fin, a.duree 
+
+	$sql="SELECT u.lastname, u.firstname, a.type, a.date_debut, a.date_fin, a.duree
 	FROM ".MAIN_DB_PREFIX."rh_absence as a
 		LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (a.fk_user = u.rowid)
 	WHERE a.type LIKE 'maladienonmaintenue'
 	AND a.entity IN (0,".$conf->entity.")
 	AND a.fk_user=".$userId."
 	AND (a.date_debut>'".$date_debut."' AND a.date_fin<'".$date_fin."')";
-	
+
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
 		$TabRecapMaladie[$userId]['maladienonmaintenue']=$TabRecapMaladie[$user]['maladienonmaintenue']+$ATMdb->Get_field('duree');
 	}
-	
+
 	return $TabRecapMaladie;
 }
 
 function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 	global $user, $conf;
-			
+
 	//**********************************************
 	//On récupère le nombre de jours entre les 2 dates
 	//**********************************************
-	
+
 	$dateDeb = strtotime($date_debut);
 	$dateFin = strtotime($date_fin);
-	
+
 	$nb_jours = ($dateFin-$dateDeb)/(3600*24);
 	$nb_jours_travailles = 0;
 	$nb_jours_conges = 0;
 	$nb_jours_event_famille = 0;
 	$nb_jours_conges_divers = 0;
-	
+
 	//**********************************************
 	//On récupère l'emploi du temps de l'utilisateur
 	//**********************************************
-	
+
 	$EmploiDuTemps=array();
-	
+
 	$sql="SELECT *
 	FROM ".MAIN_DB_PREFIX."rh_absence_emploitemps as a
 		LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (a.fk_user = u.rowid)
 	WHERE a.entity IN (0,".$conf->entity.")
 	AND a.fk_user=".$userId." AND a.is_archive!=1";
-	
+
 	$ATMdb->Execute($sql);
 	while($ATMdb->Get_line()) {
 		$EmploiDuTemps['lundiam']=$ATMdb->Get_field('lundiam');
@@ -238,14 +238,14 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 		$EmploiDuTemps['dimancheam']=$ATMdb->Get_field('dimancheam');
 		$EmploiDuTemps['dimanchepm']=$ATMdb->Get_field('dimanchepm');
 	}
-	
+
 	//Traitement sur chaque jour
 	while ($dateDeb <= $dateFin)
 	{
 		$timestamp = strtotime(date('Y-m-d', $dateDeb));
 		setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
 		$jour = strftime("%A",$timestamp);
-		
+
 		//on regarde tout d'abord quand l'utilisateur doit travailler
 		switch ($jour) {
 		    case "lundi":
@@ -305,7 +305,7 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 		        }
 		        break;
 		}
-		
+
 		//on regarde ensuite si la personne a déposé un jour d'absence ce jour-ci, si oui, on le décompte
 		$sql="SELECT *
 		FROM ".MAIN_DB_PREFIX."rh_absence as a
@@ -314,7 +314,7 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 		AND u.rowid=".$userId."
 		AND a.etat='Validee'
 		AND (a.date_debut<='".date('Y-m-d 00:00:00',$dateDeb)."' AND a.date_fin>='".date('Y-m-d 00:00:00',$dateDeb)."')";
-		
+
 		$k=0;
 		$m=0;
 		$n=0;
@@ -356,13 +356,13 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 				$n++;
 			}
 		}
-		
+
 		//on regarde si le jour est férié, si oui, on le décompte
 		$sql="SELECT *
 		FROM ".MAIN_DB_PREFIX."rh_absence_jours_feries as a
 		WHERE a.entity IN (0,".$conf->entity.")
 		AND a.date_jourOff='".date('Y-m-d 00:00:00',$dateDeb)."'";
-		
+
 		$ATMdb->Execute($sql);
 		while($ATMdb->Get_line()) {
 			$typeAbsence=$ATMdb->Get_field('typeAbsence');
@@ -433,19 +433,19 @@ function _conges(&$ATMdb, $userId, $date_debut, $date_fin){
 				}
 			}
 		}
-		
+
 		//on incrémente la date
 		$dateDeb = strtotime('+1 day', $dateDeb);
 	}
 
 	$nb_jours_non_travailles=$nb_jours-$nb_jours_travailles;
-	
+
 	$TabRecapConges['nbJoursTravailles']=$nb_jours_travailles;
 	$TabRecapConges['nbJoursNonTravailles']=$nb_jours_non_travailles;
 	$TabRecapConges['congesPayes']=$nb_jours_conges;
 	$TabRecapConges['eventFamille']=$nb_jours_event_famille;
 	$TabRecapConges['congesDivers']=$nb_jours_conges_divers;
-	
+
 	return $TabRecapConges;
 }
 

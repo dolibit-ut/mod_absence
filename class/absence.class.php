@@ -1038,8 +1038,10 @@ class TRH_Absence extends TObjetStd {
 	                else if ($typeAbs->unite == 'heure' && $typeAbs->isPresence)
 					{
 						// comparer la date_hourEnd avec 17h00 (valeur par défaut) pour calculer la durée en heures (pouvant être négatif)
-						$testDate = strtotime(date('Y-m-d 17:00:00', $this->date_hourEnd));
-						$this->dureeHeure = ($this->date_hourEnd - $testDate)/3600;
+						$testDateDebut = strtotime(date('Y-m-d ', $this->date_debut).date('H:i:s', $this->date_hourStart));
+						$testDateFin = strtotime(date('Y-m-d ', $this->date_fin).date('H:i:s', $this->date_hourEnd));
+//						var_dump(array(date('Y-m-d H:i:s', $testDateDebut), $testDateFin - $testDateDebut), date('Y-m-d H:i:s', $testDateFin)); exit;
+						$this->dureeHeure = ($testDateFin - $testDateDebut)/3600;
 //						var_dump($this->dureeHeure, date("d-m-Y H:i:s", $this->date_hourEnd), date("d-m-Y H:i:s", $testDate)); exit;
 					}
 	                else

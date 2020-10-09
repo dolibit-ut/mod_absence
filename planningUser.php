@@ -300,10 +300,20 @@ function _planningResult(&$ATMdb, &$absence, $mode) {
                 $(data).find('#workflowScript').first().appendTo('#popAbsence');
 
                 $('#popAbsence form').submit(function() {
+					var formdata = new FormData();
+					var ins = $('input[name^="userfile"]')[0].files.length;
+					for (var x = 0; x < ins; x++) {
+						formdata.append("userfile[]", $('input[name^="userfile"]')[0].files[x]);
+					}
+					let formVal = $(this).serializeArray();
+					for (var i=0; i<formVal.length; i++) formdata.append(formVal[i].name, formVal[i].value);
+
                     $.ajax({
                         url: "<?php echo dol_escape_js(dol_buildpath('/absence/script/interface.php', 1)) ?>?post=saveAbsence&inc=main"
                         , method: 'POST'
-                        , data: $(this).serialize()
+                        , data: formdata
+						, processData: false
+						, contentType: false
                         , success : function (data)
                         {
                             if(data.saved)

@@ -30,18 +30,19 @@
 				if ($ta->unite == 'heure' && $ta->isPresence)
 				{
 					require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
-					$absence->set_values(array('date_hourEnd' => '17:00' ));
+//					$absence->set_values(array('date_hourEnd' => '17:00' ));
 
 					$dureeSingle = GETPOST('dureeSingle');
-
+//
 					$TDuree = explode(":",$dureeSingle);
-					$operateur = '+';
-					// intval(-0) == 0 ... voilà voilà
-					if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-') !== false) $operateur = '-';
-					$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
 
-					$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourEnd)));
-//					var_dump($dureeSingle, date("d-m-Y H:i:s", $absence->date_hourEnd)); exit;
+//					// intval(-0) == 0 ... voilà voilà
+					if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-') !== false) $operateur = '-';
+					$dureeMinutes = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
+
+                    $absence->duree = $absence->calculDureeAbsenceParAddition($ATMdb);
+                    $absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeMinutes.' minutes', $absence->date_hourEnd)));
+                    //var_dump($dureeSingle, date("d-m-Y H:i:s", $absence->date_hourEnd)); exit;
 
 				}
 

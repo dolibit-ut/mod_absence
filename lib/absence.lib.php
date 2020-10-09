@@ -1245,9 +1245,9 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 		if (intval($TDuree[0]) < 0 || strpos($TDuree[0],'-') !== false) $operateur = '-';
 		$dureeSingle = convertTime2Seconds(abs(intval($TDuree[0])),intval($TDuree[1]),0) / 60;
 
-		$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourEnd)));
+		$absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeSingle.' minutes', $absence->date_hourStart)));
 
-		//var_dump($operateur.$dureeSingle, date("Y-m-d H:i", $absence->date_hourEnd)); return false;
+//		var_dump($operateur.$dureeSingle, date("Y-m-d H:i", $absence->date_hourStart), date("Y-m-d H:i", $absence->date_hourEnd)); return false;
 	}
 
 
@@ -1295,7 +1295,7 @@ function saveAbsence(TPDOdb &$PDOdb, TRH_Absence &$absence)
 	}
 
 	// Quand l'input est vide $_FILES n'est pas vide ce qui crée une erreur
-	if (count($_FILES['userfile']['name']) == 1 && empty($_FILES['userfile']['name'][0]))
+	if (!empty($_FILES['userfile']['name']) && count($_FILES['userfile']['name']) == 1 && empty($_FILES['userfile']['name'][0]))
 	{
 		unset($_FILES['userfile']['name']);
 	}
