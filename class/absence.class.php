@@ -472,12 +472,12 @@ class TRH_Absence extends TObjetStd {
 		parent::add_champs('type',array('type'=>'string','length'=>50, 'index'=>true));				//type de congé
 		parent::add_champs('libelle');				//type de congé
 		parent::add_champs('date_debut,date_fin,date_validation',array('type'=>'date', 'index'=>true));	//dates debut fin de congés
-		parent::add_champs('date_hourStart,date_hourEnd,date_lunchBreak',array('type'=>'date'));	//dates debut fin de congés
+		parent::add_champs('date_hourStart,date_hourMorningEnd, date_hourAfternoonStart, date_hourEnd, date_lunchBreak',array('type'=>'date'));	//dates debut fin de congés
 		parent::add_champs('ddMoment, dfMoment',array('type'=>'string','length'=>10));		//moment (matin ou après midi)
 		parent::add_champs('duree,congesPrisNM1,congesPrisN',array('type'=>'float'));
 		parent::add_champs('dureeHeure');
 		parent::add_champs('dureeHeurePaie');
-		parent::add_champs('commentaire');		//commentaire
+		parent::add_champs('commentaire');		//commentaire                                                                                                                                         9*999999999999999999999999999 s
 		parent::add_champs('commentaireValideur');		//commentaire
 		parent::add_champs('etat',array('type'=>'string','length'=>50, 'index'=>true));			//état (à valider, validé...)
 		parent::add_champs('avertissement',array('type'=>'integer'));
@@ -983,7 +983,7 @@ class TRH_Absence extends TObjetStd {
 	}
 
 	function calculDureeAbsenceParAddition(&$PDOdb, $dateN=0, $dateTooOld = 0) {
-		global $TJourNonTravailleEntreprise, $langs;
+		global $TJourNonTravailleEntreprise, $langs, $conf;
 
 		$TJourSemaine = array('dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi');
 		$TJourFerie = $this->getJourFerie($PDOdb);
@@ -1011,6 +1011,7 @@ class TRH_Absence extends TObjetStd {
 		    $emploiTemps->load_by_fkuser($PDOdb, $this->fk_user, !empty($t_current)?date('Y-m-d', $t_current):'');
 
 			$current_day = $TJourSemaine[(int)date('w', $t_current)];
+
 			if(!@in_array($current_day, $TJourNonTravailleEntreprise)) {
 
 				$dureeJour=0;
@@ -1035,14 +1036,21 @@ class TRH_Absence extends TObjetStd {
 	                        }
 
 	                }
-	                else if ($typeAbs->unite == 'heure' && $typeAbs->isPresence)
+	                else if ($typeAbs->isPresence)
 					{
-						// comparer la date_hourEnd avec 17h00 (valeur par défaut) pour calculer la durée en heures (pouvant être négatif)
-						$testDateDebut = strtotime(date('Y-m-d ', $this->date_debut).date('H:i:s', $this->date_hourStart));
-						$testDateFin = strtotime(date('Y-m-d ', $this->date_fin).date('H:i:s', $this->date_hourEnd));
-//						var_dump(array(date('Y-m-d H:i:s', $testDateDebut), $testDateFin - $testDateDebut), date('Y-m-d H:i:s', $testDateFin)); exit;
-						$this->dureeHeure = ($testDateFin - $testDateDebut)/3600;
-//						var_dump($this->dureeHeure, date("d-m-Y H:i:s", $this->date_hourEnd), date("d-m-Y H:i:s", $testDate)); exit;
+						if($typeAbs->unite == 'heure') {
+							// comparer la date_hourEnd avec 17h00 (valeur par défaut) pour calculer la durée en heures (pouvant être négatif)
+							$testDateDebut = strtotime(date('Y-m-d ', $this->date_debut).date('H:i:s', $this->date_hourStart));
+							$testDateFin = strtotime(date('Y-m-d ', $this->date_fin).date('H:i:s', $this->date_hourEnd));
+							$this->dureeHeure = ($testDateFin - $testDateDebut) / 3600;
+						}
+						else if(!empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD)){
+							$testDateMatin = strtotime(date('Y-m-d ', $this->date_debut).date('H:i:s', $this->date_hourStart));
+							$testDateMatinFin = strtotime(date('Y-m-d ', $this->date_debut).date('H:i:s', $this->date_hourMorningEnd));
+							$testDateAprem = strtotime(date('Y-m-d ', $this->date_fin).date('H:i:s', $this->date_hourAfternoonStart));
+							$testDateApremFin = strtotime(date('Y-m-d ', $this->date_fin).date('H:i:s', $this->date_hourEnd));
+							$this->dureeHeure = (($testDateMatinFin - $testDateMatin) + ($testDateApremFin - $testDateAprem)) / 3600;
+						}
 					}
 	                else
 	                {
@@ -2947,6 +2955,10 @@ END:VCALENDAR
 			$TabAbsence[$row->fk_user][$k]['colorId']=$row->colorId;
 			$TabAbsence[$row->fk_user][$k]['commentaire']=$row->commentaire;
 			$TabAbsence[$row->fk_user][$k]['idAbsence']=$row->rowid;
+			$TabAbsence[$row->fk_user][$k]['date_hourStart']=$row->date_hourStart;
+			$TabAbsence[$row->fk_user][$k]['date_hourMorningEnd']=$row->date_hourMorningEnd;
+			$TabAbsence[$row->fk_user][$k]['date_hourAfternoonStart']=$row->date_hourAfternoonStart;
+			$TabAbsence[$row->fk_user][$k]['date_hourEnd']=$row->date_hourEnd;
 			$TabAbsence[$row->fk_user][$k]['etat']=$row->etat;
 
 
@@ -3100,6 +3112,10 @@ END:VCALENDAR
 						$moment->dureeHeure = $tabAbs['dureeHeure'];
 
 						$moment->idAbsence = $tabAbs['idAbsence'];
+						$moment->date_hourStart = $tabAbs['date_hourStart'];
+						$moment->date_hourMorningEnd = $tabAbs['date_hourMorningEnd'];
+						$moment->date_hourAfternoonStart = $tabAbs['date_hourAfternoonStart'];
+						$moment->date_hourEnd = $tabAbs['date_hourEnd'];
 
 						$TRetour[$time_debut_inc][$id][] = $moment;
 						$time_debut_inc = strtotime('+1day', $time_debut_inc);
@@ -3652,7 +3668,7 @@ class TRH_TypeAbsence extends TObjetStd {
 		global $conf;
 
 		$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_type_absence
-		WHERE entity IN (0,".(! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)?"1,":"").$conf->entity.")
+		WHERE entity IN (0,".((! empty($conf->multicompany->enabled) && (! empty($conf->multicompany->transverse_mode) || ! empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE))) ? "1," : "").$conf->entity.")
 		AND isPresence=".(int)$isPresence."
 		ORDER BY typeAbsence";
 

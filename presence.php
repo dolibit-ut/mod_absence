@@ -21,6 +21,7 @@
 				//$ATMdb->db->debug=true;
 				$absence->load($ATMdb, $_REQUEST['id']);
 
+
 				$absence->set_values($_REQUEST);
 
 				// prise en charge des présences d'unité "heure"
@@ -44,6 +45,19 @@
                     $absence->set_date('date_hourEnd', date("Y-m-d H:i:s", strtotime($operateur.$dureeMinutes.' minutes', $absence->date_hourEnd)));
                     //var_dump($dureeSingle, date("d-m-Y H:i:s", $absence->date_hourEnd)); exit;
 
+				} else if(!empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD)) {
+					$hourMorningStart = GETPOST('hourStartMorning');
+					$hourMorningEnd = GETPOST('hourEndMorning');
+					$hourAfternoonStart = GETPOST('hourStartAfternoon');
+					$hourAfternoonEnd = GETPOST('hourEndAfternoon');
+					if(! empty($hourMorningStart)) $absence->set_date('date_hourStart', date('Y-m-d '.$hourMorningStart.':s', $absence->date_hourStart));
+					else  $absence->set_date('date_hourStart', date('Y-m-d 00:00:s', $absence->date_hourStart));
+					if(! empty($hourMorningEnd)) $absence->set_date('date_hourMorningEnd', date('Y-m-d '.$hourMorningEnd.':s', $absence->date_hourStart));
+					else $absence->set_date('date_hourMorningEnd', date('Y-m-d 00:00:s', $absence->date_hourStart));
+					if(! empty($hourAfternoonStart)) $absence->set_date('date_hourAfternoonStart', date('Y-m-d '.$hourAfternoonStart.':s', $absence->date_hourEnd));
+					else $absence->set_date('date_hourAfternoonStart', date('Y-m-d 00:00:s', $absence->date_hourEnd));
+					if(! empty($hourAfternoonEnd)) $absence->set_date('date_hourEnd', date('Y-m-d '.$hourAfternoonEnd.':s', $absence->date_hourEnd));
+					else $absence->set_date('date_hourEnd', date('Y-m-d 00:00:s', $absence->date_hourEnd));
 				}
 
 				$existeDeja=$absence->testExisteDeja($ATMdb, $absence);
@@ -680,15 +694,18 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 
 	$TlistPresence = TRH_TypeAbsence::getList($ATMdb, true);
 	$TPresenceHourIds = array();
+	$TPresenceDayIds = array();
 	$isPresenceHour = false;
 	if (!empty($TlistPresence))
 	{
 		foreach ($TlistPresence as $typeAbsence)
 		{
-			if ($typeAbsence->isPresence == 1 && $typeAbsence->unite == 'heure')
-			{
-				$TPresenceHourIds[] = $typeAbsence->typeAbsence;
-				if ($absence->typeAbsence->id == $typeAbsence->id) $isPresenceHour = true;
+			if($typeAbsence->isPresence == 1) {
+				if($typeAbsence->unite == 'heure') {
+					$TPresenceHourIds[] = $typeAbsence->typeAbsence;
+					if($absence->typeAbsence->id == $typeAbsence->id) $isPresenceHour = true;
+				}
+				else  $TPresenceDayIds[] = $typeAbsence->typeAbsence;
 			}
 		}
 	}
@@ -710,8 +727,16 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 				,'date_fin'=> $form->calendrier('', 'date_fin', $absence->date_fin, 12)
 				,'date_single'=> $form->doliCalendar('date_single', $absence->date_debut)
 
-				,'hourStart'=>$form->timepicker('', 'date_hourStart', $absence->date_hourStart,5).' - '.$langs->trans('lunchBreak').' : '.$form->timepicker('', 'date_lunchBreak', $absence->date_lunchBreak,5)
-				,'hourEnd'=>$form->timepicker('', 'date_hourEnd', $absence->date_hourEnd,5)
+				,'hourStart'=>!empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ?
+					($mode == 'edit' ?
+						"<input class='text periodPresenceHour' type='text' id='hourStartMorning' name='hourStartMorning' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>&nbsp;&nbsp;<input class='text periodPresenceHour' type='text' id='hourEndMorning' name='hourEndMorning' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>"
+						: date('H:i',$absence->date_hourStart).' - '.  date('H:i', $absence->date_hourMorningEnd))
+					: $form->timepicker('', 'date_hourStart', $absence->date_hourStart,5).' - '.$langs->trans('lunchBreak').' : '.$form->timepicker('', 'date_lunchBreak', $absence->date_lunchBreak,5)
+				,'hourEnd'=> !empty($conf->global->ABSENCE_SHOW_PRESENCE_BY_PERIOD) ?
+					($mode == 'edit' ?
+						"<input class='text periodPresenceHour' type='text' id='hourStartAfternoon' name='hourStartAfternoon' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>&nbsp;&nbsp;<input class='text periodPresenceHour' type='text' id='hourEndAfternoon' name='hourEndAfternoon' size='5' maxlength='10' pattern='{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'>"
+						: date('H:i',$absence->date_hourAfternoonStart).' - '.  date('H:i', $absence->date_hourEnd))
+					: $form->timepicker('', 'date_hourEnd', $absence->date_hourEnd,5)
 
 				,'idUser'=>$user->id
 				,'comboType'=>$form->combo('','type',$typeAbsenceCreable,$absence->type)
@@ -746,6 +771,7 @@ function _fiche(&$ATMdb, &$absence, $mode) {
 				,'isPresenceHour'=>(int)$isPresenceHour
 				,'dureeSingle'=>$form->texte('', 'dureeSingle', $dureeAbsFormated, 5, 10, "pattern='-{0,1}[0-9]+:[0-9]{2}' placeholder='00:00'")
 				,'presenceHourIds'=>'"'.implode('","',$TPresenceHourIds).'"'
+				,'presenceDayIds'=>'"'.implode('","',$TPresenceDayIds).'"'
 
 
 			)
