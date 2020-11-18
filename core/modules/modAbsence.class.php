@@ -484,7 +484,7 @@ class modAbsence extends DolibarrModules
 								'titre'=>$langs->trans('TitleAbsPresence'),
 								'mainmenu'=>'absence',
 								'leftmenu'=>'',
-								'url'=>'/absence/calendrierAbsence.php?',
+								'url'=>'/absence/planningUser.php?action=view',
 								'langs'=>'absence@absence',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>100,
 								'enabled'=>'1',	// Define condition to show or hide menu entry. Use '$conf->financement->enabled' if entry must be visible if module is enabled.
@@ -631,6 +631,7 @@ class modAbsence extends DolibarrModules
 					'url'=> '/absence/pointeuse.php',
 					'langs'=> 'absence@absence',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=> 103,
+					'enabled' => '$conf->global->ABSENCE_SHOW_DEPRECATED_MENUS',        // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=> '$user->rights->absence->myactions->pointeuse',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=> '',
 					'user'=> 2
@@ -794,7 +795,7 @@ class modAbsence extends DolibarrModules
 					'url'=> '/absence/ticketResto.php',
 					'langs'=> 'absence@absence',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=> 110,
-					'enabled'=> '1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+					'enabled'=> '$conf->global->ABSENCE_SHOW_DEPRECATED_MENUS',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=> '$user->rights->absence->myactions->gererTicketRestaurant',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=> '',
 					'user'=> 2
@@ -810,7 +811,7 @@ class modAbsence extends DolibarrModules
 					'url'=> '/absence/declarationCadre.php',
 					'langs'=> 'absence@absence',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=> 110,
-					'enabled'=> '1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+					'enabled'=> '$conf->global->ABSENCE_SHOW_DEPRECATED_MENUS',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=> '$user->rights->absence->myactions->declarationCadre',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=> '',
 					'user'=> 2
