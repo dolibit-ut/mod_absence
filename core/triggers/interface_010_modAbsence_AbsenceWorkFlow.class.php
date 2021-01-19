@@ -64,7 +64,7 @@ class InterfaceAbsenceWorkflow extends DolibarrTriggers
         else return $langs->trans("Unknown");
     }
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
-        $this->run_trigger($action, $object, $user, $langs, $conf);
+       return  $this->run_trigger($action, $object, $user, $langs, $conf);
     }
 
     /**
