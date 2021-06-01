@@ -8,6 +8,7 @@
 
 ### Fixes
 
+ - 1.3.7 Create absence for group menu disappeared
  - 1.3.6 Module setup UX improvement: use a `<select>` instead of a text input
    for the ID of the expense type to be accounted for during the luncheon voucher
    calculation.
