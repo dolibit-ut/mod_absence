@@ -565,6 +565,7 @@ class modAbsence extends DolibarrModules
                     'url'=> '/absence/absenceGroup.php',
                     'langs'=> 'absence@absence',    // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
                     'position'=> 103,
+		    		'enabled'=>'1',
                     'perms'=> '$user->rights->absence->myactions->CanDeclareAbsenceForGroup',           // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
         		    'user'=> 2
         );
