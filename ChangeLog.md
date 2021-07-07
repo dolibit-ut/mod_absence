@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0
+- FIX: v13 compat (NOTOKENRENEWAL, NOCSRFCHECK) - 2021-07-07 - 2.0.5
+
 ## 1.0
 
 ### New features

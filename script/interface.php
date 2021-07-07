@@ -1,5 +1,7 @@
 <?php
 
+if (!defined('NOCSRFCHECK')) define('NOCSRFCHECK', 1);
+if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
 if(isset($_REQUEST['inc']) && $_REQUEST['inc']=='main') {
 	null;
 }
