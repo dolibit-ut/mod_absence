@@ -1,12 +1,12 @@
 
 <div class="fichecenter">
-		
+
 	[congesCourant.titreConges;strconv=no;protect=no]
-	
+
 	<div class="underbanner clearboth"></div>
-	
+
 	<div class="twocolumns" >
-	
+
 	<div class="firstcolumn fichehalfleft" >
 		<table class="noborder" style="width:100%;"  >
 
@@ -53,18 +53,24 @@
 					<td><b>[congesPrec.reste;strconv=no;protect=no]</b></td>
 				</tr>
 
+			[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
+			<tr>
+				<td>[translate.acquisRecuperation;strconv=no;protect=no]</td>
+				<td>[congesCourant.acquisRecuperation;strconv=no;protect=no]</td>
+			</tr>
+			[onshow;block=end]
 		    </table>
-		</div>    
+		</div>
 
 
 [onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
-	   
-	   <div class="fichehalfright" > 
+
+	   <div class="fichehalfright" >
 			<table class="noborder " style="width:100%;"  >
 				<tr class="liste_titre">
 					<td colspan="2" >[congesCourant.title;strconv=no;protect=no]</td>
 				</tr>
-				
+
 [onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
 				<tr>
 					<td>[translate.AcquiredExercise;strconv=no;protect=no]</td>
@@ -106,29 +112,23 @@
 					<td><b>[congesCourant.date_congesCloture;strconv=no;protect=no]</b></td>
 				</tr>
 
-[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']				
-				<tr>
-					<td>[translate.acquisRecuperation;strconv=no;protect=no]</td>
-					<td>[congesCourant.acquisRecuperation;strconv=no;protect=no]</td>
-				</tr>
-[onshow;block=end]
 		</table>
-	</div>	
+	</div>
 [onshow;block=end]
 
-</div>		
-		
+</div>
+
 <br />
 
-	
+
 	[rttCourant.titreRtt;strconv=no;protect=no]
 		<div class="underbanner clearboth"></div>
-		
 
-	
+
+
 <div class="twocolumns" >
 	<div class="firstcolumn fichehalfleft" >
-			
+
 		<table class="noborder" style="width:100%">
 				<tr class="liste_titre">
 					 <td  colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
@@ -143,8 +143,8 @@
 					<td>[translate.CumulatedDayOffTaken;strconv=no;protect=no]</td>
 					<td>[rttCourant.cumulePris;strconv=no;protect=no]	</td>
 				</tr>
-				
-[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']	
+
+[onshow;block=begin;when [userRight.ViewCompteurAllData]=='1']
 				<tr>
 					<td>[translate.langs.transnoentities(CumulatedDayOffTakenNextYear)] N+1</td>
 					<td>[rttCourant.cumulePrisN1;strconv=no;protect=no]	</td>
@@ -159,12 +159,12 @@
 					<td>[rttCourant.cumuleTotal;strconv=no;protect=no]</td>
 				</tr>
 		</table>
-		
-	
+
+
 		</div>
-	   <div class="fichehalfright" > 
-			
-	   <table class="noborder" style="width:100%">	
+	   <div class="fichehalfright" >
+
+	   <table class="noborder" style="width:100%">
 				<tr class="liste_titre">
 					 <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.CounterNonCumulatedDayOff;strconv=no;protect=no]</td>
@@ -192,13 +192,13 @@
 					<td>[rttCourant.nonCumuleTotal;strconv=no;protect=no]</td>
 				</tr>
 		</table>
-	
-	</div>	
 
-</div>	   	
-		
+	</div>
+
+</div>
+
 		<div class="underbanner clearboth"></div>
-		<table class="noborder" style="width:100%">		             
+		<table class="noborder" style="width:100%">
 				<tr class="liste_titre">
 					  <td colspan="2" style="color: #2AA8B9; font-size: 15px;font-family: arial,tahoma,verdana,helvetica; font-weight: bold; text-decoration: none; text-shadow: 1px 1px 2px #CFCFCF;" >
 					 	[translate.AcquisitionMethodOfDays;strconv=no;protect=no]</h2></td>
@@ -209,8 +209,8 @@
 				</tr> -->
 				<tr>
 					<td>[translate.AcquisitionType;strconv=no;protect=no]</td>
-					
-					<td>[onshow;block=begin;when [view.mode]=='edit'] 
+
+					<td>[onshow;block=begin;when [view.mode]=='edit']
 							[rttCourant.typeAcquisition;strconv=no;protect=no]
 						[onshow;block=end]
 						[onshow;block=begin;when [view.mode]!='edit']
@@ -237,18 +237,18 @@
 				<tr>
 					<td><b>[translate.LastClosingDayOff;strconv=no;protect=no]</b></td>
 					<td>[rttCourant.date_rttCloture;strconv=no;protect=no]</td>
-				</tr>	
+				</tr>
 		</table>
-    
 
-		
+
+
 		[onshow;block=begin;when [view.mode]=='edit']
 			<div class="tabsAction" >
 			<input type="submit" value="[translate.Register;strconv=no;protect=no]" name="save" class="button"  onclick="document.location.href='?id=[rttCourant.id]&action=view'">
 			&nbsp; &nbsp; <input type="button" value="[translate.Cancel;strconv=no;protect=no]" name="cancel" class="button" onclick="document.location.href='?id=[rttCourant.id]&action=view'">
 			</div>
 		[onshow;block=end]
-		
+
 		[onshow;block=begin;when [view.mode]!='edit']
 			[onshow;block=begin;when [userCourant.modifierCompteur]=='1']
 			<div class="tabsAction" >
@@ -256,22 +256,22 @@
 			</div>
 			[onshow;block=end]
 		[onshow;block=end]
-		
+
 		[onshow;block=begin;when [view.mode]!='edit']
 			[onshow;block=begin;when [userCourant.modifierCompteur]!='1']
 			 <br/> <br/>
 			[onshow;block=end]
 		[onshow;block=end]
-		
 
-		
-		
+
+
+
 		<script>
 		$(document).ready( function(){
 			//on empêche que la date de début dépasse celle de fin
 			$('#rttMetier').change( 	function(){
-				
-				
+
+
 				if($('#rttMetier').val()=="cadre"){
 					$("#rttTypeAcquisition").val("Annuel").attr('selected');
 					$("#rttAcquisMensuelInit").val(0);
@@ -317,4 +317,4 @@
 
 		});
 	</script>
-	
+
