@@ -272,6 +272,11 @@ function showParameters(&$form, &$doliform) {
 		print '<td>';
 		print ajax_constantonoff('ABSENCE_SHOW_PRESENCE_BY_PERIOD');
 		print '</td>';
+        print '</tr>';
+
+        print '<tr>';
+		print '<td>'.$langs->trans('ABSENCE_SHOW_DEPRECATED_MENUS').'</td>';
+		print '<td>'.ajax_constantonoff('ABSENCE_SHOW_DEPRECATED_MENUS').'</td>';
 		print '</tr>';
 	?>
 	</table>
