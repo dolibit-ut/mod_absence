@@ -5,7 +5,9 @@
   might not have been followed. - 2021-07-07 - 2.1.0
 
 ## 2.0
-- FIX: v13 compat (NOTOKENRENEWAL, NOCSRFCHECK) - 2021-07-07 - 2.0.5
+
+- FIX : Déplacement de la ligne des compteurs : "Nombre de jour de récupération acquis" sur la partie N-1 - 13/12/2021 - 2.0.6
+- FIX : v13 compat (NOTOKENRENEWAL, NOCSRFCHECK) - 2021-07-07 - 2.0.5
 
 ## 1.0
 
