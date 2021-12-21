@@ -20,7 +20,7 @@ $action		= GETPOST('action','alpha');
 $confirm	= GETPOST('confirm','alpha');
 $id			= GETPOST('id','int');
 $ref		= GETPOST('ref','alpha');
-
+$permissiontoadd = 1;
 // Security check
 $socid='';
 if (! empty($user->societe_id))
