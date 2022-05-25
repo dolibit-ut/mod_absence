@@ -3,6 +3,10 @@
 	require('./class/absence.class.php');
 	require('./lib/absence.lib.php');
 	
+	if (empty($user->rights->absence->myactions->modifierParamGlobalConges)) {
+		accessforbidden('', 0, 1);
+	}
+
 	$langs->load('absence@absence');
 	
 	$ATMdb=new TPDOdb;
