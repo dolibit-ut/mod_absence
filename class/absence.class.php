@@ -16,9 +16,9 @@ class TRH_absenceDay {
 	public $colorId = 0;
 	public $description='';
 
-	/** @var string $ddMoment matin|apresmidi */
+	/** @var string $ddMoment  morning (a.m.) | afternoon (p.m.) */
 	public $ddMoment;
-	/** @var string $dfMoment matin|apresmidi */
+	/** @var string $dfMoment  morning (a.m.) | afternoon (p.m.) */
 	public $dfMoment;
 
 	function __construct() {
