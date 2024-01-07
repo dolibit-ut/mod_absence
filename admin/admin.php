@@ -17,13 +17,14 @@
  */
 
 /**
- *   	\file       dev/skeletons/skeleton_page.php
- *		\ingroup    mymodule othermodule1 othermodule2
- *		\brief      This file is an example of a php page
- *		\version    $Id: skeleton_page.php,v 1.19 2011/07/31 22:21:57 eldy Exp $
- *		\author		Put author name here
- *		\remarks	Put here some comments
+ *    \file		/admin/admin.php
+ *	\ingroup    mymodule othermodule1 othermodule2
+ *	\brief      This file is an example of a php page
+ *	
+ *	\author		Put author name here
+ *	\remarks	Put here some comments
  */
+
 // Change this following line to use the correct relative path (../, ../../, etc)
 include '../config.php';
 dol_include_once('/core/lib/admin.lib.php');
